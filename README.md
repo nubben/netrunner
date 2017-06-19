@@ -34,4 +34,8 @@ In the face of recent changes in Firefox, some anons were asking for a /g/'s per
 - Actual javascript support so we can lurk and post in 4chan.
 
 ## TODO
-- Fork links2
+- Browse the elinks2 source code (you can use Ctags or GNU GLOBAL for tagging functions and files).
+- Expose API and give (scripting) access to just about everything.
+- Put every accessed interface in a scriptable file.
+- Give control over the DOM, use folders for each site to be manually edited (use a hierarchical structure to cover subsites).
+- Implement a link grabber for every link available to be parsed by the scripting interface.
