@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="auto" height="300" src="https://u.teknik.io/wASmM.png">
+</p>
+
 # Netrunner
 In the face of recent changes in Firefox, some anons were asking for a /g/'s perfect web browser, we have collected here the most wanted features:
 - Granular control over incomming traffic like Policeman (more control than uMatrix in this particular subject).
@@ -7,6 +11,8 @@ In the face of recent changes in Firefox, some anons were asking for a /g/'s per
 - Custom stylesheets like Stylish.
 - Userscript support like Greasemonkey.
 - Cookie management like Cookie Monster.
+- Work in the javascript engine implementation.
+- Bookmark management.
 - HTTPS with HTTP fallback and ports management like Smart HTTPS and HTTPS by default.
 - Proxy management like FoxyProxy.
 - "Open with" feature to use an external application, like for using a video player with youtube-dl and MPV, or for text input with a text editor, and for other protocols like ftp and gopher, and even as a file picker.
@@ -31,5 +37,3 @@ In the face of recent changes in Firefox, some anons were asking for a /g/'s per
 
 ## TODO
 - Fork links2
-
-### PLEASE FORK ME
