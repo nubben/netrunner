@@ -1,6 +1,4 @@
-<p align="center">
-  <img width="auto" height="300" src="https://u.teknik.io/wASmM.png">
-</p>
+<img height="300" src="https://u.teknik.io/wASmM.png">
 
 # Netrunner
 In the face of recent changes in Firefox, some anons were asking for a /g/'s perfect web browser, we have collected here the most wanted features:
