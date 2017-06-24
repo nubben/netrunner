@@ -3,14 +3,15 @@
 #include <iostream>
 #include <memory>
 
-void printNode(std::shared_ptr<Node> node, int indent) {
+void printNode(const std::shared_ptr<Node> node, const int indent) {
     for (int i = 0; i < indent; i++) {
         std::cout << '\t';
     }
+
     if (node->nodeType == NodeType::ROOT) {
         std::cout << "ROOT" << std::endl;
     }
-    if (node->nodeType == NodeType::TAG) {
+    else if (node->nodeType == NodeType::TAG) {
         std::cout << "TAG: " << dynamic_cast<TagNode*>(node.get())->tag << std::endl;
         for (const std::pair<std::string, std::string> property : dynamic_cast<TagNode*>(node.get())->properties) {
             for (int i = 0; i < indent; i++) {
@@ -29,8 +30,8 @@ void printNode(std::shared_ptr<Node> node, int indent) {
 }
 
 void HTMLParser::parse(const std::string &html) const {
-    Node rootNode = Node(NodeType::ROOT);
-    std::shared_ptr<Node> currentNode = std::make_shared<Node>(rootNode);
+    std::shared_ptr<Node> rootNode = std::make_shared<Node>(NodeType::ROOT);
+    std::shared_ptr<Node> currentNode = rootNode;
     std::vector<int> starts;
     int cursor;
     int start = 0;
@@ -90,7 +91,7 @@ void HTMLParser::parse(const std::string &html) const {
         }
     }
 
-    printNode(std::make_shared<Node>(rootNode), 0);
+    printNode(rootNode, 0);
 }
 
 void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {
