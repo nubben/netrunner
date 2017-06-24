@@ -27,15 +27,13 @@ In the face of recent changes in Firefox, some anons were asking for a /g/'s per
 - Send commands to the background to be optionally displayed in an optional interface, as to use wget web crawling feature like a DownThemAll, and to use and watch other batch commands.
 - A way to import bookmarks from other browsers like Firefox.
 - Search customization like surfraw, dwb funtions or InstantFox Quick Search, and reverse image search like Google Reverse Image Search.
-- Writen in C.
 - Low on dependencies.
 - GPL v3+.
 - Framebuffer support like NetSurf for working in the virtual terminal (TTY).
 - Actual javascript support so we can lurk and post in 4chan.
 
 ## TODO
-- Browse the elinks2 source code (you can use Ctags or GNU GLOBAL for tagging functions and files).
-- Expose API and give (scripting) access to just about everything.
-- Put every accessed interface in a scriptable file.
-- Give control over the DOM, use folders for each site to be manually edited (use a hierarchical structure to cover subsites).
-- Implement a link grabber for every link available to be parsed by the scripting interface.
+- Create components for defining how HTML elements are rendered.
+- Create components for defining how CSS rules affect elements.
+- Render the parsed data.
+

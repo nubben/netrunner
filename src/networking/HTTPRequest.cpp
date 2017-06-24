@@ -1,0 +1,80 @@
+#include "HTTPRequest.h"
+#include <errno.h>
+#include <iostream>
+#include <netdb.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+HTTPRequest::HTTPRequest(std::string host, std::string document) {
+    this->document = document;
+    this->version = Version::HTTP10;
+    this->method = Method::GET;
+    this->host = host;
+    this->userAgent = "NetRunner";
+}
+
+bool HTTPRequest::sendRequest(std::function<void(HTTPResponse)> responseCallback) {
+    struct addrinfo hints;
+    struct addrinfo *servinfo;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    int res = getaddrinfo(host.c_str(), "80", &hints, &servinfo);
+    if (res != 0) {
+        std::cout << "Could not lookup " << host << ": " << res << std::endl;
+        return false;
+    }
+
+    int sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    if (sock == -1) {
+        std::cout << "Could not create socket: " << errno << std::endl;
+        freeaddrinfo(servinfo);
+        return false;
+    }
+
+    if (connect(sock, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+        std::cout << "Could not connect: " << errno << std::endl;
+        freeaddrinfo(servinfo);
+        return false;
+    }
+
+    std::string request = methodToString(method) + std::string(" ") + document + std::string(" ") + versionToString(version) + std::string("\r\nHost: ") + host + std::string("\r\nUser-Agent: ") + userAgent + std::string("\r\n\r\n");
+    size_t sent = send(sock, request.c_str(), request.length(), 0);
+    if (sent == -1) {
+        std::cout << "Could not send \"" << request << "\": " << errno << std::endl;
+        freeaddrinfo(servinfo);
+        return false;
+    }
+
+    std::string response;
+    char buffer[512];
+    size_t received;
+    while ((received = recv(sock, buffer, sizeof(buffer), 0)) != 0) {
+        response += std::string(buffer, received);
+    }
+
+    responseCallback(HTTPResponse(response));
+
+    freeaddrinfo(servinfo);
+    return true;
+}
+
+std::string HTTPRequest::versionToString(Version version) {
+    switch (version) {
+        case Version::HTTP10:
+            return "HTTP/1.0";
+    }
+    return "ERROR";
+}
+
+std::string HTTPRequest::methodToString(Method method) {
+    switch (method) {
+        case Method::GET:
+            return "GET";
+        case Method::POST:
+            return "POST";
+    }
+    return "ERROR";
+}

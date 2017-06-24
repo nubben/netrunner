@@ -1,0 +1,115 @@
+#include "Text.h"
+#include "../text/TextRasterizer.h"
+#include <memory>
+
+Text::Text(std::string text, int x, int y, int windowWidth, int windowHeight) {
+    this->x = x;
+    this->y = y;
+
+    std::unique_ptr<TextRasterizer> textRasterizer = std::unique_ptr<TextRasterizer>(new TextRasterizer("DejaVuSerif.ttf", 50, 72));
+    unsigned int glyphCount;
+    std::unique_ptr<Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, glyphCount);
+    if (glyphs ==  nullptr) {
+        return;
+    }
+    for (int i = 0; i < glyphCount; i++) {
+        Glyph &glyph = glyphs[i];
+
+        pointToViewport(glyph.x0, glyph.y0, windowWidth, windowHeight);
+        pointToViewport(glyph.x1, glyph.y1, windowWidth, windowHeight);
+
+        float *vertices = new float[20];
+        vertices[(0 * 5) + 0] = glyph.x0;
+        vertices[(0 * 5) + 1] = glyph.y0;
+        vertices[(0 * 5) + 2] = 0.0f;
+        vertices[(0 * 5) + 3] = glyph.s0;
+        vertices[(0 * 5) + 4] = glyph.t0;
+        vertices[(1 * 5) + 0] = glyph.x0;
+        vertices[(1 * 5) + 1] = glyph.y1;
+        vertices[(1 * 5) + 2] = 0.0f;
+        vertices[(1 * 5) + 3] = glyph.s0;
+        vertices[(1 * 5) + 4] = glyph.t1;
+        vertices[(2 * 5) + 0] = glyph.x1;
+        vertices[(2 * 5) + 1] = glyph.y1;
+        vertices[(2 * 5) + 2] = 0.0f;
+        vertices[(2 * 5) + 3] = glyph.s1;
+        vertices[(2 * 5) + 4] = glyph.t1;
+        vertices[(3 * 5) + 0] = glyph.x1;
+        vertices[(3 * 5) + 1] = glyph.y0;
+        vertices[(3 * 5) + 2] = 0.0f;
+        vertices[(3 * 5) + 3] = glyph.s1;
+        vertices[(3 * 5) + 4] = glyph.t0;
+        glyphVertices.push_back(vertices);
+
+        vertexArrayObjects.push_back(0);
+        vertexBufferObjects.push_back(0);
+        elementBufferObjects.push_back(0);
+        glGenVertexArrays(1, &vertexArrayObjects.back());
+        glGenBuffers(1, &vertexBufferObjects.back());
+        glGenBuffers(1, &elementBufferObjects.back());
+
+        glBindVertexArray(vertexArrayObjects.back());
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
+        glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObjects.back());
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (0 * sizeof(float)));
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        textures.push_back(0);
+        glGenTextures(1, &textures.back());
+        glBindTexture(GL_TEXTURE_2D, textures.back());
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get());
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+}
+
+Text::~Text() {
+    for (int i = 0; i < vertexArrayObjects.size(); i++) {
+        glDeleteVertexArrays(1, &vertexArrayObjects[i]);
+        glDeleteBuffers(1, &vertexBufferObjects[i]);
+        glDeleteBuffers(1, &elementBufferObjects[i]);
+        glDeleteTextures(1, &textures[i]);
+    }
+}
+
+void Text::render() {
+    if (verticesDirty) {
+        for (int i = 0; i < vertexArrayObjects.size(); i++) {
+            glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects[i]);
+            glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices[i], GL_STATIC_DRAW);
+        }
+        verticesDirty = false;
+    }
+    for (int i = 0; i < vertexArrayObjects.size(); i++) {
+        glBindVertexArray(vertexArrayObjects[i]);
+        glBindTexture(GL_TEXTURE_2D, textures[i]);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+}
+
+void Text::resize(float sx, float sy) {
+    for (int i = 0; i < glyphVertices.size(); i++) {
+        glyphVertices[i][(0 * 5) + 0] = ((glyphVertices[i][(0 * 5) + 0] + 1) / sx) - 1;
+        glyphVertices[i][(0 * 5) + 1] = ((glyphVertices[i][(0 * 5) + 1] + 1) / sy) - 1;
+        glyphVertices[i][(1 * 5) + 0] = ((glyphVertices[i][(1 * 5) + 0] + 1) / sx) - 1;
+        glyphVertices[i][(1 * 5) + 1] = ((glyphVertices[i][(1 * 5) + 1] + 1) / sy) - 1;
+        glyphVertices[i][(2 * 5) + 0] = ((glyphVertices[i][(2 * 5) + 0] + 1) / sx) - 1;
+        glyphVertices[i][(2 * 5) + 1] = ((glyphVertices[i][(2 * 5) + 1] + 1) / sy) - 1;
+        glyphVertices[i][(3 * 5) + 0] = ((glyphVertices[i][(3 * 5) + 0] + 1) / sx) - 1;
+        glyphVertices[i][(3 * 5) + 1] = ((glyphVertices[i][(3 * 5) + 1] + 1) / sy) - 1;
+    }
+    verticesDirty = true;
+}
+
+void Text::pointToViewport(float &x, float &y, int windowWidth, int windowHeight) {
+    x = ((x / windowWidth) * 2) - 1;
+    y = ((y / windowHeight) * 2) - 1;
+}
