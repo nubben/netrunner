@@ -1,6 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <memory>
 #include <vector>
 
 enum class NodeType {
@@ -14,8 +15,8 @@ public:
     Node(NodeType nodeType);
     virtual ~Node();
     NodeType nodeType;
-    Node *parent;
-    std::vector<Node*> children;
+    std::shared_ptr<Node> parent;
+    std::vector<std::shared_ptr<Node>> children;
 };
 
 #endif

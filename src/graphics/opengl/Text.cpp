@@ -6,7 +6,7 @@ Text::Text(const std::string &text, const int x, const int y, const int windowWi
     this->x = x;
     this->y = y;
 
-    const std::unique_ptr<TextRasterizer> textRasterizer = std::unique_ptr<TextRasterizer>(new TextRasterizer("DejaVuSerif.ttf", 50, 72));
+    const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", 50, 72);
     unsigned int glyphCount;
     std::unique_ptr<const Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, glyphCount);
     if (glyphs ==  nullptr) {
@@ -22,7 +22,7 @@ Text::Text(const std::string &text, const int x, const int y, const int windowWi
         pointToViewport(vx0, vy0, windowWidth, windowHeight);
         pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
-        float *vertices = new float[20];
+        std::unique_ptr<float[]> vertices = std::make_unique<float[]>(20);
         vertices[(0 * 5) + 0] = vx0;
         vertices[(0 * 5) + 1] = vy0;
         vertices[(0 * 5) + 2] = 0.0f;
@@ -43,7 +43,7 @@ Text::Text(const std::string &text, const int x, const int y, const int windowWi
         vertices[(3 * 5) + 2] = 0.0f;
         vertices[(3 * 5) + 3] = glyph.s1;
         vertices[(3 * 5) + 4] = glyph.t0;
-        glyphVertices.push_back(vertices);
+        glyphVertices.push_back(std::move(vertices));
 
         vertexArrayObjects.push_back(0);
         vertexBufferObjects.push_back(0);
@@ -55,7 +55,7 @@ Text::Text(const std::string &text, const int x, const int y, const int windowWi
         glBindVertexArray(vertexArrayObjects.back());
 
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
-        glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices.back().get(), GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObjects.back());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -88,7 +88,7 @@ void Text::render() {
     if (verticesDirty) {
         for (int i = 0; i < vertexArrayObjects.size(); i++) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects[i]);
-            glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices[i], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices[i].get(), GL_STATIC_DRAW);
         }
         verticesDirty = false;
     }

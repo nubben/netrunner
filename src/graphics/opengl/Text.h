@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <array>
+#include <memory>
 #include <vector>
 
 class Text {
@@ -17,7 +18,7 @@ private:
         0, 2, 3
     };
     unsigned char data[1024][1024][4];
-    std::vector<float*> glyphVertices;
+    std::vector<std::unique_ptr<float[]>> glyphVertices;
     std::vector<GLuint> vertexArrayObjects;
     std::vector<GLuint> vertexBufferObjects;
     std::vector<GLuint> elementBufferObjects;

@@ -19,9 +19,9 @@ bool Window::init() {
     }
     initGL();
 
-    boxes.push_back(std::unique_ptr<Box>(new Box(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight)));
-    boxes.push_back(std::unique_ptr<Box>(new Box(-1024, 0.0f, 1024, 1024, windowWidth, windowHeight)));
-    texts.push_back(std::unique_ptr<Text>(new Text("Hello, World!", 32, 32, windowWidth, windowHeight)));
+    boxes.push_back(std::make_unique<Box>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
+    boxes.push_back(std::make_unique<Box>(-1024, 0.0f, 1024, 1024, windowWidth, windowHeight));
+    texts.push_back(std::make_unique<Text>("Hello, World!", 32, 32, windowWidth, windowHeight));
 
     return true;
 }

@@ -48,7 +48,7 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
     const hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
     const hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
 
-    std::unique_ptr<Glyph[]> glyphs = std::unique_ptr<Glyph[]>(new Glyph[glyphCount]);
+    std::unique_ptr<Glyph[]> glyphs = std::make_unique<Glyph[]>(glyphCount);
 
     int cx = x;
     int cy = y;
@@ -70,7 +70,7 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
 
         glyphs[i].textureWidth = pow(2, ceil(log(ftBitmap.width) / log(2)));
         glyphs[i].textureHeight = pow(2, ceil(log(ftBitmap.rows) / log(2)));
-        glyphs[i].textureData = std::unique_ptr<unsigned char[]>(new unsigned char[glyphs[i].textureWidth * glyphs[i].textureHeight]);
+        glyphs[i].textureData = std::make_unique<unsigned char[]>(glyphs[i].textureWidth * glyphs[i].textureHeight);
         for (int iy = 0; iy < ftBitmap.rows; iy++) {
             memcpy(glyphs[i].textureData.get() + iy * glyphs[i].textureWidth, ftBitmap.buffer + iy * ftBitmap.width, ftBitmap.width);
         }

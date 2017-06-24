@@ -1,9 +1,9 @@
 #include "HTMLParser.h"
 #include "TextNode.h"
 #include <iostream>
-#include <unistd.h>
+#include <memory>
 
-void printNode(Node *node, int indent) {
+void printNode(std::shared_ptr<Node> node, int indent) {
     for (int i = 0; i < indent; i++) {
         std::cout << '\t';
     }
@@ -11,8 +11,8 @@ void printNode(Node *node, int indent) {
         std::cout << "ROOT" << std::endl;
     }
     if (node->nodeType == NodeType::TAG) {
-        std::cout << "TAG: " << dynamic_cast<TagNode*>(node)->tag << std::endl;
-        for (const std::pair<std::string, std::string> property : dynamic_cast<TagNode*>(node)->properties) {
+        std::cout << "TAG: " << dynamic_cast<TagNode*>(node.get())->tag << std::endl;
+        for (const std::pair<std::string, std::string> property : dynamic_cast<TagNode*>(node.get())->properties) {
             for (int i = 0; i < indent; i++) {
                 std::cout << '\t';
             }
@@ -20,17 +20,17 @@ void printNode(Node *node, int indent) {
         }
     }
     else if (node->nodeType == NodeType::TEXT) {
-        std::cout << "TEXT: " << dynamic_cast<TextNode*>(node)->text << std::endl;
+        std::cout << "TEXT: " << dynamic_cast<TextNode*>(node.get())->text << std::endl;
     }
 
-    for (Node *child : node->children) {
+    for (std::shared_ptr<Node> child : node->children) {
         printNode(child, indent + 1);
     }
 }
 
 void HTMLParser::parse(const std::string &html) const {
     Node rootNode = Node(NodeType::ROOT);
-    Node *currentNode = &rootNode;
+    std::shared_ptr<Node> currentNode = std::make_shared<Node>(rootNode);
     std::vector<int> starts;
     int cursor;
     int start = 0;
@@ -49,7 +49,7 @@ void HTMLParser::parse(const std::string &html) const {
                     state = 1;
                 }
                 else {
-                    TagNode *tagNode = new TagNode();
+                    std::shared_ptr<TagNode> tagNode = std::make_shared<TagNode>();
                     currentNode->children.push_back(tagNode);
                     tagNode->parent = currentNode;
                     currentNode = tagNode;
@@ -58,7 +58,7 @@ void HTMLParser::parse(const std::string &html) const {
                 }
             }
             else {
-                TextNode *textNode = new TextNode();
+                std::shared_ptr<TextNode> textNode = std::make_shared<TextNode>();
                 currentNode->children.push_back(textNode);
                 textNode->parent = currentNode;
                 currentNode = textNode;
@@ -76,7 +76,7 @@ void HTMLParser::parse(const std::string &html) const {
                 const int start = starts.back();
                 starts.pop_back();
                 std::string element = html.substr(start, cursor - start + 1);
-                parseTag(element, dynamic_cast<TagNode*>(currentNode));
+                parseTag(element, dynamic_cast<TagNode*>(currentNode.get()));
                 state = 0;
             }
         }
@@ -84,13 +84,13 @@ void HTMLParser::parse(const std::string &html) const {
             if (html[cursor + 1] == '<' && html[cursor + 2] == '/') {
                 const int start = starts.back();
                 starts.pop_back();
-                dynamic_cast<TextNode*>(currentNode)->text = html.substr(start, cursor - start + 1);
+                dynamic_cast<TextNode*>(currentNode.get())->text = html.substr(start, cursor - start + 1);
                 state = 0;
             }
         }
     }
 
-    printNode(&rootNode, 0);
+    printNode(std::make_shared<Node>(rootNode), 0);
 }
 
 void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {

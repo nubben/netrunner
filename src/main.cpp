@@ -35,14 +35,14 @@ const std::string getHostFromURL(const std::string &url) {
 
 void handleRequest(const HTTPResponse &response) {
     if (response.statusCode == 200) {
-        const std::unique_ptr<HTMLParser> parser = std::unique_ptr<HTMLParser>(new HTMLParser());
+        const std::unique_ptr<HTMLParser> parser = std::make_unique<HTMLParser>();
         parser->parse(response.body);
     }
     else if (response.statusCode == 301) {
         const std::string location = response.properties.at("Location");
         std::cout << "Redirect To: " << location << std::endl;
         std::cout << getHostFromURL(location) << "!" << getDocumentFromURL(location) << std::endl;
-        const std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(location), getDocumentFromURL(location)));
+        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(location), getDocumentFromURL(location));
         request->sendRequest(handleRequest);
         return;
     }
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
         std::cout << "./netrunner <url>" << std::endl;
         return 1;
     }
-    const std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(argv[1]), getDocumentFromURL(argv[1])));
+    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(argv[1]), getDocumentFromURL(argv[1]));
     request->sendRequest(handleRequest);
     const std::unique_ptr<Window> window = std::make_unique<Window>();
     window->init();
