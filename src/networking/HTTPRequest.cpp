@@ -16,27 +16,27 @@ HTTPRequest::HTTPRequest(const std::string &host, const std::string &document) {
 
 const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const {
     struct addrinfo hints;
-    struct addrinfo *servinfo;
+    struct addrinfo *serverInfo;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    const int res = getaddrinfo(host.c_str(), "80", &hints, &servinfo);
+    const int res = getaddrinfo(host.c_str(), "80", &hints, &serverInfo);
     if (res != 0) {
         std::cout << "Could not lookup " << host << ": " << res << std::endl;
         return false;
     }
 
-    const int sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    const int sock = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
     if (sock == -1) {
         std::cout << "Could not create socket: " << errno << std::endl;
-        freeaddrinfo(servinfo);
+        freeaddrinfo(serverInfo);
         return false;
     }
 
-    if (connect(sock, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+    if (connect(sock, serverInfo->ai_addr, serverInfo->ai_addrlen) == -1) {
         std::cout << "Could not connect: " << errno << std::endl;
-        freeaddrinfo(servinfo);
+        freeaddrinfo(serverInfo);
         return false;
     }
 
@@ -44,7 +44,7 @@ const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> res
     const size_t sent = send(sock, request.c_str(), request.length(), 0);
     if (sent == -1) {
         std::cout << "Could not send \"" << request << "\": " << errno << std::endl;
-        freeaddrinfo(servinfo);
+        freeaddrinfo(serverInfo);
         return false;
     }
 
@@ -57,7 +57,7 @@ const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> res
 
     responseCallback(HTTPResponse(response));
 
-    freeaddrinfo(servinfo);
+    freeaddrinfo(serverInfo);
     return true;
 }
 
