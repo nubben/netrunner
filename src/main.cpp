@@ -7,7 +7,7 @@
 #include <iostream>
 #include <memory>
 
-std::string getDocumentFromURL(std::string url) {
+const std::string getDocumentFromURL(const std::string &url) {
     int slashes = 0;
     for (int i = 0; i < url.length(); i++) {
         if (url[i] == '/') {
@@ -19,7 +19,7 @@ std::string getDocumentFromURL(std::string url) {
     }
 }
 
-std::string getHostFromURL(std::string url) {
+const std::string getHostFromURL(const std::string &url) {
     int slashes = 0;
     int start = 0;
     for (int i = 0; i < url.length(); i++) {
@@ -33,16 +33,16 @@ std::string getHostFromURL(std::string url) {
     }
 }
 
-void handleRequest(HTTPResponse response) {
+void handleRequest(const HTTPResponse &response) {
     if (response.statusCode == 200) {
-        std::unique_ptr<HTMLParser> parser = std::unique_ptr<HTMLParser>(new HTMLParser());
+        const std::unique_ptr<HTMLParser> parser = std::unique_ptr<HTMLParser>(new HTMLParser());
         parser->parse(response.body);
     }
     else if (response.statusCode == 301) {
-        std::string location = response.properties["Location"];
+        const std::string location = response.properties.at("Location");
         std::cout << "Redirect To: " << location << std::endl;
         std::cout << getHostFromURL(location) << "!" << getDocumentFromURL(location) << std::endl;
-        std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(location), getDocumentFromURL(location)));
+        const std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(location), getDocumentFromURL(location)));
         request->sendRequest(handleRequest);
         return;
     }
@@ -56,9 +56,9 @@ int main(int argc, char *argv[]) {
         std::cout << "./netrunner <url>" << std::endl;
         return 1;
     }
-    std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(argv[1]), getDocumentFromURL(argv[1])));
+    const std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(argv[1]), getDocumentFromURL(argv[1])));
     request->sendRequest(handleRequest);
-    std::unique_ptr<Window> window = std::make_unique<Window>();
+    const std::unique_ptr<Window> window = std::make_unique<Window>();
     window->init();
     while (!glfwWindowShouldClose(window->window)) {
         window->render();

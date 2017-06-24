@@ -2,7 +2,7 @@
 #include "../../../anime.h"
 #include <cmath>
 
-Box::Box(float x, float y, float width, float height, int windowWidth, int windowHeight) {
+Box::Box(const float x, const float y, const float width, const float height, const int windowWidth, const int windowHeight) {
     this->x = x;
     this->y = y;
     this->width = width;
@@ -87,7 +87,7 @@ void Box::render() {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Box::resize(int windowWidth, int windowHeight) {
+void Box::resize(const int windowWidth, const int windowHeight) {
     float vx = x;
     float vy = y;
     float vWidth = width;
@@ -107,7 +107,7 @@ void Box::resize(int windowWidth, int windowHeight) {
     verticesDirty = true;
 }
 
-void Box::pointToViewport(float &x, float &y, int windowWidth, int windowHeight) {
+void Box::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     if (x < 0) {
         x += windowWidth;
     }
@@ -124,7 +124,7 @@ void Box::pointToViewport(float &x, float &y, int windowWidth, int windowHeight)
     y = (y * 2) - 1;
 }
 
-void Box::distanceToViewport(float &x, float &y, int windowWidth, int windowHeight) {
+void Box::distanceToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     if (std::abs(x) > 1) {
         x /= windowWidth;
     }

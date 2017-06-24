@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-HTTPRequest::HTTPRequest(std::string host, std::string document) {
+HTTPRequest::HTTPRequest(const std::string &host, const std::string &document) {
     this->document = document;
     this->version = Version::HTTP10;
     this->method = Method::GET;
@@ -14,20 +14,20 @@ HTTPRequest::HTTPRequest(std::string host, std::string document) {
     this->userAgent = "NetRunner";
 }
 
-bool HTTPRequest::sendRequest(std::function<void(HTTPResponse)> responseCallback) {
+const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const {
     struct addrinfo hints;
     struct addrinfo *servinfo;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    int res = getaddrinfo(host.c_str(), "80", &hints, &servinfo);
+    const int res = getaddrinfo(host.c_str(), "80", &hints, &servinfo);
     if (res != 0) {
         std::cout << "Could not lookup " << host << ": " << res << std::endl;
         return false;
     }
 
-    int sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    const int sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
     if (sock == -1) {
         std::cout << "Could not create socket: " << errno << std::endl;
         freeaddrinfo(servinfo);
@@ -40,8 +40,8 @@ bool HTTPRequest::sendRequest(std::function<void(HTTPResponse)> responseCallback
         return false;
     }
 
-    std::string request = methodToString(method) + std::string(" ") + document + std::string(" ") + versionToString(version) + std::string("\r\nHost: ") + host + std::string("\r\nUser-Agent: ") + userAgent + std::string("\r\n\r\n");
-    size_t sent = send(sock, request.c_str(), request.length(), 0);
+    const std::string request = methodToString(method) + std::string(" ") + document + std::string(" ") + versionToString(version) + std::string("\r\nHost: ") + host + std::string("\r\nUser-Agent: ") + userAgent + std::string("\r\n\r\n");
+    const size_t sent = send(sock, request.c_str(), request.length(), 0);
     if (sent == -1) {
         std::cout << "Could not send \"" << request << "\": " << errno << std::endl;
         freeaddrinfo(servinfo);
@@ -61,7 +61,7 @@ bool HTTPRequest::sendRequest(std::function<void(HTTPResponse)> responseCallback
     return true;
 }
 
-std::string HTTPRequest::versionToString(Version version) {
+const std::string HTTPRequest::versionToString(const Version version) const {
     switch (version) {
         case Version::HTTP10:
             return "HTTP/1.0";
@@ -69,7 +69,7 @@ std::string HTTPRequest::versionToString(Version version) {
     return "ERROR";
 }
 
-std::string HTTPRequest::methodToString(Method method) {
+const std::string HTTPRequest::methodToString(const Method method) const {
     switch (method) {
         case Method::GET:
             return "GET";

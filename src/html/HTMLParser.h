@@ -7,8 +7,8 @@
 
 class HTMLParser {
 public:
-    void parse(std::string html);
-    void parseTag(std::string element, TagNode* tagNode);
+    void parse(const std::string &html) const;
+    void parseTag(const std::string &element, TagNode* tagNode) const;
 };
 
 #endif

@@ -6,7 +6,7 @@
 
 class HTTPResponse {
 public:
-    HTTPResponse(std::string rawRequest);
+    HTTPResponse(const std::string &rawRequest);
     std::string version;
     std::string status;
     std::map<std::string, std::string> properties;

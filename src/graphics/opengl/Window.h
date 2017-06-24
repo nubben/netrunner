@@ -16,11 +16,11 @@ public:
     ~Window();
     bool init();
     bool initGLFW();
-    bool initGLEW();
+    bool initGLEW() const;
     bool initGL();
-    GLuint compileShader(GLenum shaderType, const char *shaderSource);
-    GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader);
-    void render();
+    const GLuint compileShader(const GLenum shaderType, const char *shaderSource) const;
+    const GLuint compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const;
+    void render() const;
     GLFWwindow *window;
     int windowWidth;
     int windowHeight;

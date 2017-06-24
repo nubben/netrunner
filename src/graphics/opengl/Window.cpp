@@ -48,14 +48,14 @@ bool Window::initGLFW() {
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) {
         glViewport(0, 0, width, height);
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-        float sx = (float) width / thiz->windowWidth;
-        float sy = (float) height / thiz->windowHeight;
+        const float sx = (float) width / thiz->windowWidth;
+        const float sy = (float) height / thiz->windowHeight;
         thiz->windowWidth = width;
         thiz->windowHeight = height;
-        for (std::unique_ptr<Box> &box : thiz->boxes) {
+        for (const std::unique_ptr<Box> &box : thiz->boxes) {
             box->resize(width, height);
         }
-        for (std::unique_ptr<Text> &text : thiz->texts) {
+        for (const std::unique_ptr<Text> &text : thiz->texts) {
             text->resize(sx, sy);
         }
     });
@@ -64,9 +64,9 @@ bool Window::initGLFW() {
     return true;
 }
 
-bool Window::initGLEW() {
+bool Window::initGLEW() const {
     glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
+    const GLenum err = glewInit();
     if (err != GLEW_OK) {
         std::cout << "Could not initialize GLEW: " << glewGetErrorString(err) << std::endl;
         return false;
@@ -88,21 +88,21 @@ bool Window::initGL() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    GLuint fontVertexShader = compileShader(GL_VERTEX_SHADER, fontVertexShaderSource);
-    GLuint fontFragmentShader = compileShader(GL_FRAGMENT_SHADER, fontFragmentShaderSource);
+    const GLuint fontVertexShader = compileShader(GL_VERTEX_SHADER, fontVertexShaderSource);
+    const GLuint fontFragmentShader = compileShader(GL_FRAGMENT_SHADER, fontFragmentShaderSource);
     fontProgram = compileProgram(fontVertexShader, fontFragmentShader);
     glDeleteShader(fontVertexShader);
     glDeleteShader(fontFragmentShader);
 
-    GLuint textureVertexShader = compileShader(GL_VERTEX_SHADER, textureVertexShaderSource);
-    GLuint textureFragmentShader = compileShader(GL_FRAGMENT_SHADER, textureFragmentShaderSource);
+    const GLuint textureVertexShader = compileShader(GL_VERTEX_SHADER, textureVertexShaderSource);
+    const GLuint textureFragmentShader = compileShader(GL_FRAGMENT_SHADER, textureFragmentShaderSource);
     textureProgram = compileProgram(textureVertexShader, textureFragmentShader);
     glDeleteShader(textureVertexShader);
     glDeleteShader(textureFragmentShader);
 }
 
-GLuint Window::compileShader(GLenum shaderType, const char *shaderSource) {
-    GLuint shader = glCreateShader(shaderType);
+const GLuint Window::compileShader(const GLenum shaderType, const char *shaderSource) const {
+    const GLuint shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &shaderSource, NULL);
     glCompileShader(shader);
 
@@ -117,8 +117,8 @@ GLuint Window::compileShader(GLenum shaderType, const char *shaderSource) {
     return shader;
 }
 
-GLuint Window::compileProgram(GLuint vertexShader, GLuint fragmentShader) {
-    GLuint program = glCreateProgram();
+const GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const {
+    const GLuint program = glCreateProgram();
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
@@ -134,14 +134,14 @@ GLuint Window::compileProgram(GLuint vertexShader, GLuint fragmentShader) {
     return program;
 }
 
-void Window::render() {
+void Window::render() const {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(textureProgram);
-    for (std::unique_ptr<Box> &box : boxes) {
+    for (const std::unique_ptr<Box> &box : boxes) {
         box->render();
     }
     glUseProgram(fontProgram);
-    for (std::unique_ptr<Text> &text : texts) {
+    for (const std::unique_ptr<Text> &text : texts) {
         text->render();
     }
     glfwPollEvents();

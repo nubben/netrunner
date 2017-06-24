@@ -12,7 +12,7 @@ void printNode(Node *node, int indent) {
     }
     if (node->nodeType == NodeType::TAG) {
         std::cout << "TAG: " << dynamic_cast<TagNode*>(node)->tag << std::endl;
-        for (std::pair<std::string, std::string> property : dynamic_cast<TagNode*>(node)->properties) {
+        for (const std::pair<std::string, std::string> property : dynamic_cast<TagNode*>(node)->properties) {
             for (int i = 0; i < indent; i++) {
                 std::cout << '\t';
             }
@@ -28,7 +28,7 @@ void printNode(Node *node, int indent) {
     }
 }
 
-void HTMLParser::parse(std::string html) {
+void HTMLParser::parse(const std::string &html) const {
     Node rootNode = Node(NodeType::ROOT);
     Node *currentNode = &rootNode;
     std::vector<int> starts;
@@ -73,7 +73,7 @@ void HTMLParser::parse(std::string html) {
         }
         else if (state == 2) { // Tag
             if (html[cursor] == '>') {
-                int start = starts.back();
+                const int start = starts.back();
                 starts.pop_back();
                 std::string element = html.substr(start, cursor - start + 1);
                 parseTag(element, dynamic_cast<TagNode*>(currentNode));
@@ -82,7 +82,7 @@ void HTMLParser::parse(std::string html) {
         }
         else if (state == 3) { // Text
             if (html[cursor + 1] == '<' && html[cursor + 2] == '/') {
-                int start = starts.back();
+                const int start = starts.back();
                 starts.pop_back();
                 dynamic_cast<TextNode*>(currentNode)->text = html.substr(start, cursor - start + 1);
                 state = 0;
@@ -93,7 +93,7 @@ void HTMLParser::parse(std::string html) {
     printNode(&rootNode, 0);
 }
 
-void HTMLParser::parseTag(std::string element, TagNode* tagNode) {
+void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {
     int cursor;
     int start = 1; // skip first <
     int state = 0;

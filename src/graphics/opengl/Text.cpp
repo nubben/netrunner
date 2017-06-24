@@ -2,40 +2,44 @@
 #include "../text/TextRasterizer.h"
 #include <memory>
 
-Text::Text(std::string text, int x, int y, int windowWidth, int windowHeight) {
+Text::Text(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight) {
     this->x = x;
     this->y = y;
 
-    std::unique_ptr<TextRasterizer> textRasterizer = std::unique_ptr<TextRasterizer>(new TextRasterizer("DejaVuSerif.ttf", 50, 72));
+    const std::unique_ptr<TextRasterizer> textRasterizer = std::unique_ptr<TextRasterizer>(new TextRasterizer("DejaVuSerif.ttf", 50, 72));
     unsigned int glyphCount;
-    std::unique_ptr<Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, glyphCount);
+    std::unique_ptr<const Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, glyphCount);
     if (glyphs ==  nullptr) {
         return;
     }
     for (int i = 0; i < glyphCount; i++) {
-        Glyph &glyph = glyphs[i];
+        const Glyph &glyph = glyphs[i];
 
-        pointToViewport(glyph.x0, glyph.y0, windowWidth, windowHeight);
-        pointToViewport(glyph.x1, glyph.y1, windowWidth, windowHeight);
+        float vx0 = glyph.x0;
+        float vy0 = glyph.y0;
+        float vx1 = glyph.x1;
+        float vy1 = glyph.y1;
+        pointToViewport(vx0, vy0, windowWidth, windowHeight);
+        pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
         float *vertices = new float[20];
-        vertices[(0 * 5) + 0] = glyph.x0;
-        vertices[(0 * 5) + 1] = glyph.y0;
+        vertices[(0 * 5) + 0] = vx0;
+        vertices[(0 * 5) + 1] = vy0;
         vertices[(0 * 5) + 2] = 0.0f;
         vertices[(0 * 5) + 3] = glyph.s0;
         vertices[(0 * 5) + 4] = glyph.t0;
-        vertices[(1 * 5) + 0] = glyph.x0;
-        vertices[(1 * 5) + 1] = glyph.y1;
+        vertices[(1 * 5) + 0] = vx0;
+        vertices[(1 * 5) + 1] = vy1;
         vertices[(1 * 5) + 2] = 0.0f;
         vertices[(1 * 5) + 3] = glyph.s0;
         vertices[(1 * 5) + 4] = glyph.t1;
-        vertices[(2 * 5) + 0] = glyph.x1;
-        vertices[(2 * 5) + 1] = glyph.y1;
+        vertices[(2 * 5) + 0] = vx1;
+        vertices[(2 * 5) + 1] = vy1;
         vertices[(2 * 5) + 2] = 0.0f;
         vertices[(2 * 5) + 3] = glyph.s1;
         vertices[(2 * 5) + 4] = glyph.t1;
-        vertices[(3 * 5) + 0] = glyph.x1;
-        vertices[(3 * 5) + 1] = glyph.y0;
+        vertices[(3 * 5) + 0] = vx1;
+        vertices[(3 * 5) + 1] = vy0;
         vertices[(3 * 5) + 2] = 0.0f;
         vertices[(3 * 5) + 3] = glyph.s1;
         vertices[(3 * 5) + 4] = glyph.t0;
@@ -95,7 +99,7 @@ void Text::render() {
     }
 }
 
-void Text::resize(float sx, float sy) {
+void Text::resize(const float sx, const float sy) {
     for (int i = 0; i < glyphVertices.size(); i++) {
         glyphVertices[i][(0 * 5) + 0] = ((glyphVertices[i][(0 * 5) + 0] + 1) / sx) - 1;
         glyphVertices[i][(0 * 5) + 1] = ((glyphVertices[i][(0 * 5) + 1] + 1) / sy) - 1;
@@ -109,7 +113,7 @@ void Text::resize(float sx, float sy) {
     verticesDirty = true;
 }
 
-void Text::pointToViewport(float &x, float &y, int windowWidth, int windowHeight) {
+void Text::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     x = ((x / windowWidth) * 2) - 1;
     y = ((y / windowHeight) * 2) - 1;
 }

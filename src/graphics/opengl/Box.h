@@ -16,7 +16,7 @@ private:
         0.0f, 0.0f, 0.0f,    0.0f, 0.0f
     };
     bool verticesDirty = false;
-    unsigned int indices[6] = {
+    const unsigned int indices[6] = {
         0, 1, 2,
         0, 2, 3
     };
@@ -26,12 +26,12 @@ private:
     GLuint elementBufferObject = 0;
     GLuint texture = 0;
 public:
-    Box(float x, float y, float width, float height, int windowWidth, int windowHeight);
+    Box(const float x, const float y, const float width, const float height, const int windowWidth, const int windowHeight);
     ~Box();
     void render();
-    void resize(int width, int height);
-    void pointToViewport(float &x, float &y, int windowWidth, int windowHeight);
-    void distanceToViewport(float &x, float &y, int windowWidth, int windowHeight);
+    void resize(const int width, const int height);
+    void pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const ;
+    void distanceToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const ;
 };
 
 #endif

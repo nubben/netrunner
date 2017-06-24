@@ -12,7 +12,7 @@ private:
     float width;
     float height;
     bool verticesDirty = false;
-    unsigned int indices[6] = {
+    const unsigned int indices[6] = {
         0, 1, 2,
         0, 2, 3
     };
@@ -23,11 +23,11 @@ private:
     std::vector<GLuint> elementBufferObjects;
     std::vector<GLuint> textures;
 public:
-    Text(std::string text, int x, int y, int windowWidth, int windowHeight);
+    Text(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight);
     ~Text();
     void render();
-    void resize(float sx, float sy);
-    void pointToViewport(float &x, float &y, int windowWidth, int windowHeight);
+    void resize(const float sx, const float sy);
+    void pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const;
 };
 
 #endif

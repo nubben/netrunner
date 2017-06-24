@@ -1,6 +1,6 @@
 #include "HTTPResponse.h"
 
-HTTPResponse::HTTPResponse(std::string rawResponse) {
+HTTPResponse::HTTPResponse(const std::string &rawResponse) {
     int state = 0;
     int cursor = 0;
     int start = 0;

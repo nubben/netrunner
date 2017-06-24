@@ -16,10 +16,10 @@ enum class Method {
 
 class HTTPRequest {
 public:
-    HTTPRequest(std::string host, std::string document);
-    bool sendRequest(std::function<void(HTTPResponse)> responseCallback);
-    std::string versionToString(Version version);
-    std::string methodToString(Method method);
+    HTTPRequest(const std::string &host, const std::string &document);
+    const bool sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const;
+    const std::string versionToString(const Version version) const;
+    const std::string methodToString(const Method method) const;
 private:
     std::string document;
     Version version;
