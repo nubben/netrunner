@@ -6,7 +6,7 @@
 TextRasterizer::TextRasterizer(std::string fontPath, int size, int resolution) {
     FT_Init_FreeType(&lib);
 
-    face = std::unique_ptr<FT_Face>(new FT_Face);
+    face = std::make_unique<FT_Face>();
     if (FT_New_Face(lib, fontPath.c_str(), 0, face.get())) {
         std::cout << "Could not open font" << std::endl;
         return;

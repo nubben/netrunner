@@ -56,9 +56,9 @@ int main(int argc, char *argv[]) {
         std::cout << "./netrunner <url>" << std::endl;
         return 1;
     }
-//    std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(argv[1]), getDocumentFromURL(argv[1])));
-//    request->sendRequest(handleRequest);
-    std::unique_ptr<Window> window = std::unique_ptr<Window>(new Window());
+    std::unique_ptr<HTTPRequest> request = std::unique_ptr<HTTPRequest>(new HTTPRequest(getHostFromURL(argv[1]), getDocumentFromURL(argv[1])));
+    request->sendRequest(handleRequest);
+    std::unique_ptr<Window> window = std::make_unique<Window>();
     window->init();
     while (!glfwWindowShouldClose(window->window)) {
         window->render();
