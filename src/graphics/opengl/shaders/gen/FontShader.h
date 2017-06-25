@@ -1,5 +1,5 @@
-#ifndef TEXTURESHADER_H
-#define TEXTURESHADER_H
+#ifndef FONTSHADER_H
+#define FONTSHADER_H
 
 const char *fontVertexShaderSource =
 	"#version 400\n"

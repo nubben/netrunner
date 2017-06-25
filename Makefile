@@ -1,12 +1,13 @@
-CXX      = g++
-CXXFLAGS = -O3 -flto=8
-INCPATH  = -I /usr/include/freetype2 -I /usr/include/harfbuzz
-LINK     = g++
-LDFLAGS  = -O3 -flto=8
-LIBS     = -lglfw -lGL -lGLEW -lfreetype -lharfbuzz
-SRCDIR   = src
-OBJDIR   = gen
-DEPDIR   = d
+CXX        = g++
+CXXFLAGS   = -O3 -flto=8
+EXECUTABLE = netrunner
+INCPATH    = -I /usr/include/freetype2 -I /usr/include/harfbuzz
+LINK       = g++
+LDFLAGS    = -O3 -flto=8
+LIBS       = -lglfw -lGL -lGLEW -lfreetype -lharfbuzz
+SRCDIR     = src
+OBJDIR     = gen
+DEPDIR     = d
 
 SOURCES = $(subst ./,,$(shell find . -name *.cpp))
 OBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:.cpp=.o))
@@ -42,6 +43,6 @@ $(DEPDIR)/%d: ;
 .PRECIOUS: $(DEPDIR)/%.d
 
 clean:
-	-@rm -rf src/graphics/opengl/shaders/gen $(OBJDIR) netrunner 2>/dev/null || true
+	-@rm -rf src/graphics/opengl/shaders/gen $(OBJDIR) $(EXECUTABLE) 2>/dev/null || true
 
 include $(addsuffix .d,$(subst $(SRCDIR),$(DEPDIR),$(basename $(SOURCES))))

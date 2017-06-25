@@ -1,0 +1,6 @@
+.idea
+d
+gen
+src/graphics/opengl/shaders/gen
+netrunner
+*.iml
