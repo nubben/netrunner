@@ -1,14 +1,14 @@
-#include "Text.h"
-#include "../text/TextRasterizer.h"
+#include "TextComponent.h"
+#include "../../text/TextRasterizer.h"
 #include <memory>
 
-Text::Text(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight) {
+TextComponent::TextComponent(const std::string &text, const int x, const int y, const int fontSize, const bool bold, const int windowWidth, const int windowHeight) {
     this->x = x;
     this->y = y;
 
-    const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", 50, 72);
+    const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", fontSize, 72, bold);
     unsigned int glyphCount;
-    std::unique_ptr<const Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, glyphCount);
+    std::unique_ptr<const Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, height, glyphCount);
     if (glyphs ==  nullptr) {
         return;
     }
@@ -75,7 +75,7 @@ Text::Text(const std::string &text, const int x, const int y, const int windowWi
     }
 }
 
-Text::~Text() {
+TextComponent::~TextComponent() {
     for (int i = 0; i < vertexArrayObjects.size(); i++) {
         glDeleteVertexArrays(1, &vertexArrayObjects[i]);
         glDeleteBuffers(1, &vertexBufferObjects[i]);
@@ -84,7 +84,7 @@ Text::~Text() {
     }
 }
 
-void Text::render() {
+void TextComponent::render() {
     if (verticesDirty) {
         for (int i = 0; i < vertexArrayObjects.size(); i++) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects[i]);
@@ -92,14 +92,14 @@ void Text::render() {
         }
         verticesDirty = false;
     }
-    for (int i = 0; i < vertexArrayObjects.size(); i++) {
+    for (int i = vertexArrayObjects.size() - 1; i >= 0; i--) {
         glBindVertexArray(vertexArrayObjects[i]);
         glBindTexture(GL_TEXTURE_2D, textures[i]);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 }
 
-void Text::resize(const float sx, const float sy) {
+void TextComponent::resize(const float sx, const float sy) {
     for (int i = 0; i < glyphVertices.size(); i++) {
         glyphVertices[i][(0 * 5) + 0] = ((glyphVertices[i][(0 * 5) + 0] + 1) / sx) - 1;
         glyphVertices[i][(0 * 5) + 1] = ((glyphVertices[i][(0 * 5) + 1] + 1) / sy) - 1;
@@ -113,7 +113,7 @@ void Text::resize(const float sx, const float sy) {
     verticesDirty = true;
 }
 
-void Text::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
+void TextComponent::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     x = ((x / windowWidth) * 2) - 1;
     y = ((y / windowHeight) * 2) - 1;
 }

@@ -1,17 +1,17 @@
-#ifndef TEXT_H
-#define TEXT_H
+#ifndef TEXTCOMPONENT_H
+#define TEXTCOMPONENT_H
 
 #include <GL/glew.h>
+#include "Component.h"
 #include <array>
 #include <memory>
 #include <vector>
 
-class Text {
+class TextComponent : public Component {
 private:
     float x;
     float y;
     float width;
-    float height;
     bool verticesDirty = false;
     const unsigned int indices[6] = {
         0, 1, 2,
@@ -24,8 +24,8 @@ private:
     std::vector<GLuint> elementBufferObjects;
     std::vector<GLuint> textures;
 public:
-    Text(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight);
-    ~Text();
+    TextComponent(const std::string &text, const int x, const int y, const int fontSize, const bool bold,const int windowWidth, const int windowHeight);
+    ~TextComponent();
     void render();
     void resize(const float sx, const float sy);
     void pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const;

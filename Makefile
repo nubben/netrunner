@@ -1,8 +1,8 @@
 CXX      = g++
-CXXFLAGS = -O3
+CXXFLAGS = -O3 -flto=8
 INCPATH  = -I /usr/include/freetype2 -I /usr/include/harfbuzz
 LINK     = g++
-LDFLAGS  = -O3 -flto
+LDFLAGS  = -O3 -flto=8
 LIBS     = -lglfw -lGL -lGLEW -lfreetype -lharfbuzz
 SRCDIR   = src
 OBJDIR   = gen

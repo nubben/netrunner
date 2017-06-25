@@ -1,14 +1,14 @@
-#include "Box.h"
-#include "../../../anime.h"
+#include "BoxComponent.h"
+#include "../../../../anime.h"
 #include <cmath>
 
-Box::Box(const float x, const float y, const float width, const float height, const int windowWidth, const int windowHeight) {
+BoxComponent::BoxComponent(const float x, const float y, const float width, const float height, const int windowWidth, const int windowHeight) {
     this->x = x;
     this->y = y;
     this->width = width;
     this->height = height;
 
-    if (width == 1024) {
+    if (width == 512) {
         for (int y = 0; y < 1024; y++) {
             for (int x = 0; x < 1024; x++) {
                 for (int i = 0; i < 4; i++) {
@@ -69,14 +69,14 @@ Box::Box(const float x, const float y, const float width, const float height, co
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-Box::~Box() {
+BoxComponent::~BoxComponent() {
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
     glDeleteTextures(1, &texture);
 }
 
-void Box::render() {
+void BoxComponent::render() {
     if (verticesDirty) {
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -87,7 +87,7 @@ void Box::render() {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Box::resize(const int windowWidth, const int windowHeight) {
+void BoxComponent::resize(const int windowWidth, const int windowHeight) {
     float vx = x;
     float vy = y;
     float vWidth = width;
@@ -107,7 +107,7 @@ void Box::resize(const int windowWidth, const int windowHeight) {
     verticesDirty = true;
 }
 
-void Box::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
+void BoxComponent::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     if (x < 0) {
         x += windowWidth;
     }
@@ -124,7 +124,7 @@ void Box::pointToViewport(float &x, float &y, const int windowWidth, const int w
     y = (y * 2) - 1;
 }
 
-void Box::distanceToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
+void BoxComponent::distanceToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     if (std::abs(x) > 1) {
         x /= windowWidth;
     }

@@ -1,6 +1,9 @@
 #include "Window.h"
 #include "shaders/gen/FontShader.h"
 #include "shaders/gen/TextureShader.h"
+#include "../../html/TagNode.h"
+#include "../../html/TextNode.h"
+#include <cmath>
 #include <iostream>
 
 Window::~Window() {
@@ -19,9 +22,8 @@ bool Window::init() {
     }
     initGL();
 
-    boxes.push_back(std::make_unique<Box>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
-    boxes.push_back(std::make_unique<Box>(-1024, 0.0f, 1024, 1024, windowWidth, windowHeight));
-    texts.push_back(std::make_unique<Text>("Hello, World!", 32, 32, windowWidth, windowHeight));
+    boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
+    boxComponents.push_back(std::make_unique<BoxComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
 
     return true;
 }
@@ -52,11 +54,12 @@ bool Window::initGLFW() {
         const float sy = (float) height / thiz->windowHeight;
         thiz->windowWidth = width;
         thiz->windowHeight = height;
-        for (const std::unique_ptr<Box> &box : thiz->boxes) {
-            box->resize(width, height);
+        for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
+            boxComponent->resize(width, height);
         }
-        for (const std::unique_ptr<Text> &text : thiz->texts) {
-            text->resize(sx, sy);
+        for (const std::unique_ptr<Component> &component : thiz->components) {
+            TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+            textComponent->resize(sx, sy);
         }
     });
     glfwMakeContextCurrent(window);
@@ -80,8 +83,6 @@ bool Window::initGL() {
     std::cout << "Renderer: " << renderer << std::endl;
     std::cout << "Version: " << version << std::endl;
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.8f, 0.8f, 0.8f, 0.8f);
@@ -134,16 +135,41 @@ const GLuint Window::compileProgram(const GLuint vertexShader, const GLuint frag
     return program;
 }
 
-void Window::render() const {
+void Window::render() {
+    if (domDirty) {
+        drawNode(domRootNode);
+        domDirty = false;
+    }
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(textureProgram);
-    for (const std::unique_ptr<Box> &box : boxes) {
-        box->render();
+    for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
+        boxComponent->render();
     }
     glUseProgram(fontProgram);
-    for (const std::unique_ptr<Text> &text : texts) {
-        text->render();
+    for (const std::unique_ptr<Component> &component : components) {
+        TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+        textComponent->render();
     }
     glfwPollEvents();
     glfwSwapBuffers(window);
+}
+
+void Window::setDOM(std::shared_ptr<Node> rootNode) {
+    domRootNode = rootNode;
+    domDirty = true;
+}
+
+void Window::drawNode(std::shared_ptr<Node> node) {
+    if (node->nodeType == NodeType::TAG) {
+        TagNode *tagNode = dynamic_cast<TagNode*>(node.get());
+        std::unique_ptr<Component> component = tagNode->render(*tagNode, y, windowWidth, windowHeight);
+        if (component) {
+            components.push_back(tagNode->render(*tagNode, y, windowWidth, windowHeight));
+            y -= component->height;
+        }
+    }
+    for (std::shared_ptr<Node> child : node->children) {
+        drawNode(child);
+    }
 }

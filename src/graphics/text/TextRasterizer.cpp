@@ -3,11 +3,12 @@
 #include <limits>
 #include <iostream>
 
-TextRasterizer::TextRasterizer(const std::string &fontPath, int size, int resolution) {
+TextRasterizer::TextRasterizer(const std::string &fontPath, const int fontSize, const int resolution, const bool bold) {
+    this->fontSize = fontSize;
     FT_Init_FreeType(&lib);
 
     face = std::make_unique<FT_Face>();
-    if (FT_New_Face(lib, fontPath.c_str(), 0, face.get())) {
+    if (FT_New_Face(lib, bold ? (fontPath.substr(0, fontPath.length() - 4) + "-Bold.ttf").c_str() : fontPath.c_str(), 0, face.get())) {
         std::cout << "Could not open font" << std::endl;
         return;
     }
@@ -15,7 +16,7 @@ TextRasterizer::TextRasterizer(const std::string &fontPath, int size, int resolu
         std::cout << "Font is not Unicode BMP" << std::endl;
         return;
     }
-    if (FT_Set_Char_Size(*face, 0, size * 64, resolution, resolution)) {
+    if (FT_Set_Char_Size(*face, 0, fontSize * 64, resolution, resolution)) {
         std::cout << "Could not set font size" << std::endl;
         return;
     }
@@ -35,7 +36,7 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
-std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, unsigned int &glyphCount) const {
+std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, float &height, unsigned int &glyphCount) const {
     hb_buffer_reset(buffer);
     hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
     hb_buffer_set_language(buffer, hb_language_from_string("en", 2));
@@ -91,8 +92,20 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
         glyphs[i].t1 = (float) ftBitmap.rows / glyphs[i].textureHeight;
 
         cx += xa;
-        cx += ya;
+        cy += ya;
+
+        if (glyphs[i].x1 >= 1920) {
+            glyphs[i].x0 -= cx;
+            glyphs[i].y0 -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
+            glyphs[i].x1 -= cx;
+            glyphs[i].y1 -= std::ceil(1.2f * fontSize);
+            cx -= cx;
+            cy -= std::ceil(1.2f * fontSize);
+        }
     }
+    cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
+
+    height = y - cy;
 
     return glyphs;
 }

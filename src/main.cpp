@@ -4,8 +4,11 @@
 #include "html/TextNode.h"
 #include "networking/HTTPRequest.h"
 #include "networking/HTTPResponse.h"
+#include <ctime>
 #include <iostream>
 #include <memory>
+
+const std::unique_ptr<Window> window = std::make_unique<Window>();
 
 const std::string getDocumentFromURL(const std::string &url) {
     int slashes = 0;
@@ -36,12 +39,15 @@ const std::string getHostFromURL(const std::string &url) {
 void handleRequest(const HTTPResponse &response) {
     if (response.statusCode == 200) {
         const std::unique_ptr<HTMLParser> parser = std::make_unique<HTMLParser>();
-        parser->parse(response.body);
+        std::clock_t begin = clock();
+        std::shared_ptr<Node> rootNode = parser->parse(response.body);
+        std::clock_t end = clock();
+        std::cout << "Parsed document in: " << std::fixed << (((double) (end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+        window->setDOM(rootNode);
     }
     else if (response.statusCode == 301) {
         const std::string location = response.properties.at("Location");
         std::cout << "Redirect To: " << location << std::endl;
-        std::cout << getHostFromURL(location) << "!" << getDocumentFromURL(location) << std::endl;
         const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(location), getDocumentFromURL(location));
         request->sendRequest(handleRequest);
         return;
@@ -58,7 +64,6 @@ int main(int argc, char *argv[]) {
     }
     const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(argv[1]), getDocumentFromURL(argv[1]));
     request->sendRequest(handleRequest);
-    const std::unique_ptr<Window> window = std::make_unique<Window>();
     window->init();
     while (!glfwWindowShouldClose(window->window)) {
         window->render();

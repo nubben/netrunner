@@ -29,7 +29,7 @@ void printNode(const std::shared_ptr<Node> node, const int indent) {
     }
 }
 
-void HTMLParser::parse(const std::string &html) const {
+std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
     std::shared_ptr<Node> rootNode = std::make_shared<Node>(NodeType::ROOT);
     std::shared_ptr<Node> currentNode = rootNode;
     std::vector<int> starts;
@@ -91,7 +91,8 @@ void HTMLParser::parse(const std::string &html) const {
         }
     }
 
-    printNode(rootNode, 0);
+//    printNode(rootNode, 0);
+    return rootNode;
 }
 
 void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {

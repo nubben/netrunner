@@ -1,2 +1,2 @@
 #!/bin/bash
-make && ./netrunner http://gyroninja.net/a.html;
+make -j8 && ./netrunner http://motherfuckingwebsite.com/

@@ -21,10 +21,12 @@ struct Glyph {
 };
 
 class TextRasterizer {
+private:
+    int fontSize;
 public:
-    TextRasterizer(const std::string &fontPath, int size, int resolution);
+    TextRasterizer(const std::string &fontPath, const int size, const int resolution, const bool bold);
     ~TextRasterizer();
-    std::unique_ptr<const Glyph[]> rasterize(const std::string &text, const int x, const int y, unsigned int &glyphCount) const;
+    std::unique_ptr<const Glyph[]> rasterize(const std::string &text, const int x, const int y, float &height, unsigned int &glyphCount) const;
     const bool isUnicodeBMP(const FT_Face &face) const;
     FT_Library lib;
     hb_font_t *font;
