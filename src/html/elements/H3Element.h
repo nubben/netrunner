@@ -3,7 +3,7 @@
 
 #include "../../graphics/opengl/components/Component.h"
 #include "../../graphics/opengl/components/TextComponent.h"
-#include "../Node.h"
+#include "../TextNode.h"
 
 class H3Element {
 public:

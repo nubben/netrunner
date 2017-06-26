@@ -8,7 +8,7 @@
 class HTMLParser {
 public:
     std::shared_ptr<Node> parse(const std::string &html) const;
-    void parseTag(const std::string &element, TagNode* tagNode) const;
+    void parseTag(const std::string &element, TagNode &tagNode) const;
 };
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include "../graphics/opengl/components/Component.h"
 #include <memory>
 #include <vector>
 
@@ -17,6 +18,11 @@ public:
     NodeType nodeType;
     std::shared_ptr<Node> parent;
     std::vector<std::shared_ptr<Node>> children;
+};
+
+struct Element {
+    std::string tag;
+    std::function<std::unique_ptr<Component>(const Node &node, int y, int windowWidth, int windowHeight)> render;
 };
 
 #endif

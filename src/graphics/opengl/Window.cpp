@@ -161,12 +161,12 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
 }
 
 void Window::drawNode(const std::shared_ptr<Node> node) {
-    if (node->nodeType == NodeType::TAG) {
-        TagNode *tagNode = dynamic_cast<TagNode*>(node.get());
-        std::unique_ptr<Component> component = tagNode->render(*tagNode, y, windowWidth, windowHeight);
+    if (node->nodeType == NodeType::TEXT) {
+        TextNode *textNode = dynamic_cast<TextNode*>(node.get());
+        std::unique_ptr<Component> component = textNode->render(*textNode, y, windowWidth, windowHeight);
         if (component) {
-            components.push_back(tagNode->render(*tagNode, y, windowWidth, windowHeight));
             y -= component->height;
+            components.push_back(std::move(component));
         }
     }
     for (std::shared_ptr<Node> child : node->children) {

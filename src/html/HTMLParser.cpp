@@ -49,6 +49,17 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                     currentNode = currentNode->parent;
                     state = 1;
                 }
+                else if (
+                    (html[cursor + 1] == 'h' && html[cursor + 2] == 'r') ||
+                    (html[cursor + 1] == 'b' && html[cursor + 2] == 'r') ||
+                    (html[cursor + 1] == 'w' && html[cursor + 2] == 'b' && html[cursor + 3] == 'r') ||
+                    (html[cursor + 1] == 'i' && html[cursor + 2] == 'm' && html[cursor + 3] == 'g') ||
+                    (html[cursor + 1] == 'l' && html[cursor + 2] == 'i' && html[cursor + 3] == 'n' && html[cursor + 4] == 'k') ||
+                    (html[cursor + 1] == 'm' && html[cursor + 2] == 'e' && html[cursor + 3] == 't' && html[cursor + 4] == 'a') ||
+                    (html[cursor + 1] == 'i' && html[cursor + 2] == 'n' && html[cursor + 3] == 'p' && html[cursor + 4] == 'u' && html[cursor + 5] == 't')
+                    ) {
+                    state = 1;
+                }
                 else {
                     std::shared_ptr<TagNode> tagNode = std::make_shared<TagNode>();
                     currentNode->children.push_back(tagNode);
@@ -66,6 +77,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                 starts.push_back(cursor);
                 state = 3;
             }
+            cursor--;
         }
         else if (state == 1) { // Skip Over Element
             if (html[cursor] == '>') {
@@ -77,15 +89,16 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                 const int start = starts.back();
                 starts.pop_back();
                 std::string element = html.substr(start, cursor - start + 1);
-                parseTag(element, dynamic_cast<TagNode*>(currentNode.get()));
+                parseTag(element, *dynamic_cast<TagNode*>(currentNode.get()));
                 state = 0;
             }
         }
         else if (state == 3) { // Text
-            if (html[cursor + 1] == '<' && html[cursor + 2] == '/') {
+            if (html[cursor + 1] == '<') {
                 const int start = starts.back();
                 starts.pop_back();
                 dynamic_cast<TextNode*>(currentNode.get())->text = html.substr(start, cursor - start + 1);
+                currentNode = currentNode->parent;
                 state = 0;
             }
         }
@@ -95,7 +108,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
     return rootNode;
 }
 
-void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {
+void HTMLParser::parseTag(const std::string &element, TagNode &tagNode) const {
     int cursor;
     int start = 1; // skip first <
     int state = 0;
@@ -103,7 +116,7 @@ void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {
     for (cursor = 0; cursor < element.length();  cursor++) {
         if (state == 0) {
             if (element[cursor] == ' ' || element[cursor] == '>') {
-                tagNode->tag = element.substr(start, cursor - start);
+                tagNode.tag = element.substr(start, cursor - start);
                 start = cursor + 1;
                 state = 1;
             }
@@ -118,14 +131,25 @@ void HTMLParser::parseTag(const std::string &element, TagNode* tagNode) const {
             }
         }
         else if (state == 2) {
-            if (element[cursor] == '\"') {
+            if (element[cursor] == '"') {
                 start = cursor + 1;
                 state = 3;
             }
+            else if (element[cursor] == '\'') {
+                start = cursor + 1;
+                state = 4;
+            }
         }
         else if (state == 3) {
-            if (element[cursor] == '\"') {
-                tagNode->properties.insert(std::pair<std::string, std::string>(propertyKey, element.substr(start, cursor - start)));
+            if (element[cursor] == '"') {
+                tagNode.properties.insert(std::pair<std::string, std::string>(propertyKey, element.substr(start, cursor - start)));
+                start = cursor + 1;
+                state = 1;
+            }
+        }
+        else if (state == 4) {
+            if (element[cursor] == '\'') {
+                tagNode.properties.insert(std::pair<std::string, std::string>(propertyKey, element.substr(start, cursor - start)));
                 start = cursor + 1;
                 state = 1;
             }

@@ -7,7 +7,9 @@ TextComponent::TextComponent(const std::string &text, const int x, const int y, 
     this->fontSize = fontSize;
     this->bold = bold;
 
-    rasterize(text, x, y, fontSize, bold, windowWidth, windowHeight);
+    htmlDecode(this->text);
+
+    rasterize(this->text, x, y, fontSize, bold, windowWidth, windowHeight);
 
     for (int i = 0; i < glyphVertices.size(); i++) {
         const Glyph &glyph = glyphs[i];
@@ -118,4 +120,14 @@ void TextComponent::resize(const int x, const int y, const int windowWidth, cons
 void TextComponent::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
     x = ((x / windowWidth) * 2) - 1;
     y = ((y / windowHeight) * 2) - 1;
+}
+
+void TextComponent::htmlDecode(std::string &str) {
+    size_t found = 0;
+    while ((found = str.find("&", found)) != std::string::npos) {
+        if (str.substr(found, 4) == "&gt;") {
+            str.replace(found, 4, ">");
+        }
+        found++;
+    }
 }
