@@ -4,13 +4,15 @@
 #include "elements/H3Element.h"
 #include "elements/LIElement.h"
 #include "elements/PElement.h"
+#include "elements/SPANElement.h"
 
 const Element TagNode::elements[] = {
     {"h1", &H1Element::render},
     {"h2", &H2Element::render},
     {"h3", &H3Element::render},
     {"li", &LIElement::render},
-    {"p", &PElement::render}
+    {"p", &PElement::render},
+    {"span", &SPANElement::render}
 };
 
 TagNode::TagNode() : Node(NodeType::TAG) {
