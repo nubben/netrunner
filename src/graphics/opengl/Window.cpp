@@ -50,16 +50,16 @@ bool Window::initGLFW() {
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) {
         glViewport(0, 0, width, height);
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-        const float sx = (float) width / thiz->windowWidth;
-        const float sy = (float) height / thiz->windowHeight;
         thiz->windowWidth = width;
         thiz->windowHeight = height;
         for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
             boxComponent->resize(width, height);
         }
+        thiz->y = 950;
         for (const std::unique_ptr<Component> &component : thiz->components) {
             TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
-            textComponent->resize(sx, sy);
+            textComponent->resize(0, thiz->y, width, height);
+            thiz->y -= textComponent->height;
         }
     });
     glfwMakeContextCurrent(window);
@@ -155,12 +155,12 @@ void Window::render() {
     glfwSwapBuffers(window);
 }
 
-void Window::setDOM(std::shared_ptr<Node> rootNode) {
+void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     domRootNode = rootNode;
     domDirty = true;
 }
 
-void Window::drawNode(std::shared_ptr<Node> node) {
+void Window::drawNode(const std::shared_ptr<Node> node) {
     if (node->nodeType == NodeType::TAG) {
         TagNode *tagNode = dynamic_cast<TagNode*>(node.get());
         std::unique_ptr<Component> component = tagNode->render(*tagNode, y, windowWidth, windowHeight);

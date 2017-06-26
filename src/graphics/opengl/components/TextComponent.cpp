@@ -1,17 +1,65 @@
 #include "TextComponent.h"
-#include "../../text/TextRasterizer.h"
-#include <memory>
 
 TextComponent::TextComponent(const std::string &text, const int x, const int y, const int fontSize, const bool bold, const int windowWidth, const int windowHeight) {
+    this->text = text;
     this->x = x;
     this->y = y;
+    this->fontSize = fontSize;
+    this->bold = bold;
 
+    rasterize(text, x, y, fontSize, bold, windowWidth, windowHeight);
+
+    for (int i = 0; i < glyphVertices.size(); i++) {
+        const Glyph &glyph = glyphs[i];
+        const std::unique_ptr<float[]> &glyphVertice = glyphVertices[i];
+        vertexArrayObjects.push_back(0);
+        vertexBufferObjects.push_back(0);
+        elementBufferObjects.push_back(0);
+        glGenVertexArrays(1, &vertexArrayObjects.back());
+        glGenBuffers(1, &vertexBufferObjects.back());
+        glGenBuffers(1, &elementBufferObjects.back());
+
+        glBindVertexArray(vertexArrayObjects.back());
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
+        glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObjects.back());
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (0 * sizeof(float)));
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        textures.push_back(0);
+        glGenTextures(1, &textures.back());
+        glBindTexture(GL_TEXTURE_2D, textures.back());
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get());
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+}
+
+TextComponent::~TextComponent() {
+    for (int i = 0; i < vertexArrayObjects.size(); i++) {
+        glDeleteVertexArrays(1, &vertexArrayObjects[i]);
+        glDeleteBuffers(1, &vertexBufferObjects[i]);
+        glDeleteBuffers(1, &elementBufferObjects[i]);
+        glDeleteTextures(1, &textures[i]);
+    }
+}
+#include <iostream>
+void TextComponent::rasterize(const std::string &text, const int x, const int y, const int fontSize, const bool bold, const int windowWidth, const int windowHeight) {
     const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", fontSize, 72, bold);
     unsigned int glyphCount;
-    std::unique_ptr<const Glyph[]> glyphs = textRasterizer->rasterize(text, x, y, height, glyphCount);
-    if (glyphs ==  nullptr) {
+    glyphs = textRasterizer->rasterize(text, x, y, windowWidth, windowHeight, height, glyphCount);
+    if (glyphs == nullptr) {
         return;
     }
+
+    glyphVertices.clear();
     for (int i = 0; i < glyphCount; i++) {
         const Glyph &glyph = glyphs[i];
 
@@ -44,43 +92,6 @@ TextComponent::TextComponent(const std::string &text, const int x, const int y, 
         vertices[(3 * 5) + 3] = glyph.s1;
         vertices[(3 * 5) + 4] = glyph.t0;
         glyphVertices.push_back(std::move(vertices));
-
-        vertexArrayObjects.push_back(0);
-        vertexBufferObjects.push_back(0);
-        elementBufferObjects.push_back(0);
-        glGenVertexArrays(1, &vertexArrayObjects.back());
-        glGenBuffers(1, &vertexBufferObjects.back());
-        glGenBuffers(1, &elementBufferObjects.back());
-
-        glBindVertexArray(vertexArrayObjects.back());
-
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
-        glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices.back().get(), GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObjects.back());
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (0 * sizeof(float)));
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        textures.push_back(0);
-        glGenTextures(1, &textures.back());
-        glBindTexture(GL_TEXTURE_2D, textures.back());
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get());
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-}
-
-TextComponent::~TextComponent() {
-    for (int i = 0; i < vertexArrayObjects.size(); i++) {
-        glDeleteVertexArrays(1, &vertexArrayObjects[i]);
-        glDeleteBuffers(1, &vertexBufferObjects[i]);
-        glDeleteBuffers(1, &elementBufferObjects[i]);
-        glDeleteTextures(1, &textures[i]);
     }
 }
 
@@ -99,17 +110,8 @@ void TextComponent::render() {
     }
 }
 
-void TextComponent::resize(const float sx, const float sy) {
-    for (int i = 0; i < glyphVertices.size(); i++) {
-        glyphVertices[i][(0 * 5) + 0] = ((glyphVertices[i][(0 * 5) + 0] + 1) / sx) - 1;
-        glyphVertices[i][(0 * 5) + 1] = ((glyphVertices[i][(0 * 5) + 1] + 1) / sy) - 1;
-        glyphVertices[i][(1 * 5) + 0] = ((glyphVertices[i][(1 * 5) + 0] + 1) / sx) - 1;
-        glyphVertices[i][(1 * 5) + 1] = ((glyphVertices[i][(1 * 5) + 1] + 1) / sy) - 1;
-        glyphVertices[i][(2 * 5) + 0] = ((glyphVertices[i][(2 * 5) + 0] + 1) / sx) - 1;
-        glyphVertices[i][(2 * 5) + 1] = ((glyphVertices[i][(2 * 5) + 1] + 1) / sy) - 1;
-        glyphVertices[i][(3 * 5) + 0] = ((glyphVertices[i][(3 * 5) + 0] + 1) / sx) - 1;
-        glyphVertices[i][(3 * 5) + 1] = ((glyphVertices[i][(3 * 5) + 1] + 1) / sy) - 1;
-    }
+void TextComponent::resize(const int x, const int y, const int windowWidth, const int windowHeight) {
+    rasterize(text, x, y, fontSize, bold, windowWidth, windowHeight);
     verticesDirty = true;
 }
 

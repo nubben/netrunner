@@ -23,8 +23,9 @@ public:
     const GLuint compileShader(const GLenum shaderType, const char *shaderSource) const;
     const GLuint compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const;
     void render();
-    void setDOM(std::shared_ptr<Node> rootNode);
-    void drawNode(std::shared_ptr<Node> rootNode);
+    void setDOM(const std::shared_ptr<Node> rootNode);
+    void drawNode(const std::shared_ptr<Node> rootNode);
+    void repositionNode(const std::shared_ptr<Node> rootNode);
     GLFWwindow *window;
     int windowWidth;
     int windowHeight;

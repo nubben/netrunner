@@ -36,7 +36,7 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
-std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, float &height, unsigned int &glyphCount) const {
+std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &height, unsigned int &glyphCount) const {
     hb_buffer_reset(buffer);
     hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
     hb_buffer_set_language(buffer, hb_language_from_string("en", 2));
@@ -94,7 +94,7 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
         cx += xa;
         cy += ya;
 
-        if (glyphs[i].x1 >= 1920) {
+        if (glyphs[i].x1 >= windowWidth) {
             glyphs[i].x0 -= cx;
             glyphs[i].y0 -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
             glyphs[i].x1 -= cx;
@@ -103,7 +103,7 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
             cy -= std::ceil(1.2f * fontSize);
         }
     }
-    cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
+    cy -= std::ceil(1.2f * fontSize);
 
     height = y - cy;
 
