@@ -62,6 +62,11 @@ bool Window::initGLFW() {
             thiz->y -= textComponent->height;
         }
     });
+    glfwSetScrollCallback(window, [](GLFWwindow *window, double xOffset, double yOffset) {
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+        thiz->transformMatrix[13] += -yOffset * 0.1;
+        thiz->transformMatrixDirty = true;
+    });
     glfwMakeContextCurrent(window);
 
     return true;
@@ -147,6 +152,11 @@ void Window::render() {
         boxComponent->render();
     }
     glUseProgram(fontProgram);
+    if (transformMatrixDirty) {
+        GLuint transformLocation = glGetUniformLocation(fontProgram, "transform");
+        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformMatrix);
+        transformMatrixDirty = false;
+    }
     for (const std::unique_ptr<Component> &component : components) {
         TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
         textComponent->render();

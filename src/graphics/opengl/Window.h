@@ -26,6 +26,13 @@ public:
     void setDOM(const std::shared_ptr<Node> rootNode);
     void drawNode(const std::shared_ptr<Node> rootNode);
     void repositionNode(const std::shared_ptr<Node> rootNode);
+    float transformMatrix[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+    bool transformMatrixDirty = true;
     GLFWwindow *window;
     int windowWidth;
     int windowHeight;

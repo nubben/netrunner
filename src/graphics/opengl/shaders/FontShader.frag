@@ -1,7 +1,7 @@
 #version 400
-out vec4 colorOut;
-in vec2 texCoordPipe;
 uniform sampler2D textureIn;
+in vec2 texCoordPipe;
+out vec4 colorOut;
 void main() {
     colorOut = vec4(0, 0, 0, texture(textureIn, texCoordPipe).r);
 }
