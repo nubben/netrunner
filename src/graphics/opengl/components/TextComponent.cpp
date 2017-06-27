@@ -7,26 +7,26 @@ TextComponent::TextComponent(const std::string &text, const int x, const int y, 
     this->fontSize = fontSize;
     this->bold = bold;
 
-    htmlDecode(this->text);
+    sanitize(this->text);
 
     rasterize(this->text, x, y, fontSize, bold, windowWidth, windowHeight);
+
+    glGenBuffers(1, &elementBufferObject);
 
     for (int i = 0; i < glyphVertices.size(); i++) {
         const Glyph &glyph = glyphs[i];
         const std::unique_ptr<float[]> &glyphVertice = glyphVertices[i];
         vertexArrayObjects.push_back(0);
         vertexBufferObjects.push_back(0);
-        elementBufferObjects.push_back(0);
         glGenVertexArrays(1, &vertexArrayObjects.back());
         glGenBuffers(1, &vertexBufferObjects.back());
-        glGenBuffers(1, &elementBufferObjects.back());
 
         glBindVertexArray(vertexArrayObjects.back());
 
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
         glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObjects.back());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (0 * sizeof(float)));
@@ -45,10 +45,10 @@ TextComponent::TextComponent(const std::string &text, const int x, const int y, 
 }
 
 TextComponent::~TextComponent() {
+    glDeleteBuffers(1, &elementBufferObject);
     for (int i = 0; i < vertexArrayObjects.size(); i++) {
         glDeleteVertexArrays(1, &vertexArrayObjects[i]);
         glDeleteBuffers(1, &vertexBufferObjects[i]);
-        glDeleteBuffers(1, &elementBufferObjects[i]);
         glDeleteTextures(1, &textures[i]);
     }
 }
@@ -99,7 +99,7 @@ void TextComponent::rasterize(const std::string &text, const int x, const int y,
 
 void TextComponent::render() {
     if (verticesDirty) {
-        for (int i = 0; i < vertexArrayObjects.size(); i++) {
+        for (int i = 0; i < vertexBufferObjects.size(); i++) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects[i]);
             glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices[i].get(), GL_STATIC_DRAW);
         }
@@ -122,12 +122,17 @@ void TextComponent::pointToViewport(float &x, float &y, const int windowWidth, c
     y = ((y / windowHeight) * 2) - 1;
 }
 
-void TextComponent::htmlDecode(std::string &str) {
+void TextComponent::sanitize(std::string &str) {
     size_t found = 0;
     while ((found = str.find("&", found)) != std::string::npos) {
         if (str.substr(found, 4) == "&gt;") {
             str.replace(found, 4, ">");
         }
+        found++;
+    }
+    found = 0;
+    while ((found = str.find("\n", found)) != std::string::npos) {
+        str.replace(found, 1, "");
         found++;
     }
 }

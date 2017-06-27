@@ -39,9 +39,9 @@ const std::string getHostFromURL(const std::string &url) {
 void handleRequest(const HTTPResponse &response) {
     if (response.statusCode == 200) {
         const std::unique_ptr<HTMLParser> parser = std::make_unique<HTMLParser>();
-        std::clock_t begin = clock();
+        const std::clock_t begin = clock();
         std::shared_ptr<Node> rootNode = parser->parse(response.body);
-        std::clock_t end = clock();
+        const std::clock_t end = clock();
         std::cout << "Parsed document in: " << std::fixed << (((double) (end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         window->setDOM(rootNode);
     }
@@ -66,7 +66,10 @@ int main(int argc, char *argv[]) {
     request->sendRequest(handleRequest);
     window->init();
     while (!glfwWindowShouldClose(window->window)) {
+        const std::clock_t begin = clock();
         window->render();
+        const std::clock_t end = clock();
+        std::cout << '\r' << std::fixed << ((((double) (end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
     }
     return 0;
 }

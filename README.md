@@ -36,4 +36,9 @@ In the face of recent changes in Firefox, some anons were asking for a /g/'s per
 - Create components for defining how HTML elements are rendered.
 - Create components for defining how CSS rules affect elements.
 - Render the parsed data.
-
+- Calculate the height of every node to make positioning nodes easier.
+- Create css parser.
+- Make css rules trickle down.
+- Make text components more efficient (no longer have seperate vao, vbo, and texture for every character)
+- Handle more HTTP status codes
+- Add address field

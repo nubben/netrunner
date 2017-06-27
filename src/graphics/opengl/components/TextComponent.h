@@ -25,7 +25,7 @@ private:
     std::vector<std::unique_ptr<float[]>> glyphVertices;
     std::vector<GLuint> vertexArrayObjects;
     std::vector<GLuint> vertexBufferObjects;
-    std::vector<GLuint> elementBufferObjects;
+    GLuint elementBufferObject;
     std::vector<GLuint> textures;
 public:
     TextComponent(const std::string &text, const int x, const int y, const int fontSize, const bool bold,const int windowWidth, const int windowHeight);
@@ -34,7 +34,7 @@ public:
     void render();
     void resize(const int x, const int y, const int windowWidth, const int windowHeight);
     void pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const;
-    void htmlDecode(std::string &str);
+    void sanitize(std::string &str);
 };
 
 #endif
