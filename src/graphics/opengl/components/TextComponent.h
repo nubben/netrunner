@@ -15,6 +15,7 @@ private:
     float y;
     int fontSize;
     bool bold;
+    unsigned int color;
     bool verticesDirty = false;
     const unsigned int indices[6] = {
         0, 1, 2,
@@ -28,12 +29,12 @@ private:
     GLuint elementBufferObject;
     std::vector<GLuint> textures;
 public:
-    TextComponent(const std::string &text, const int x, const int y, const int fontSize, const bool bold,const int windowWidth, const int windowHeight);
+    TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight);
     ~TextComponent();
-    void rasterize(const std::string &text, const int x, const int y, const int fontSize, const bool bold, const int windowWidth, const int windowHeight);
+    void rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight);
     void render();
-    void resize(const int x, const int y, const int windowWidth, const int windowHeight);
-    void pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const;
+    void resize(const int rawX, const int rawY, const int windowWidth, const int windowHeight);
+    void pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const;
     void sanitize(std::string &str);
 };
 

@@ -1,19 +1,20 @@
 #include "TextComponent.h"
 
-TextComponent::TextComponent(const std::string &text, const int x, const int y, const int fontSize, const bool bold, const int windowWidth, const int windowHeight) {
-    this->text = text;
-    this->x = x;
-    this->y = y;
-    this->fontSize = fontSize;
-    this->bold = bold;
+TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
+    text = rawText;
+    x = rawX;
+    y = rawY;
+    fontSize = size;
+    bold = bolded;
+    color = hexColor;
 
-    sanitize(this->text);
+    sanitize(text);
 
-    rasterize(this->text, x, y, fontSize, bold, windowWidth, windowHeight);
+    rasterize(rawX, rawY, windowWidth, windowHeight);
 
     glGenBuffers(1, &elementBufferObject);
 
-    for (int i = 0; i < glyphVertices.size(); i++) {
+    for (unsigned int i = 0; i < glyphVertices.size(); i++) {
         const Glyph &glyph = glyphs[i];
         const std::unique_ptr<float[]> &glyphVertice = glyphVertices[i];
         vertexArrayObjects.push_back(0);
@@ -24,16 +25,19 @@ TextComponent::TextComponent(const std::string &text, const int x, const int y, 
         glBindVertexArray(vertexArrayObjects.back());
 
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
-        glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (0 * sizeof(float)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, (3 + 4 + 2) * sizeof(float), nullptr);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, (3 + 4 + 2) * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, (3 + 4 + 2) * sizeof(float), reinterpret_cast<void*>(7 * sizeof(float)));
+        glEnableVertexAttribArray(2);
 
         textures.push_back(0);
         glGenTextures(1, &textures.back());
@@ -46,23 +50,23 @@ TextComponent::TextComponent(const std::string &text, const int x, const int y, 
 
 TextComponent::~TextComponent() {
     glDeleteBuffers(1, &elementBufferObject);
-    for (int i = 0; i < vertexArrayObjects.size(); i++) {
+    for (unsigned int i = 0; i < vertexArrayObjects.size(); i++) {
         glDeleteVertexArrays(1, &vertexArrayObjects[i]);
         glDeleteBuffers(1, &vertexBufferObjects[i]);
         glDeleteTextures(1, &textures[i]);
     }
 }
-#include <iostream>
-void TextComponent::rasterize(const std::string &text, const int x, const int y, const int fontSize, const bool bold, const int windowWidth, const int windowHeight) {
+
+void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
     const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", fontSize, 72, bold);
     unsigned int glyphCount;
-    glyphs = textRasterizer->rasterize(text, x, y, windowWidth, windowHeight, height, glyphCount);
+    glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, height, glyphCount);
     if (glyphs == nullptr) {
         return;
     }
 
     glyphVertices.clear();
-    for (int i = 0; i < glyphCount; i++) {
+    for (unsigned int i = 0; i < glyphCount; i++) {
         const Glyph &glyph = glyphs[i];
 
         float vx0 = glyph.x0;
@@ -72,54 +76,71 @@ void TextComponent::rasterize(const std::string &text, const int x, const int y,
         pointToViewport(vx0, vy0, windowWidth, windowHeight);
         pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
-        std::unique_ptr<float[]> vertices = std::make_unique<float[]>(20);
-        vertices[(0 * 5) + 0] = vx0;
-        vertices[(0 * 5) + 1] = vy0;
-        vertices[(0 * 5) + 2] = 0.0f;
-        vertices[(0 * 5) + 3] = glyph.s0;
-        vertices[(0 * 5) + 4] = glyph.t0;
-        vertices[(1 * 5) + 0] = vx0;
-        vertices[(1 * 5) + 1] = vy1;
-        vertices[(1 * 5) + 2] = 0.0f;
-        vertices[(1 * 5) + 3] = glyph.s0;
-        vertices[(1 * 5) + 4] = glyph.t1;
-        vertices[(2 * 5) + 0] = vx1;
-        vertices[(2 * 5) + 1] = vy1;
-        vertices[(2 * 5) + 2] = 0.0f;
-        vertices[(2 * 5) + 3] = glyph.s1;
-        vertices[(2 * 5) + 4] = glyph.t1;
-        vertices[(3 * 5) + 0] = vx1;
-        vertices[(3 * 5) + 1] = vy0;
-        vertices[(3 * 5) + 2] = 0.0f;
-        vertices[(3 * 5) + 3] = glyph.s1;
-        vertices[(3 * 5) + 4] = glyph.t0;
+        std::unique_ptr<float[]> vertices = std::make_unique<float[]>(36);
+        vertices[(0 * (3 + 4 + 2)) + 0] = vx0;
+        vertices[(0 * (3 + 4 + 2)) + 1] = vy0;
+        vertices[(0 * (3 + 4 + 2)) + 2] = 0.0f;
+        vertices[(0 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+        vertices[(0 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+        vertices[(0 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+        vertices[(0 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+        vertices[(0 * (3 + 4 + 2)) + 7] = glyph.s0;
+        vertices[(0 * (3 + 4 + 2)) + 8] = glyph.t0;
+        vertices[(1 * (3 + 4 + 2)) + 0] = vx0;
+        vertices[(1 * (3 + 4 + 2)) + 1] = vy1;
+        vertices[(1 * (3 + 4 + 2)) + 2] = 0.0f;
+        vertices[(1 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+        vertices[(1 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+        vertices[(1 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+        vertices[(1 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+        vertices[(1 * (3 + 4 + 2)) + 7] = glyph.s0;
+        vertices[(1 * (3 + 4 + 2)) + 8] = glyph.t1;
+        vertices[(2 * (3 + 4 + 2)) + 0] = vx1;
+        vertices[(2 * (3 + 4 + 2)) + 1] = vy1;
+        vertices[(2 * (3 + 4 + 2)) + 2] = 0.0f;
+        vertices[(2 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+        vertices[(2 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+        vertices[(2 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+        vertices[(2 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+        vertices[(2 * (3 + 4 + 2)) + 7] = glyph.s1;
+        vertices[(2 * (3 + 4 + 2)) + 8] = glyph.t1;
+        vertices[(3 * (3 + 4 + 2)) + 0] = vx1;
+        vertices[(3 * (3 + 4 + 2)) + 1] = vy0;
+        vertices[(3 * (3 + 4 + 2)) + 2] = 0.0f;
+        vertices[(3 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+        vertices[(3 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+        vertices[(3 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+        vertices[(3 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+        vertices[(3 * (3 + 4 + 2)) + 7] = glyph.s1;
+        vertices[(3 * (3 + 4 + 2)) + 8] = glyph.t0;
+
         glyphVertices.push_back(std::move(vertices));
     }
 }
 
 void TextComponent::render() {
     if (verticesDirty) {
-        for (int i = 0; i < vertexBufferObjects.size(); i++) {
+        for (unsigned int i = 0; i < vertexBufferObjects.size(); i++) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects[i]);
-            glBufferData(GL_ARRAY_BUFFER, ((3 + 2) * 4) * sizeof(float), glyphVertices[i].get(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), glyphVertices[i].get(), GL_STATIC_DRAW);
         }
         verticesDirty = false;
     }
-    for (int i = vertexArrayObjects.size() - 1; i >= 0; i--) {
-        glBindVertexArray(vertexArrayObjects[i]);
-        glBindTexture(GL_TEXTURE_2D, textures[i]);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    for (unsigned int i = vertexArrayObjects.size(); i > 0; i--) {
+        glBindVertexArray(vertexArrayObjects[i - 1]);
+        glBindTexture(GL_TEXTURE_2D, textures[i - 1]);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     }
 }
 
-void TextComponent::resize(const int x, const int y, const int windowWidth, const int windowHeight) {
-    rasterize(text, x, y, fontSize, bold, windowWidth, windowHeight);
+void TextComponent::resize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
+    rasterize(rawX, rawY, windowWidth, windowHeight);
     verticesDirty = true;
 }
 
-void TextComponent::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
-    x = ((x / windowWidth) * 2) - 1;
-    y = ((y / windowHeight) * 2) - 1;
+void TextComponent::pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const {
+    rawX = ((rawX / windowWidth) * 2) - 1;
+    rawY = ((rawY / windowHeight) * 2) - 1;
 }
 
 void TextComponent::sanitize(std::string &str) {
