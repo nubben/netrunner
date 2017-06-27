@@ -39,7 +39,7 @@ bool Window::initGLFW() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(640, 480, "NetRunner", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "NetRunner", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         std::cout << "Could not create window" << std::endl;
@@ -47,9 +47,9 @@ bool Window::initGLFW() {
     }
     glfwSetWindowUserPointer(window, this);
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
-    glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) {
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow *win, int width, int height) {
         glViewport(0, 0, width, height);
-        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->windowWidth = width;
         thiz->windowHeight = height;
         for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
@@ -62,8 +62,8 @@ bool Window::initGLFW() {
             thiz->y -= textComponent->height;
         }
     });
-    glfwSetScrollCallback(window, [](GLFWwindow *window, double xOffset, double yOffset) {
-        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->transformMatrix[13] += -yOffset * 0.1;
         thiz->transformMatrixDirty = true;
     });
@@ -105,25 +105,27 @@ bool Window::initGL() {
     textureProgram = compileProgram(textureVertexShader, textureFragmentShader);
     glDeleteShader(textureVertexShader);
     glDeleteShader(textureFragmentShader);
+
+    return true;
 }
 
-const GLuint Window::compileShader(const GLenum shaderType, const char *shaderSource) const {
+GLuint Window::compileShader(const GLenum shaderType, const char *shaderSource) const {
     const GLuint shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &shaderSource, NULL);
+    glShaderSource(shader, 1, &shaderSource, nullptr);
     glCompileShader(shader);
 
     GLint success;
     GLchar infoLog[1024];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+        glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
         std::cout << "Could not compile shader\n" << infoLog << std::endl;
     }
 
     return shader;
 }
 
-const GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const {
+GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const {
     const GLuint program = glCreateProgram();
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
@@ -133,7 +135,7 @@ const GLuint Window::compileProgram(const GLuint vertexShader, const GLuint frag
     GLchar infoLog[1024];
     glGetProgramiv(program, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(program, 1024, NULL, infoLog);
+        glGetProgramInfoLog(program, 1024, nullptr, infoLog);
         std::cout << "Could not compile program\n" << infoLog << std::endl;
     }
 
@@ -153,7 +155,7 @@ void Window::render() {
     }
     glUseProgram(fontProgram);
     if (transformMatrixDirty) {
-        GLuint transformLocation = glGetUniformLocation(fontProgram, "transform");
+        GLint transformLocation = glGetUniformLocation(fontProgram, "transform");
         glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformMatrix);
         transformMatrixDirty = false;
     }

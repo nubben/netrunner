@@ -8,11 +8,15 @@
 #include <iostream>
 #include <memory>
 
+const std::string getDocumentFromURL(const std::string &url);
+const std::string getHostFromURL(const std::string &url);
+void handleRequest(const HTTPResponse &response);
+
 const std::unique_ptr<Window> window = std::make_unique<Window>();
 
 const std::string getDocumentFromURL(const std::string &url) {
     int slashes = 0;
-    for (int i = 0; i < url.length(); i++) {
+    for (unsigned int i = 0; i < url.length(); i++) {
         if (url[i] == '/') {
             slashes++;
             if (slashes == 3) {
@@ -20,12 +24,13 @@ const std::string getDocumentFromURL(const std::string &url) {
             }
         }
     }
+    return "";
 }
 
 const std::string getHostFromURL(const std::string &url) {
     int slashes = 0;
-    int start = 0;
-    for (int i = 0; i < url.length(); i++) {
+    unsigned int start = 0;
+    for (unsigned int i = 0; i < url.length(); i++) {
         if (url[i] == '/') {
             if (slashes == 2) {
                 return url.substr(start, i - start);
@@ -34,6 +39,7 @@ const std::string getHostFromURL(const std::string &url) {
             start = i + 1;
         }
     }
+    return "";
 }
 
 void handleRequest(const HTTPResponse &response) {
@@ -42,7 +48,7 @@ void handleRequest(const HTTPResponse &response) {
         const std::clock_t begin = clock();
         std::shared_ptr<Node> rootNode = parser->parse(response.body);
         const std::clock_t end = clock();
-        std::cout << "Parsed document in: " << std::fixed << (((double) (end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+        std::cout << "Parsed document in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         window->setDOM(rootNode);
     }
     else if (response.statusCode == 301) {
@@ -69,7 +75,7 @@ int main(int argc, char *argv[]) {
         const std::clock_t begin = clock();
         window->render();
         const std::clock_t end = clock();
-        std::cout << '\r' << std::fixed << ((((double) (end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
+        std::cout << '\r' << std::fixed << (((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
     }
     return 0;
 }

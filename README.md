@@ -42,3 +42,4 @@ In the face of recent changes in Firefox, some anons were asking for a /g/'s per
 - Make text components more efficient (no longer have seperate vao, vbo, and texture for every character)
 - Handle more HTTP status codes
 - Add address field
+- Support inlining nodes

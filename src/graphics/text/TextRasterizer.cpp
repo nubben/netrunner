@@ -3,8 +3,8 @@
 #include <limits>
 #include <iostream>
 
-TextRasterizer::TextRasterizer(const std::string &fontPath, const int fontSize, const int resolution, const bool bold) {
-    this->fontSize = fontSize;
+TextRasterizer::TextRasterizer(const std::string &fontPath, const int size, const unsigned int resolution, const bool bold) {
+    fontSize = size;
     FT_Init_FreeType(&lib);
 
     face = std::make_unique<FT_Face>();
@@ -21,7 +21,7 @@ TextRasterizer::TextRasterizer(const std::string &fontPath, const int fontSize, 
         return;
     }
 
-    font = hb_ft_font_create(*face, NULL);
+    font = hb_ft_font_create(*face, nullptr);
 
     buffer = hb_buffer_create();
     if (!hb_buffer_allocation_successful(buffer)) {
@@ -43,7 +43,10 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
 
     hb_buffer_add_utf8(buffer, text.c_str(), text.length(), 0, text.length());
 
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wold-style-cast"
     const hb_feature_t KerningOn = { HB_TAG('k', 'e', 'r', 'n'), 1, 0, std::numeric_limits<unsigned int>::max() };
+    #pragma GCC diagnostic pop
     hb_shape(font, buffer, &KerningOn, 1);
 
     const hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
@@ -54,7 +57,7 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
     int cx = x;
     int cy = y;
 
-    for (int i = 0; i < glyphCount; i++) {
+    for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
             std::cout << "Could not load glyph" << std::endl;
             return nullptr;
@@ -71,15 +74,15 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
 
         glyphs[i].textureWidth = pow(2, ceil(log(ftBitmap.width) / log(2)));
         glyphs[i].textureHeight = pow(2, ceil(log(ftBitmap.rows) / log(2)));
-        glyphs[i].textureData = std::make_unique<unsigned char[]>(glyphs[i].textureWidth * glyphs[i].textureHeight);
-        for (int iy = 0; iy < ftBitmap.rows; iy++) {
-            memcpy(glyphs[i].textureData.get() + iy * glyphs[i].textureWidth, ftBitmap.buffer + iy * ftBitmap.width, ftBitmap.width);
+        glyphs[i].textureData = std::make_unique<unsigned char[]>(static_cast<size_t>(glyphs[i].textureWidth * glyphs[i].textureHeight));
+        for (unsigned int iy = 0; iy < ftBitmap.rows; iy++) {
+            memcpy(glyphs[i].textureData.get() + iy * static_cast<unsigned int>(glyphs[i].textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
         }
 
-        const float xa = (float) glyphPos[i].x_advance / 64;
-        const float ya = (float) glyphPos[i].y_advance / 64;
-        const float xo = (float) glyphPos[i].x_offset / 64;
-        const float yo = (float) glyphPos[i].y_offset / 64;
+        const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
+        const float ya = static_cast<float>(glyphPos[i].y_advance) / 64;
+        const float xo = static_cast<float>(glyphPos[i].x_offset) / 64;
+        const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
 
         glyphs[i].x0 = cx + xo + slot->bitmap_left;
         glyphs[i].y0 = floor(cy + yo + slot->bitmap_top);
@@ -88,8 +91,8 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
 
         glyphs[i].s0 = 0.0f;
         glyphs[i].t0 = 0.0f;
-        glyphs[i].s1 = (float) ftBitmap.width / glyphs[i].textureWidth;
-        glyphs[i].t1 = (float) ftBitmap.rows / glyphs[i].textureHeight;
+        glyphs[i].s1 = static_cast<float>(ftBitmap.width) / glyphs[i].textureWidth;
+        glyphs[i].t1 = static_cast<float>(ftBitmap.rows) / glyphs[i].textureHeight;
 
         cx += xa;
         cy += ya;
@@ -110,10 +113,10 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
     return glyphs;
 }
 
-const bool TextRasterizer::isUnicodeBMP(const FT_Face &face) const {
-    for (int i = 0; i < face->num_charmaps; i++) {
-        if (((face->charmaps[i]->platform_id == 0) && (face->charmaps[i]->encoding_id == 3)) || ((face->charmaps[i]->platform_id == 3) && (face->charmaps[i]->encoding_id == 1))) {
-            FT_Set_Charmap(face, face->charmaps[i]);
+bool TextRasterizer::isUnicodeBMP(const FT_Face &ftFace) const {
+    for (int i = 0; i < ftFace->num_charmaps; i++) {
+        if (((ftFace->charmaps[i]->platform_id == 0) && (ftFace->charmaps[i]->encoding_id == 3)) || ((ftFace->charmaps[i]->platform_id == 3) && (ftFace->charmaps[i]->encoding_id == 1))) {
+            FT_Set_Charmap(ftFace, ftFace->charmaps[i]);
             return true;
         }
     }

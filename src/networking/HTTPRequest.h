@@ -16,8 +16,8 @@ enum class Method {
 
 class HTTPRequest {
 public:
-    HTTPRequest(const std::string &host, const std::string &document);
-    const bool sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const;
+    HTTPRequest(const std::string &hostName, const std::string &doc);
+    bool sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const;
     const std::string versionToString(const Version version) const;
     const std::string methodToString(const Method method) const;
 private:

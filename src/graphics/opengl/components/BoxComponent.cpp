@@ -2,36 +2,36 @@
 #include "../../../../anime.h"
 #include <cmath>
 
-BoxComponent::BoxComponent(const float x, const float y, const float width, const float height, const int windowWidth, const int windowHeight) {
-    this->x = x;
-    this->y = y;
-    this->width = width;
-    this->height = height;
+BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight) {
+    x = rawX;
+    y = rawY;
+    width = rawWidth;
+    height = rawHeight;
 
     if (width == 512) {
-        for (int y = 0; y < 1024; y++) {
-            for (int x = 0; x < 1024; x++) {
+        for (int py = 0; py < 1024; py++) {
+            for (int px = 0; px < 1024; px++) {
                 for (int i = 0; i < 4; i++) {
-                    data[1023 - y][x][i] = anime.pixel_data[((x * 4) + (y * 4 * 1024)) + i];
+                    data[1023 - py][px][i] = anime.pixel_data[((px * 4) + (py * 4 * 1024)) + i];
                 }
             }
         }
     }
     else {
-        for (int y = 0; y < 1024; y++) {
-            for (int x = 0; x < 1024; x++) {
+        for (int py = 0; py < 1024; py++) {
+            for (int px = 0; px < 1024; px++) {
                 for (int i = 0; i < 3; i++) {
-                    data[1023 - y][x][i] = 0x88;
+                    data[1023 - py][px][i] = 0x88;
                 }
-                data[1023 - y][x][3] = 0xff;
+                data[1023 - py][px][3] = 0xff;
             }
         }
     }
 
-    float vx = x;
-    float vy = y;
-    float vWidth = width;
-    float vHeight = height;
+    float vx = rawX;
+    float vy = rawY;
+    float vWidth = rawWidth;
+    float vHeight = rawHeight;
     pointToViewport(vx, vy, windowWidth, windowHeight);
     distanceToViewport(vWidth, vHeight, windowWidth, windowHeight);
 
@@ -56,10 +56,10 @@ BoxComponent::BoxComponent(const float x, const float y, const float width, cons
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (0 * sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glGenTextures(1, &texture);
@@ -84,7 +84,7 @@ void BoxComponent::render() {
     }
     glBindVertexArray(vertexArrayObject);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
 void BoxComponent::resize(const int windowWidth, const int windowHeight) {
@@ -107,30 +107,30 @@ void BoxComponent::resize(const int windowWidth, const int windowHeight) {
     verticesDirty = true;
 }
 
-void BoxComponent::pointToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
-    if (x < 0) {
-        x += windowWidth;
+void BoxComponent::pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const {
+    if (rawX < 0) {
+        rawX += windowWidth;
     }
-    if (y < 0) {
-        y += windowHeight;
+    if (rawY < 0) {
+        rawY += windowHeight;
     }
-    if (x > 1) {
-        x /= windowWidth;
+    if (rawX > 1) {
+        rawX /= windowWidth;
     }
-    if (y > 1) {
-        y /= windowHeight;
+    if (rawY > 1) {
+        rawY /= windowHeight;
     }
-    x = (x * 2) - 1;
-    y = (y * 2) - 1;
+    rawX = (rawX * 2) - 1;
+    rawY = (rawY * 2) - 1;
 }
 
-void BoxComponent::distanceToViewport(float &x, float &y, const int windowWidth, const int windowHeight) const {
-    if (std::abs(x) > 1) {
-        x /= windowWidth;
+void BoxComponent::distanceToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const {
+    if (std::abs(rawX) > 1) {
+        rawX /= windowWidth;
     }
-    if (std::abs(y) > 1) {
-        y /= windowHeight;
+    if (std::abs(rawY) > 1) {
+        rawY /= windowHeight;
     }
-    x *= 2;
-    y *= 2;
+    rawX *= 2;
+    rawY *= 2;
 }

@@ -1,7 +1,10 @@
 #include "HTMLParser.h"
 #include "TextNode.h"
+#include <algorithm>
 #include <iostream>
 #include <memory>
+
+void printNode(const std::shared_ptr<Node> node, const int indent);
 
 void printNode(const std::shared_ptr<Node> node, const int indent) {
     for (int i = 0; i < indent; i++) {
@@ -32,9 +35,8 @@ void printNode(const std::shared_ptr<Node> node, const int indent) {
 std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
     std::shared_ptr<Node> rootNode = std::make_shared<Node>(NodeType::ROOT);
     std::shared_ptr<Node> currentNode = rootNode;
-    std::vector<int> starts;
-    int cursor;
-    int start = 0;
+    std::vector<unsigned int> starts;
+    unsigned int cursor;
     int state = 0;
     for (cursor = 0; cursor < html.length(); cursor++) { // TODO handle trying to look ahead past string
         if (state == 0) { // Neutral
@@ -86,37 +88,36 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
         }
         else if (state == 2) { // Tag
             if (html[cursor] == '>') {
-                const int start = starts.back();
+                std::string element = html.substr(starts.back(), cursor - starts.back() + 1);
                 starts.pop_back();
-                std::string element = html.substr(start, cursor - start + 1);
                 parseTag(element, *dynamic_cast<TagNode*>(currentNode.get()));
                 state = 0;
             }
         }
         else if (state == 3) { // Text
             if (html[cursor + 1] == '<') {
-                const int start = starts.back();
+                dynamic_cast<TextNode*>(currentNode.get())->text = html.substr(starts.back(), cursor - starts.back() + 1);
                 starts.pop_back();
-                dynamic_cast<TextNode*>(currentNode.get())->text = html.substr(start, cursor - start + 1);
                 currentNode = currentNode->parent;
                 state = 0;
             }
         }
     }
 
-//    printNode(rootNode, 0);
+    printNode(rootNode, 0);
     return rootNode;
 }
 
 void HTMLParser::parseTag(const std::string &element, TagNode &tagNode) const {
-    int cursor;
-    int start = 1; // skip first <
+    unsigned int cursor;
+    unsigned int start = 1; // skip first <
     int state = 0;
     std::string propertyKey;
     for (cursor = 0; cursor < element.length();  cursor++) {
         if (state == 0) {
             if (element[cursor] == ' ' || element[cursor] == '>') {
                 tagNode.tag = element.substr(start, cursor - start);
+                std::transform(tagNode.tag.begin(), tagNode.tag.end(), tagNode.tag.begin(), tolower);
                 start = cursor + 1;
                 state = 1;
             }

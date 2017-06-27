@@ -1,5 +1,6 @@
 CXX        = g++
 CXXFLAGS   = -O3 -flto=8
+WARNINGS   = -Werror -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused -Wzero-as-null-pointer-constant -Wuseless-cast
 EXECUTABLE = netrunner
 INCPATH    = -I /usr/include/freetype2 -I /usr/include/harfbuzz
 LINK       = g++
@@ -36,7 +37,7 @@ endif
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | shaders
 	@mkdir -p $(@D)
 	@mkdir -p $(subst gen,d,$(@D))
-	$(CXX) -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td $(CXXFLAGS) $(INCPATH) -c -o $@ $<
+	$(CXX) -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td $(CXXFLAGS) $(INCPATH) $(WARNINGS) -c -o $@ $<
 	@mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 $(DEPDIR)/%d: ;

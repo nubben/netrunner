@@ -6,15 +6,15 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-HTTPRequest::HTTPRequest(const std::string &host, const std::string &document) {
-    this->document = document;
-    this->version = Version::HTTP10;
-    this->method = Method::GET;
-    this->host = host;
-    this->userAgent = "NetRunner";
+HTTPRequest::HTTPRequest(const std::string &hostName, const std::string &doc) {
+    document = doc;
+    version = Version::HTTP10;
+    method = Method::GET;
+    host = hostName;
+    userAgent = "NetRunner";
 }
 
-const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const {
+bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const {
     struct addrinfo hints;
     struct addrinfo *serverInfo;
     memset(&hints, 0, sizeof(hints));
@@ -41,7 +41,7 @@ const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> res
     }
 
     const std::string request = methodToString(method) + std::string(" ") + document + std::string(" ") + versionToString(version) + std::string("\r\nHost: ") + host + std::string("\r\nUser-Agent: ") + userAgent + std::string("\r\n\r\n");
-    const size_t sent = send(sock, request.c_str(), request.length(), 0);
+    const ssize_t sent = send(sock, request.c_str(), request.length(), 0);
     if (sent == -1) {
         std::cout << "Could not send \"" << request << "\": " << errno << std::endl;
         freeaddrinfo(serverInfo);
@@ -50,9 +50,9 @@ const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> res
 
     std::string response;
     char buffer[512];
-    size_t received;
+    ssize_t received;
     while ((received = recv(sock, buffer, sizeof(buffer), 0)) != 0) {
-        response += std::string(buffer, received);
+        response += std::string(buffer, static_cast<unsigned int>(received));
     }
 
     responseCallback(HTTPResponse(response));
@@ -61,20 +61,22 @@ const bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> res
     return true;
 }
 
-const std::string HTTPRequest::versionToString(const Version version) const {
-    switch (version) {
+const std::string HTTPRequest::versionToString(const Version ver) const {
+    switch (ver) {
         case Version::HTTP10:
             return "HTTP/1.0";
+        default:
+            return "ERROR";
     }
-    return "ERROR";
 }
 
-const std::string HTTPRequest::methodToString(const Method method) const {
-    switch (method) {
+const std::string HTTPRequest::methodToString(const Method meth) const {
+    switch (meth) {
         case Method::GET:
             return "GET";
         case Method::POST:
             return "POST";
+        default:
+            return "ERROR";
     }
-    return "ERROR";
 }

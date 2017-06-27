@@ -24,10 +24,10 @@ class TextRasterizer {
 private:
     int fontSize;
 public:
-    TextRasterizer(const std::string &fontPath, const int size, const int resolution, const bool bold);
+    TextRasterizer(const std::string &fontPath, const int size, const unsigned int resolution, const bool bold);
     ~TextRasterizer();
     std::unique_ptr<const Glyph[]> rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &height, unsigned int &glyphCount) const;
-    const bool isUnicodeBMP(const FT_Face &face) const;
+    bool isUnicodeBMP(const FT_Face &face) const;
     FT_Library lib;
     hb_font_t *font;
     hb_buffer_t *buffer;

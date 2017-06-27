@@ -1,6 +1,7 @@
 #include "TagNode.h"
 
 const Element TagNode::elements[] = {
+    {"", nullptr}
 };
 
 TagNode::TagNode() : Node(NodeType::TAG) {

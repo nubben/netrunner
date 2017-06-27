@@ -2,8 +2,8 @@
 
 HTTPResponse::HTTPResponse(const std::string &rawResponse) {
     int state = 0;
-    int cursor = 0;
-    int start = 0;
+    unsigned int cursor = 0;
+    unsigned int start = 0;
     std::string propertyKey;
     for (cursor = 0; cursor < rawResponse.length(); cursor++) {
         if (state % 2 == 0 && rawResponse[cursor] == ' ') {

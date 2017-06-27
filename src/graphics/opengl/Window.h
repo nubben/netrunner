@@ -20,8 +20,8 @@ public:
     bool initGLFW();
     bool initGLEW() const;
     bool initGL();
-    const GLuint compileShader(const GLenum shaderType, const char *shaderSource) const;
-    const GLuint compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const;
+    GLuint compileShader(const GLenum shaderType, const char *shaderSource) const;
+    GLuint compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const;
     void render();
     void setDOM(const std::shared_ptr<Node> rootNode);
     void drawNode(const std::shared_ptr<Node> rootNode);

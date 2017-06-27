@@ -13,7 +13,7 @@ enum class NodeType {
 
 class Node {
 public:
-    Node(NodeType nodeType);
+    Node(NodeType type);
     virtual ~Node();
     NodeType nodeType;
     std::shared_ptr<Node> parent;
