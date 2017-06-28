@@ -1,5 +1,25 @@
 #include "TextComponent.h"
 
+FontCache *fontcache=new FontCache;
+
+// ruduces this:
+// Updated DOM in: 6.787870 seconds
+// to this:
+// Updated DOM in: 6.104453 seconds
+std::shared_ptr<TextRasterizer> FontCache::loadFont(const int size, const bool bold) {
+  if (bold) {
+    if (fontSizes_bold.find(size) == fontSizes_bold.end()) {
+      fontSizes_bold[size]=std::make_shared<TextRasterizer>("DejaVuSerif.ttf", size, 72, bold);
+    }
+    return fontSizes_bold[size];
+  } else {
+    if (fontSizes_notbold.find(size) == fontSizes_notbold.end()) {
+      fontSizes_notbold[size]=std::make_shared<TextRasterizer>("DejaVuSerif.ttf", size, 72, bold);
+    }
+    return fontSizes_notbold[size];
+  }
+}
+
 TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
     text = rawText;
     x = rawX;
@@ -8,8 +28,10 @@ TextComponent::TextComponent(const std::string &rawText, const int rawX, const i
     bold = bolded;
     color = hexColor;
 
+    // html entity decode
     sanitize(text);
 
+    // load font, rasterize, save vertices
     rasterize(rawX, rawY, windowWidth, windowHeight);
 
     glGenBuffers(1, &elementBufferObject);
@@ -58,7 +80,7 @@ TextComponent::~TextComponent() {
 }
 
 void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
-    const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", fontSize, 72, bold);
+    const std::shared_ptr<TextRasterizer> textRasterizer=fontcache->loadFont(fontSize, bold);
     unsigned int glyphCount;
     glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, height, glyphCount);
     if (glyphs == nullptr) {

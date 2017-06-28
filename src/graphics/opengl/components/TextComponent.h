@@ -7,6 +7,15 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include <map>
+#include <iostream>
+
+class FontCache {
+public:
+  std::shared_ptr<TextRasterizer> loadFont(const int size, const bool bold);
+  std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_bold;
+  std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_notbold;
+};
 
 class TextComponent : public Component {
 private:
@@ -28,6 +37,7 @@ private:
     std::vector<GLuint> vertexBufferObjects;
     GLuint elementBufferObject;
     std::vector<GLuint> textures;
+
 public:
     TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight);
     ~TextComponent();
