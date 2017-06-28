@@ -4,6 +4,10 @@
 #include "../graphics/opengl/components/Component.h"
 #include <memory>
 #include <vector>
+#include <functional>
+#include <string>
+#include <sstream>
+#include <iostream>
 
 enum class NodeType {
     ROOT,
