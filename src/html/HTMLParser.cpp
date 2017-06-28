@@ -48,7 +48,11 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                     state = 1;
                 }
                 else if (html[cursor + 1] == '/') {
-                    currentNode = currentNode->parent;
+                    if (currentNode) {
+                      currentNode = currentNode->parent;
+                    } else {
+                      std::cout << "HTMLParser::Parse - currentNode is null - close tag" << std::endl;
+                    }
                     state = 1;
                 }
                 else if (
@@ -64,8 +68,12 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                 }
                 else {
                     std::shared_ptr<TagNode> tagNode = std::make_shared<TagNode>();
-                    currentNode->children.push_back(tagNode);
-                    tagNode->parent = currentNode;
+                    if (currentNode) {
+                      currentNode->children.push_back(tagNode);
+                      tagNode->parent = currentNode;
+                    } else {
+                      std::cout << "HTMLParser::Parse - currentNode is null - tagNode" << std::endl;
+                    }
                     currentNode = tagNode;
                     starts.push_back(cursor);
                     state = 2;
@@ -73,8 +81,13 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
             }
             else {
                 std::shared_ptr<TextNode> textNode = std::make_shared<TextNode>();
-                currentNode->children.push_back(textNode);
-                textNode->parent = currentNode;
+                // not sure why currentNode is null but it is
+                if (currentNode) {
+                  currentNode->children.push_back(textNode);
+                  textNode->parent = currentNode;
+                } else {
+                  std::cout << "HTMLParser::Parse - currentNode is null - textNode" << std::endl;
+                }
                 currentNode = textNode;
                 starts.push_back(cursor);
                 state = 3;
