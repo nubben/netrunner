@@ -23,7 +23,7 @@ private:
     };
     unsigned char data[1024][1024][4];
     std::unique_ptr<const Glyph[]> glyphs;
-    std::vector<std::unique_ptr<float[]>> glyphVertices;
+    std::vector<std::unique_ptr<float[]> > glyphVertices;
     std::vector<GLuint> vertexArrayObjects;
     std::vector<GLuint> vertexBufferObjects;
     GLuint elementBufferObject;
