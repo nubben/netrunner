@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "../graphics/opengl/components/Component.h"
+#include "../graphics/components/Component.h"
 #include <memory>
 #include <vector>
 
@@ -18,6 +18,7 @@ public:
     NodeType nodeType;
     std::shared_ptr<Node> parent;
     std::vector<std::shared_ptr<Node>> children;
+    std::shared_ptr<Component> component;
 };
 
 struct Element {

@@ -1,9 +1,9 @@
 #ifndef H2ELEMENT_H
 #define H2ELEMENT_H
 
-#include "../../graphics/opengl/components/Component.h"
-#include "../../graphics/opengl/components/TextComponent.h"
-#include "../TextNode.h"
+#include "../components/Component.h"
+#include "../components/TextComponent.h"
+#include "../../html/TextNode.h"
 
 class H2Element {
 public:

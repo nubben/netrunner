@@ -1,5 +1,6 @@
 #include "TextComponent.h"
-
+#include <iostream>
+#include <ctime>
 TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
     text = rawText;
     x = rawX;

@@ -4,6 +4,7 @@
 #include "../../html/TagNode.h"
 #include "../../html/TextNode.h"
 #include <cmath>
+#include <ctime>
 #include <iostream>
 
 Window::~Window() {
@@ -67,6 +68,17 @@ bool Window::initGLFW() {
         thiz->transformMatrix[13] += -yOffset * 0.1;
         thiz->transformMatrixDirty = true;
     });
+//    glfwSetMouseButtonCallback(window, [](GLFWWindow *win, int button, int action, int mods) {
+//        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+//        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+//            for (const std::unique_ptr<Component> &component : thiz->components) {
+//
+//                TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+//                textComponent->resize(0, thiz->y, width, height);
+//                thiz->y -= textComponent->height;
+//            }
+//        }
+//    })
     glfwMakeContextCurrent(window);
 
     return true;
@@ -144,7 +156,11 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
 
 void Window::render() {
     if (domDirty) {
-        drawNode(domRootNode);
+    const std::clock_t begin = clock();
+            drawNode(domRootNode);
+            const std::clock_t end = clock();
+            std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+
         domDirty = false;
     }
 
@@ -173,13 +189,10 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
 }
 
 void Window::drawNode(const std::shared_ptr<Node> node) {
-    if (node->nodeType == NodeType::TEXT) {
-        TextNode *textNode = dynamic_cast<TextNode*>(node.get());
-        std::unique_ptr<Component> component = textNode->render(*textNode, y, windowWidth, windowHeight);
-        if (component) {
-            y -= component->height;
-            components.push_back(std::move(component));
-        }
+    std::unique_ptr<Component> component = componentBuilder.build(node, y, windowWidth, windowHeight);
+    if (component) {
+        y -= component->height;
+        components.push_back(std::move(component));
     }
     for (std::shared_ptr<Node> child : node->children) {
         drawNode(child);

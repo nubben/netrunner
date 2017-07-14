@@ -1,9 +1,9 @@
 #ifndef LIELEMENT_H
 #define LIELEMENT_H
 
-#include "../../graphics/opengl/components/Component.h"
-#include "../../graphics/opengl/components/TextComponent.h"
-#include "../TextNode.h"
+#include "../components/Component.h"
+#include "../components/TextComponent.h"
+#include "../../html/TextNode.h"
 
 class LIElement {
 public:

@@ -1,5 +1,5 @@
 #include "BoxComponent.h"
-#include "../../../../anime.h"
+#include "../../../anime.h"
 #include <cmath>
 
 BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight) {

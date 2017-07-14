@@ -1,9 +1,10 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "components/BoxComponent.h"
-#include "components/TextComponent.h"
-#include "components/Component.h"
+#include "../components/BoxComponent.h"
+#include "../components/TextComponent.h"
+#include "../components/Component.h"
+#include "../components/ComponentBuilder.h"
 #include "../../html/Node.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -38,6 +39,7 @@ public:
     int windowHeight;
     std::shared_ptr<Node> domRootNode;
     bool domDirty = false;
+    ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
     std::vector<std::unique_ptr<Component>> components;
     int y = 950;

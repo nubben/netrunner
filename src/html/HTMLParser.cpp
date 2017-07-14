@@ -12,7 +12,7 @@ void printNode(const std::shared_ptr<Node> node, const int indent) {
     }
 
     if (node->nodeType == NodeType::ROOT) {
-        std::cout << "ROOT" << std::endl;
+        std::cout << "ROOT\n" << std::endl;
     }
     else if (node->nodeType == NodeType::TAG) {
         std::cout << "TAG: " << dynamic_cast<TagNode*>(node.get())->tag << std::endl;
@@ -104,7 +104,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
         }
     }
 
-    printNode(rootNode, 0);
+//    printNode(rootNode, 0);
     return rootNode;
 }
 
