@@ -5,7 +5,7 @@
 #include "Component.h"
 
 class BoxComponent : public Component {
-private:
+protected:
     float vertices[20] = {
         0.0f, 0.0f, 0.0f,    0.0f, 1.0f,
         0.0f, 0.0f, 0.0f,    1.0f, 1.0f,
