@@ -1,2 +1,2 @@
 #!/bin/bash
-make -j8 && ./netrunner http://motherfuckingwebsite.com/
+make -j$(nproc) && ./netrunner http://motherfuckingwebsite.com/
