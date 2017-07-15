@@ -2,21 +2,12 @@
 #define TEXTCOMPONENT_H
 
 #include <GL/glew.h>
-#include "../text/TextRasterizer.h"
+#include "../text/TextRasterizerCache.h"
 #include "Component.h"
 #include <array>
 #include <memory>
 #include <vector>
-#include <map>
 #include <iostream>
-
-class FontCache {
-private:
-    std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_bold;
-    std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_notbold;
-public:
-    std::shared_ptr<TextRasterizer> loadFont(const int size, const bool bold);
-};
 
 class TextComponent : public Component {
 private:
