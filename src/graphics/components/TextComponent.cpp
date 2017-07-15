@@ -2,25 +2,7 @@
 #include <iostream>
 #include <ctime>
 
-FontCache *fontcache=new FontCache;
-
-// reduces this:
-// Updated DOM in: 6.787870 seconds
-// to this:
-// Updated DOM in: 6.104453 seconds
-std::shared_ptr<TextRasterizer> FontCache::loadFont(const int size, const bool bold) {
-    if (bold) {
-        if (fontSizes_bold.find(size) == fontSizes_bold.end()) {
-            fontSizes_bold[size]=std::make_shared<TextRasterizer>("DejaVuSerif.ttf", size, 72, bold);
-        }
-        return fontSizes_bold[size];
-    } else {
-        if (fontSizes_notbold.find(size) == fontSizes_notbold.end()) {
-            fontSizes_notbold[size]=std::make_shared<TextRasterizer>("DejaVuSerif.ttf", size, 72, bold);
-        }
-        return fontSizes_notbold[size];
-    }
-}
+extern TextRasterizerCache *rasterizerCache;
 
 TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
     //const std::clock_t begin = clock();
@@ -87,17 +69,19 @@ TextComponent::~TextComponent() {
     }
 }
 
+#define posMac(p) p*9
+
 inline void setVertices(std::unique_ptr<float[]> &vertices, int p, unsigned int color) {
-    vertices[(p * (3 + 4 + 2)) + 2] = 0.0f;
-    vertices[(p * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-    vertices[(p * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-    vertices[(p * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-    vertices[(p * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+    vertices[posMac(p) + 2] = 0.0f;
+    vertices[posMac(p) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+    vertices[posMac(p) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+    vertices[posMac(p) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+    vertices[posMac(p) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
 }
 
 void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
     //const std::clock_t begin = clock();
-    const std::shared_ptr<TextRasterizer> textRasterizer=fontcache->loadFont(fontSize, bold);
+    const std::shared_ptr<TextRasterizer> textRasterizer=rasterizerCache->loadFont(fontSize, bold);
     unsigned int glyphCount;
     glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, height, glyphCount);
     if (glyphs == nullptr) {
@@ -118,54 +102,29 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
         pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
         std::unique_ptr<float[]> vertices = std::make_unique<float[]>(36);
-        vertices[(0 * (3 + 4 + 2)) + 0] = vx0;
-        vertices[(0 * (3 + 4 + 2)) + 1] = vy0;
+        vertices[posMac(0) + 0] = vx0;
+        vertices[posMac(0) + 1] = vy0;
         setVertices(vertices, 0, color);
-        /*
-        vertices[(0 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(0 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        */
-        vertices[(0 * (3 + 4 + 2)) + 7] = glyph.s0;
-        vertices[(0 * (3 + 4 + 2)) + 8] = glyph.t0;
-        vertices[(1 * (3 + 4 + 2)) + 0] = vx0;
-        vertices[(1 * (3 + 4 + 2)) + 1] = vy1;
+        vertices[posMac(0) + 7] = glyph.s0;
+        vertices[posMac(0) + 8] = glyph.t0;
+
+        vertices[posMac(1) + 0] = vx0;
+        vertices[posMac(1) + 1] = vy1;
         setVertices(vertices, 1, color);
-        /*
-        vertices[(1 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(1 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 7] = glyph.s0;
-        vertices[(1 * (3 + 4 + 2)) + 8] = glyph.t1;
-        */
-        vertices[(2 * (3 + 4 + 2)) + 0] = vx1;
-        vertices[(2 * (3 + 4 + 2)) + 1] = vy1;
+        vertices[posMac(1) + 7] = glyph.s0;
+        vertices[posMac(1) + 8] = glyph.t1;
+
+        vertices[posMac(2) + 0] = vx1;
+        vertices[posMac(2) + 1] = vy1;
         setVertices(vertices, 2, color);
-        /*
-        vertices[(2 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(2 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        */
-        vertices[(2 * (3 + 4 + 2)) + 7] = glyph.s1;
-        vertices[(2 * (3 + 4 + 2)) + 8] = glyph.t1;
-        vertices[(3 * (3 + 4 + 2)) + 0] = vx1;
-        vertices[(3 * (3 + 4 + 2)) + 1] = vy0;
+        vertices[posMac(2) + 7] = glyph.s1;
+        vertices[posMac(2) + 8] = glyph.t1;
+
+        vertices[posMac(3) + 0] = vx1;
+        vertices[posMac(3) + 1] = vy0;
         setVertices(vertices, 3, color);
-        /*
-        vertices[(3 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(3 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        */
-        vertices[(3 * (3 + 4 + 2)) + 7] = glyph.s1;
-        vertices[(3 * (3 + 4 + 2)) + 8] = glyph.t0;
+        vertices[posMac(3) + 7] = glyph.s1;
+        vertices[posMac(3) + 8] = glyph.t0;
 
         glyphVertices.push_back(std::move(vertices));
     }
