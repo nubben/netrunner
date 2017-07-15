@@ -52,17 +52,71 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     const hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
     const hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
 
-    std::unique_ptr<Glyph[]> glyphs = std::make_unique<Glyph[]>(glyphCount);
+    //std::cout << "at:" << x << "x" << y << std::endl;
 
-    int cx = x;
-    int cy = y;
-
+    // figure out width/height
+    int cx = 0;
+    int cy = 0;
+    float width = 0;
     for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
             std::cout << "Could not load glyph" << std::endl;
             return nullptr;
         }
+        const FT_GlyphSlot slot = (*face)->glyph;
 
+        if (FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL)) {
+            std::cout << "Could not render glyph" << std::endl;
+            return nullptr;
+        }
+        const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
+        const float ya = static_cast<float>(glyphPos[i].y_advance) / 64; //mostly 0s
+
+        //std::cout << "glyph:" << xa << "x" << ya << std::endl;
+
+        cx += xa;
+        cy += ya;
+
+        if (cx+x >= windowWidth) {
+            std::cout << "hit edge" << std::endl;
+            cx -= cx;
+            cy -= std::ceil(1.2f * fontSize);
+        }
+    }
+    cy -= std::ceil(1.2f * fontSize); // at least one line
+    height = -cy;
+    width = cx;
+    //std::cout << "now:" << width << "x" << height << std::endl;
+
+    // make one single glyph
+    glyphCount=1;
+    std::unique_ptr<Glyph[]> glyphs = std::make_unique<Glyph[]>(glyphCount);
+    Glyph *line = &glyphs[0]; // lazy alias
+    line->textureWidth = pow(2, ceil(log(width) / log(2)));
+    line->textureHeight = pow(2, ceil(log(height) / log(2)));
+    //std::cout << "text texture size:" << line->textureWidth << "x" << line->textureHeight << std::endl;
+    line->textureData = std::make_unique<unsigned char[]>(static_cast<size_t>(line->textureWidth * line->textureHeight));
+
+    // translation information
+    line->x0 = x;
+    line->y0 = y;
+    line->x1 = x+width;
+    line->y1 = y+height;
+
+    // texture coords
+    line->s0=0.0f;
+    line->t0=0.0f;
+    line->s1=static_cast<float>(width) / line->textureWidth;
+    line->t1=static_cast<float>(height) / line->textureHeight;
+
+    // copy all glyphs into one single glyph
+    cx = x; // reset
+    cy = 0;
+    for (unsigned int i = 0; i < glyphCount; i++) {
+        if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
+            std::cout << "Could not load glyph" << std::endl;
+            return nullptr;
+        }
         const FT_GlyphSlot slot = (*face)->glyph;
 
         if (FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL)) {
@@ -72,43 +126,18 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
 
         const FT_Bitmap ftBitmap = slot->bitmap;
 
-        glyphs[i].textureWidth = pow(2, ceil(log(ftBitmap.width) / log(2)));
-        glyphs[i].textureHeight = pow(2, ceil(log(ftBitmap.rows) / log(2)));
-        glyphs[i].textureData = std::make_unique<unsigned char[]>(static_cast<size_t>(glyphs[i].textureWidth * glyphs[i].textureHeight));
         for (unsigned int iy = 0; iy < ftBitmap.rows; iy++) {
-            memcpy(glyphs[i].textureData.get() + iy * static_cast<unsigned int>(glyphs[i].textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
+            memcpy(line->textureData.get() + (cx - x) + (cy + iy) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
         }
 
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
-        const float ya = static_cast<float>(glyphPos[i].y_advance) / 64;
-        const float xo = static_cast<float>(glyphPos[i].x_offset) / 64;
-        const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
-
-        glyphs[i].x0 = cx + xo + slot->bitmap_left;
-        glyphs[i].y0 = floor(cy + yo + slot->bitmap_top);
-        glyphs[i].x1 = glyphs[i].x0 + ftBitmap.width;
-        glyphs[i].y1 = floor(glyphs[i].y0 - ftBitmap.rows);
-
-        glyphs[i].s0 = 0.0f;
-        glyphs[i].t0 = 0.0f;
-        glyphs[i].s1 = static_cast<float>(ftBitmap.width) / glyphs[i].textureWidth;
-        glyphs[i].t1 = static_cast<float>(ftBitmap.rows) / glyphs[i].textureHeight;
 
         cx += xa;
-        cy += ya;
-
-        if (glyphs[i].x1 >= windowWidth) {
-            glyphs[i].x0 -= cx;
-            glyphs[i].y0 -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
-            glyphs[i].x1 -= cx;
-            glyphs[i].y1 -= std::ceil(1.2f * fontSize);
+        if (cx >= windowWidth) {
             cx -= cx;
-            cy -= std::ceil(1.2f * fontSize);
+            cy += std::ceil(1.2f * fontSize);
         }
     }
-    cy -= std::ceil(1.2f * fontSize);
-
-    height = y - cy;
 
     return glyphs;
 }

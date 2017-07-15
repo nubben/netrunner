@@ -5,6 +5,7 @@
 #include "hb-ft.h"
 #include <memory>
 #include <string>
+#include <algorithm>
 
 struct Glyph {
     float x0;
