@@ -1,5 +1,4 @@
 #include "BoxComponent.h"
-#include "../../../anime.h"
 #include <cmath>
 
 BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight) {
@@ -8,23 +7,12 @@ BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWi
     width = rawWidth;
     height = rawHeight;
 
-    if (width == 512) {
-        for (int py = 0; py < 1024; py++) {
-            for (int px = 0; px < 1024; px++) {
-                for (int i = 0; i < 4; i++) {
-                    data[1023 - py][px][i] = anime.pixel_data[((px * 4) + (py * 4 * 1024)) + i];
-                }
+    for (int py = 0; py < 1024; py++) {
+        for (int px = 0; px < 1024; px++) {
+            for (int i = 0; i < 3; i++) {
+                data[1023 - py][px][i] = 0x88;
             }
-        }
-    }
-    else {
-        for (int py = 0; py < 1024; py++) {
-            for (int px = 0; px < 1024; px++) {
-                for (int i = 0; i < 3; i++) {
-                    data[1023 - py][px][i] = 0x88;
-                }
-                data[1023 - py][px][3] = 0xff;
-            }
+            data[1023 - py][px][3] = 0xff;
         }
     }
 
