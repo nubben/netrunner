@@ -25,7 +25,8 @@ bool Window::init() {
 
     //UI
     boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
-    boxComponents.push_back(std::make_unique<BoxComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
+    //Mascot
+    boxComponents.push_back(std::make_unique<AnimeComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
     return true;
 }
 
