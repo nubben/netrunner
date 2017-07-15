@@ -1,4 +1,4 @@
-#version 400
+#version 330
 uniform sampler2D textureIn;
 in vec4 colorPipe;
 in vec2 texCoordPipe;

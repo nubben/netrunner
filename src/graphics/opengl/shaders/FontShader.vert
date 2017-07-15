@@ -1,4 +1,4 @@
-#version 400
+#version 330
 uniform mat4 transform;
 layout (location = 0) in vec3 vertexIn;
 layout (location = 1) in vec4 colorIn;
