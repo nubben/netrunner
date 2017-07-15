@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         const std::clock_t begin = clock();
         window->render();
         const std::clock_t end = clock();
-        std::cout << '\r' << std::fixed << (((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
+//        std::cout << '\r' << std::fixed << (((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
     }
     return 0;
 }

@@ -4,6 +4,7 @@
 #include "../../html/TagNode.h"
 #include "../../html/TextNode.h"
 #include <cmath>
+#include <ctime>
 #include <iostream>
 
 Window::~Window() {
@@ -22,9 +23,9 @@ bool Window::init() {
     }
     initGL();
 
+    //UI
     boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
     boxComponents.push_back(std::make_unique<BoxComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
-
     return true;
 }
 
@@ -67,6 +68,17 @@ bool Window::initGLFW() {
         thiz->transformMatrix[13] += -yOffset * 0.1;
         thiz->transformMatrixDirty = true;
     });
+//    glfwSetMouseButtonCallback(window, [](GLFWWindow *win, int button, int action, int mods) {
+//        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+//        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+//            for (const std::unique_ptr<Component> &component : thiz->components) {
+//
+//                TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+//                textComponent->resize(0, thiz->y, width, height);
+//                thiz->y -= textComponent->height;
+//            }
+//        }
+//    })
     glfwMakeContextCurrent(window);
 
     return true;
@@ -106,6 +118,8 @@ bool Window::initGL() {
     glDeleteShader(textureVertexShader);
     glDeleteShader(textureFragmentShader);
 
+    std::cout << "OpenGL setup" << std::endl;
+
     return true;
 }
 
@@ -144,7 +158,10 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
 
 void Window::render() {
     if (domDirty) {
+        const std::clock_t begin = clock();
         drawNode(domRootNode);
+        const std::clock_t end = clock();
+        std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         domDirty = false;
     }
 
@@ -153,10 +170,14 @@ void Window::render() {
     for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
         boxComponent->render();
     }
+    // it's quick but done on scroll
     glUseProgram(fontProgram);
     if (transformMatrixDirty) {
+        //const std::clock_t begin = clock();
         GLint transformLocation = glGetUniformLocation(fontProgram, "transform");
         glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformMatrix);
+        //const std::clock_t end = clock();
+        //std::cout << "Updated font matrix in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         transformMatrixDirty = false;
     }
     for (const std::unique_ptr<Component> &component : components) {
@@ -173,13 +194,10 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
 }
 
 void Window::drawNode(const std::shared_ptr<Node> node) {
-    if (node->nodeType == NodeType::TEXT) {
-        TextNode *textNode = dynamic_cast<TextNode*>(node.get());
-        std::unique_ptr<Component> component = textNode->render(*textNode, y, windowWidth, windowHeight);
-        if (component) {
-            y -= component->height;
-            components.push_back(std::move(component));
-        }
+    std::unique_ptr<Component> component = componentBuilder.build(node, y, windowWidth, windowHeight);
+    if (component) {
+        y -= component->height;
+        components.push_back(std::move(component));
     }
     for (std::shared_ptr<Node> child : node->children) {
         drawNode(child);

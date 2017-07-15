@@ -2,7 +2,7 @@
 #define TEXTCOMPONENT_H
 
 #include <GL/glew.h>
-#include "../../text/TextRasterizer.h"
+#include "../text/TextRasterizer.h"
 #include "Component.h"
 #include <array>
 #include <memory>
@@ -11,26 +11,24 @@
 #include <iostream>
 
 class FontCache {
+private:
+    std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_bold;
+    std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_notbold;
 public:
-  std::shared_ptr<TextRasterizer> loadFont(const int size, const bool bold);
-  std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_bold;
-  std::map<GLuint, std::shared_ptr<TextRasterizer> > fontSizes_notbold;
+    std::shared_ptr<TextRasterizer> loadFont(const int size, const bool bold);
 };
 
 class TextComponent : public Component {
 private:
     std::string text;
-    float x;
-    float y;
     int fontSize;
     bool bold;
     unsigned int color;
-    bool verticesDirty = false;
     const unsigned int indices[6] = {
         0, 1, 2,
         0, 2, 3
     };
-    unsigned char data[1024][1024][4];
+    //std::vector <Glyph> *glyphs;
     std::unique_ptr<const Glyph[]> glyphs;
     std::vector<std::unique_ptr<float[]> > glyphVertices;
     std::vector<GLuint> vertexArrayObjects;
