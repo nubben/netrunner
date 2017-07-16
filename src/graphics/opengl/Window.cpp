@@ -157,7 +157,7 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
 void Window::render() {
     if (domDirty) {
     const std::clock_t begin = clock();
-            drawNode(domRootNode);
+            drawNode(domRootNode, nullptr);
             const std::clock_t end = clock();
             std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
 
@@ -188,13 +188,12 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     domDirty = true;
 }
 
-void Window::drawNode(const std::shared_ptr<Node> node) {
-    std::unique_ptr<Component> component = componentBuilder.build(node, y, windowWidth, windowHeight);
-    if (component) {
-        y -= component->height;
-        components.push_back(std::move(component));
-    }
+void Window::drawNode(const std::shared_ptr<Node> node, const std::unique_ptr<Component> &parentComponent) {
+    std::unique_ptr<Component> component = componentBuilder.build(node, parentComponent, windowWidth, windowHeight);
     for (std::shared_ptr<Node> child : node->children) {
-        drawNode(child);
+        drawNode(child, component);
+    }
+    if (component) {
+        components.push_back(std::move(component));
     }
 }

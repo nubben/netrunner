@@ -1,42 +1,49 @@
 #include "ComponentBuilder.h"
 #include <iostream>
 
-const ElementRendererMap ComponentBuilder::tagRenderers {
+//const ElementRendererMap ComponentBuilder::tagRenderers {
+//};
+//
+//const ElementRendererMap ComponentBuilder::textRenderers {
+//};
+
+const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder::elementMap {
+    {"a", std::make_shared<AElement>()},
+    {"blockquote", std::make_shared<BLOCKQUOTEElement>()},
+    {"h1", std::make_shared<H1Element>()},
+    {"h2", std::make_shared<H2Element>()},
+    {"h3", std::make_shared<H3Element>()},
+    {"li", std::make_shared<LIElement>()},
+    {"p", std::make_shared<PElement>()},
+    {"span", std::make_shared<SPANElement>()}
 };
 
-const ElementRendererMap ComponentBuilder::textRenderers {
-    {"a", &AElement::render},
-    {"blockquote", &BLOCKQUOTEElement::render},
-    {"h1", &H1Element::render},
-    {"h2", &H2Element::render},
-    {"h3", &H3Element::render},
-    {"li", &LIElement::render},
-    {"p", &PElement::render},
-    {"span", &SPANElement::render}
-};
-
-std::unique_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> node, int y, int windowWidth, int windowHeight) {
+std::unique_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> node, const std::unique_ptr<Component> &parentComponent, int windowWidth, int windowHeight) {
     std::unique_ptr<Component> component;
+    std::string tag;
+
     if (node->nodeType == NodeType::TAG) {
         TagNode *tagNode = dynamic_cast<TagNode*>(node.get());
         if (tagNode) {
-            ElementRendererMap::const_iterator tagRenderer = tagRenderers.find(tagNode->tag);
-            if (tagRenderer != tagRenderers.end()) {
-                component = tagRenderer->second(*tagNode, y, windowWidth, windowHeight);
-            }
+            tag = tagNode->tag;
         }
     }
     else if (node->nodeType == NodeType::TEXT) {
         TagNode *tagNode = dynamic_cast<TagNode*>(node->parent.get());
         if (tagNode) {
-            ElementRendererMap::const_iterator textRenderer = textRenderers.find(tagNode->tag);
-            if (textRenderer != textRenderers.end()) {
-                TextNode *textNode = dynamic_cast<TextNode*>(node.get());
-                if (textNode) {
-                    component = textRenderer->second(*textNode, y, windowWidth, windowHeight);
-                }
-            }
+            tag = tagNode->tag;
         }
     }
+
+    std::unordered_map<std::string, std::shared_ptr<Element>>::const_iterator elementPair = elementMap.find(tag);
+    if (elementPair != elementMap.end()) {
+        std::shared_ptr<Element> element = elementPair->second;
+        int y = parentComponent != nullptr ? (parentComponent->y + (!element->isInline ? 0 : parentComponent->y)) : 0;
+        y += 500;
+        std::cout << tag << std::endl;
+        std::cout << y << std::endl;
+        component = element->renderer(*node.get(), y, windowWidth, windowHeight);
+    }
+
     return component;
 }

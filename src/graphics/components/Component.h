@@ -8,6 +8,7 @@ public:
     float y;
     float height;
     float width;
+    bool isInline = false;
 };
 
 #endif

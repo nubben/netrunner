@@ -21,9 +21,4 @@ public:
     std::shared_ptr<Component> component;
 };
 
-struct Element {
-    std::string tag;
-    std::function<std::unique_ptr<Component>(const Node &node, int y, int windowWidth, int windowHeight)> render;
-};
-
 #endif

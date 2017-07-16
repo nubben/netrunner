@@ -25,7 +25,7 @@ public:
     GLuint compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const;
     void render();
     void setDOM(const std::shared_ptr<Node> rootNode);
-    void drawNode(const std::shared_ptr<Node> rootNode);
+    void drawNode(const std::shared_ptr<Node> rootNode, const std::unique_ptr<Component> &parentComponent);
     void repositionNode(const std::shared_ptr<Node> rootNode);
     float transformMatrix[16] = {
         1, 0, 0, 0,
