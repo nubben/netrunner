@@ -1,12 +1,6 @@
 #include "ComponentBuilder.h"
 #include <iostream>
 
-//const ElementRendererMap ComponentBuilder::tagRenderers {
-//};
-//
-//const ElementRendererMap ComponentBuilder::textRenderers {
-//};
-
 const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder::elementMap {
     {"a", std::make_shared<AElement>()},
     {"blockquote", std::make_shared<BLOCKQUOTEElement>()},
@@ -39,10 +33,7 @@ std::unique_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
     if (elementPair != elementMap.end()) {
         std::shared_ptr<Element> element = elementPair->second;
         int y = parentComponent != nullptr ? (parentComponent->y + (!element->isInline ? 0 : parentComponent->y)) : 0;
-        y += 500;
-        std::cout << tag << std::endl;
-        std::cout << y << std::endl;
-        component = element->renderer(*node.get(), y, windowWidth, windowHeight);
+        component = element->renderer(node, y, windowWidth, windowHeight);
     }
 
     return component;

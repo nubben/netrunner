@@ -9,7 +9,7 @@
 class AElement : public Element {
 public:
     bool isInline = true;
-    virtual std::unique_ptr<Component> renderer(const Node &node, int y, int windowWidth, int windowHeight);
+    virtual std::unique_ptr<Component> renderer(const std::shared_ptr<Node> node, const int y, const int windowWidth, const int windowHeight);
 };
 
 #endif
