@@ -10,7 +10,6 @@
 
 class TextComponent : public Component {
 private:
-    std::string text;
     int fontSize;
     bool bold;
     unsigned int color;
@@ -26,6 +25,7 @@ private:
     GLuint elementBufferObject;
     std::vector<GLuint> textures;
 public:
+    std::string text;
     TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight);
     ~TextComponent();
     void rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight);

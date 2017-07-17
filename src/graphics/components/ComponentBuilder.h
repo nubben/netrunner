@@ -22,11 +22,9 @@ typedef std::unordered_map<std::string, std::function<std::unique_ptr<Component>
 
 class ComponentBuilder {
 private:
-//    const static ElementRendererMap tagRenderers;
-//    const static ElementRendererMap textRenderers;
     const static std::unordered_map<std::string, std::shared_ptr<Element>> elementMap;
 public:
-    std::unique_ptr<Component> build(const std::shared_ptr<Node> node, const std::unique_ptr<Component> &parentComponent, int windowWidth, int windowHeight);
+    std::shared_ptr<Component> build(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent, int windowWidth, int windowHeight);
 };
 
 #endif

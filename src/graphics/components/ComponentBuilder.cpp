@@ -12,7 +12,7 @@ const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder
     {"span", std::make_shared<SPANElement>()}
 };
 
-std::unique_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> node, const std::unique_ptr<Component> &parentComponent, int windowWidth, int windowHeight) {
+std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent, int windowWidth, int windowHeight) {
     std::unique_ptr<Component> component;
     std::string tag;
 
@@ -29,11 +29,20 @@ std::unique_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
         }
     }
 
+    int y = parentComponent->y - parentComponent->height;
+
     std::unordered_map<std::string, std::shared_ptr<Element>>::const_iterator elementPair = elementMap.find(tag);
     if (elementPair != elementMap.end()) {
         std::shared_ptr<Element> element = elementPair->second;
-        int y = parentComponent != nullptr ? (parentComponent->y + (!element->isInline ? 0 : parentComponent->y)) : 0;
+        if (element->isInline) {
+            y += parentComponent->height;
+        }
         component = element->renderer(node, y, windowWidth, windowHeight);
+    }
+
+    if (!component) {
+        component = std::make_unique<Component>();
+        component->y = y;
     }
 
     return component;

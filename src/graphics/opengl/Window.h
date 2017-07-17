@@ -25,7 +25,10 @@ public:
     GLuint compileProgram(const GLuint vertexShader, const GLuint fragmentShader) const;
     void render();
     void setDOM(const std::shared_ptr<Node> rootNode);
-    void drawNode(const std::shared_ptr<Node> rootNode, const std::unique_ptr<Component> &parentComponent);
+    void createComponentTree(const std::shared_ptr<Node> rootNode, const std::shared_ptr<Component> &parentComponent);
+    void printComponentTree(const std::shared_ptr<Component> &component, int depth);
+    void renderComponents(std::shared_ptr<Component> component);
+    void resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height);
     void repositionNode(const std::shared_ptr<Node> rootNode);
     float transformMatrix[16] = {
         1, 0, 0, 0,
@@ -41,8 +44,7 @@ public:
     bool domDirty = false;
     ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
-    std::vector<std::unique_ptr<Component>> components;
-    int y = 950;
+    const std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
 };
 
 #endif

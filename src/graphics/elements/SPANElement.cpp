@@ -1,5 +1,9 @@
 #include "SPANElement.h"
 
+SPANElement::SPANElement() {
+    isInline = true;
+}
+
 std::unique_ptr<Component> SPANElement::renderer(const std::shared_ptr<Node> node, const int y, const int windowWidth, const int windowHeight) {
     TextNode *textNode = dynamic_cast<TextNode*>(node.get());
     if (textNode) {
