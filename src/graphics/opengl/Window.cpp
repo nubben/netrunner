@@ -61,22 +61,27 @@ bool Window::initGLFW() {
         thiz->resizeComponentTree(thiz->rootComponent, width, height);
 //        thiz->printComponentTree(thiz->rootComponent, 0);
     });
+    glfwSetCursorPosCallback(window, [](GLFWwindow *win, double xPos, double yPos) {
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        thiz->cursorX = xPos;
+        thiz->cursorY = yPos;
+    });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->transformMatrix[13] += -yOffset * 0.1;
         thiz->transformMatrixDirty = true;
     });
-//    glfwSetMouseButtonCallback(window, [](GLFWWindow *win, int button, int action, int mods) {
-//        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
-//        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-//            for (const std::unique_ptr<Component> &component : thiz->components) {
-//
-//                TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
-//                textComponent->resize(0, thiz->y, width, height);
-//                thiz->y -= textComponent->height;
-//            }
-//        }
-//    })
+    glfwSetMouseButtonCallback(window, [](GLFWwindow *win, int button, int action, int mods) {
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+            std::shared_ptr<Component> clickedComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
+            if (clickedComponent) {
+                if (clickedComponent->onClick) {
+                    clickedComponent->onClick();
+                }
+            }
+        }
+    });
     glfwMakeContextCurrent(window);
 
     return true;
@@ -264,4 +269,23 @@ void Window::resizeComponentTree(const std::shared_ptr<Component> &component, co
     for (std::shared_ptr<Component> child : component->children) {
         resizeComponentTree(child, width, height);
     }
+}
+
+std::shared_ptr<Component> Window::searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y) {
+    if (component->children.empty()) {
+        if (component->y > y && component->y - component->height < y) {
+            if (component->x < x && component->x + component->width > x) {
+                return component;
+            }
+        }
+    }
+    else {
+        for (std::shared_ptr<Component> child : component->children) {
+            std::shared_ptr<Component> found = searchComponentTree(child, x, y);
+            if (found) {
+                return found;
+            }
+        }
+    }
+    return nullptr;
 }

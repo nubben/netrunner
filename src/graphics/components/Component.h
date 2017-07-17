@@ -1,6 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -14,6 +15,7 @@ public:
     float height;
     float width;
     bool isInline = false;
+    std::function<void()> onClick = nullptr;
 };
 
 #endif

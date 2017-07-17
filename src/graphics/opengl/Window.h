@@ -29,7 +29,7 @@ public:
     void printComponentTree(const std::shared_ptr<Component> &component, int depth);
     void renderComponents(std::shared_ptr<Component> component);
     void resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height);
-    void repositionNode(const std::shared_ptr<Node> rootNode);
+    std::shared_ptr<Component> searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y);
     float transformMatrix[16] = {
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -45,6 +45,8 @@ public:
     ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
     const std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
+    double cursorX = 0;
+    double cursorY = 0;
 };
 
 #endif
