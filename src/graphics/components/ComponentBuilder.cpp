@@ -34,10 +34,16 @@ std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
     std::unordered_map<std::string, std::shared_ptr<Element>>::const_iterator elementPair = elementMap.find(tag);
     if (elementPair != elementMap.end()) {
         std::shared_ptr<Element> element = elementPair->second;
-        if (element->isInline) {
-            y += parentComponent->height;
+        if (!element->isInline) {
+            component = element->renderer(node, 0, y, windowWidth, windowHeight);
         }
-        component = element->renderer(node, y, windowWidth, windowHeight);
+        else {
+            y += parentComponent->height;
+            component = element->renderer(node, parentComponent->parent->width, y, windowWidth, windowHeight);
+            if (component) {
+                component->isInline = true;
+            }
+        }
     }
 
     if (!component) {

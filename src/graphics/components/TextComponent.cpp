@@ -62,7 +62,7 @@ TextComponent::~TextComponent() {
 void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
     const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", fontSize, 72, bold);
     unsigned int glyphCount;
-    glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, height, glyphCount);
+    glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, width, height, glyphCount);
     if (glyphs == nullptr) {
         return;
     }
@@ -136,6 +136,7 @@ void TextComponent::render() {
 }
 
 void TextComponent::resize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
+    x = rawX;
     y = rawY;
     rasterize(rawX, rawY, windowWidth, windowHeight);
     verticesDirty = true;

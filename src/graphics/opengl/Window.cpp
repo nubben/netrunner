@@ -59,7 +59,7 @@ bool Window::initGLFW() {
             boxComponent->resize(width, height);
         }
         thiz->resizeComponentTree(thiz->rootComponent, width, height);
-//        thiz->printComponentTree(thiz->rootComponent, 0);
+        thiz->printComponentTree(thiz->rootComponent, 0);
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -158,7 +158,7 @@ void Window::render() {
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
-//            printComponentTree(rootComponent, 0);
+//        printComponentTree(rootComponent, 0);
 
         domDirty = false;
     }
@@ -191,7 +191,13 @@ void Window::createComponentTree(const std::shared_ptr<Node> node, const std::sh
         parentComponent->children.push_back(component);
     }
     for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
-        parent->height += component->height;
+        parent->width += component->width;
+        if (!component->isInline) {
+            parent->height += component->height;
+        }
+        else {
+            parent->height += component->height - parent->height;
+        }
     }
     for (std::shared_ptr<Node> child : node->children) {
         createComponentTree(child, component);
@@ -204,10 +210,10 @@ void Window::printComponentTree(const std::shared_ptr<Component> &component, int
     }
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
-        std::cout << "Y: " << std::fixed << textComponent->y << " HEIGHT: " << textComponent->height << " TEXT: " << textComponent->text << std::endl;
+        std::cout << std::fixed << "X: " << textComponent->x << " Y: " << textComponent->y << " WIDTH: " << textComponent->width << " HEIGHT: " << textComponent->height << " TEXT: " << textComponent->text << std::endl;
     }
     else {
-        std::cout << "Y: " << std::fixed << component->y << " HEIGHT: " << component->height << std::endl;
+        std::cout << std::fixed << "X: " << component->x << " Y: " << component->y << " WIDTH: " << component->width << " HEIGHT: " << component->height << std::endl;
     }
     for (std::shared_ptr<Component> child : component->children) {
         printComponentTree(child, depth + 1);
@@ -230,15 +236,29 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
 void Window::resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height) {
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
-        textComponent->resize(0, component->parent->y - component->parent->height, width, height);
+        if (!textComponent->isInline) {
+            textComponent->resize(component->parent->x, component->parent->y - component->parent->height, width, height);
+        }
+        else {
+            textComponent->resize(component->parent->x + component->parent->parent->width, component->parent->parent->y, width, height);
+        }
+
         for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
-            parent->height += component->height;
+            parent->width += component->width;
+            if (!component->isInline) {
+                parent->height += component->height;
+            }
+            else {
+                parent->height += component->height - parent->height;
+            }
         }
     }
     else {
         if (component->parent) {
+            component->x = 0;
             component->y = component->parent->y - component->parent->height;
         }
+        component->width = 0;
         component->height = 0;
     }
     for (std::shared_ptr<Component> child : component->children) {

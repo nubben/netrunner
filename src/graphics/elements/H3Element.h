@@ -8,7 +8,7 @@
 
 class H3Element : public Element {
 public:
-    virtual std::unique_ptr<Component> renderer(const std::shared_ptr<Node> node, const int y, const int windowWidth, const int windowHeight);
+    virtual std::unique_ptr<Component> renderer(const std::shared_ptr<Node> node, const int x, const int y, const int windowWidth, const int windowHeight);
 };
 
 #endif

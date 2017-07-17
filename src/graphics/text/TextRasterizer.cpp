@@ -36,7 +36,7 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
-std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &height, unsigned int &glyphCount) const {
+std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &width, float &height, unsigned int &glyphCount) const {
     hb_buffer_reset(buffer);
     hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
     hb_buffer_set_language(buffer, hb_language_from_string("en", 2));
@@ -53,6 +53,8 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
     const hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
 
     std::unique_ptr<Glyph[]> glyphs = std::make_unique<Glyph[]>(glyphCount);
+
+    int maxX = 0;
 
     int cx = x;
     int cy = y;
@@ -101,13 +103,19 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
             glyphs[i].y1 -= std::ceil(1.2f * fontSize);
             cx -= cx;
             cy -= std::ceil(1.2f * fontSize);
+            maxX = windowWidth;
         }
 
         cx += xa;
         cy += ya;
+
+        if (cx > maxX) {
+            maxX = cx;
+        }
     }
     cy -= std::ceil(1.2f * fontSize);
 
+    width = maxX - x;
     height = y - cy;
 
     return glyphs;
