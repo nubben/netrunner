@@ -59,7 +59,7 @@ bool Window::initGLFW() {
             boxComponent->resize(width, height);
         }
         thiz->resizeComponentTree(thiz->rootComponent, width, height);
-        thiz->printComponentTree(thiz->rootComponent, 0);
+//        thiz->printComponentTree(thiz->rootComponent, 0);
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));

@@ -94,9 +94,6 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
         glyphs[i].s1 = static_cast<float>(ftBitmap.width) / glyphs[i].textureWidth;
         glyphs[i].t1 = static_cast<float>(ftBitmap.rows) / glyphs[i].textureHeight;
 
-        cx += xa;
-        cy += ya;
-
         if (glyphs[i].x1 >= windowWidth) {
             glyphs[i].x0 -= cx;
             glyphs[i].y0 -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
@@ -105,6 +102,9 @@ std::unique_ptr<const Glyph[]> TextRasterizer::rasterize(const std::string &text
             cx -= cx;
             cy -= std::ceil(1.2f * fontSize);
         }
+
+        cx += xa;
+        cy += ya;
     }
     cy -= std::ceil(1.2f * fontSize);
 
