@@ -59,6 +59,7 @@ bool Window::initGLFW() {
             boxComponent->resize(width, height);
         }
         thiz->resizeComponentTree(thiz->rootComponent, width, height);
+        thiz->printComponentTree(thiz->rootComponent, 0);
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -235,6 +236,9 @@ void Window::resizeComponentTree(const std::shared_ptr<Component> &component, co
         }
     }
     else {
+        if (component->parent) {
+            component->y = component->parent->y - component->parent->height;
+        }
         component->height = 0;
     }
     for (std::shared_ptr<Component> child : component->children) {

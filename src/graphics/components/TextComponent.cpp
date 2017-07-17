@@ -136,6 +136,7 @@ void TextComponent::render() {
 }
 
 void TextComponent::resize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
+    y = rawY;
     rasterize(rawX, rawY, windowWidth, windowHeight);
     verticesDirty = true;
 }
