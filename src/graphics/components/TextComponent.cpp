@@ -71,7 +71,7 @@ TextComponent::~TextComponent() {
 
 #define posMac(p) p*9 // 9 floats = 3 positions + 4 color channels + 2 S&T (texture mapping)
 
-inline void setVertices(std::unique_ptr<float[]> &vertices, int p, unsigned int color) {
+inline void setVerticesColor(std::unique_ptr<float[]> &vertices, int p, unsigned int color) {
     vertices[posMac(p) + 2] = 0.0f;
     vertices[posMac(p) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
     vertices[posMac(p) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
@@ -104,25 +104,25 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
         std::unique_ptr<float[]> vertices = std::make_unique<float[]>(36);
         vertices[posMac(0) + 0] = vx0;
         vertices[posMac(0) + 1] = vy0;
-        setVertices(vertices, 0, color);
+        setVerticesColor(vertices, 0, color);
         vertices[posMac(0) + 7] = glyph.s0;
         vertices[posMac(0) + 8] = glyph.t0;
 
         vertices[posMac(1) + 0] = vx0;
         vertices[posMac(1) + 1] = vy1;
-        setVertices(vertices, 1, color);
+        setVerticesColor(vertices, 1, color);
         vertices[posMac(1) + 7] = glyph.s0;
         vertices[posMac(1) + 8] = glyph.t1;
 
         vertices[posMac(2) + 0] = vx1;
         vertices[posMac(2) + 1] = vy1;
-        setVertices(vertices, 2, color);
+        setVerticesColor(vertices, 2, color);
         vertices[posMac(2) + 7] = glyph.s1;
         vertices[posMac(2) + 8] = glyph.t1;
 
         vertices[posMac(3) + 0] = vx1;
         vertices[posMac(3) + 1] = vy0;
-        setVertices(vertices, 3, color);
+        setVerticesColor(vertices, 3, color);
         vertices[posMac(3) + 7] = glyph.s1;
         vertices[posMac(3) + 8] = glyph.t0;
 
@@ -145,7 +145,7 @@ void TextComponent::render() {
         //const std::clock_t end = clock();
         //std::cout << "undirty TextComponent render [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
     }
-    for (unsigned int i = vertexArrayObjects.size(); i > 0; i--) {
+    for (unsigned long i = vertexArrayObjects.size(); i > 0; i--) {
         glBindVertexArray(vertexArrayObjects[i - 1]);
         glBindTexture(GL_TEXTURE_2D, textures[i - 1]);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -155,6 +155,13 @@ void TextComponent::render() {
 void TextComponent::resize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
     y = rawY;
     rasterize(rawX, rawY, windowWidth, windowHeight);
+    
+    // reupload NEW texture to video card
+    const Glyph &glyph = glyphs[0];
+    glBindTexture(GL_TEXTURE_2D, textures.back()); // select texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get()); // update texture
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
     verticesDirty = true;
 }
 
