@@ -25,8 +25,12 @@ bool Window::init() {
 
     //UI
     boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
+
     //Mascot
     boxComponents.push_back(std::make_unique<AnimeComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
+
+    rootComponent->y = 900;
+
     return true;
 }
 
@@ -57,12 +61,8 @@ bool Window::initGLFW() {
         for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
             boxComponent->resize(width, height);
         }
-        thiz->y = 950;
-        for (const std::unique_ptr<Component> &component : thiz->components) {
-            TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
-            textComponent->resize(0, thiz->y, width, height);
-            thiz->y -= textComponent->height;
-        }
+        thiz->resizeComponentTree(thiz->rootComponent, width, height);
+//        thiz->printComponentTree(thiz->rootComponent, 0);
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -160,9 +160,10 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
 void Window::render() {
     if (domDirty) {
         const std::clock_t begin = clock();
-        drawNode(domRootNode);
+        createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+        //printComponentTree(rootComponent, 0);
         domDirty = false;
     }
 
@@ -181,10 +182,7 @@ void Window::render() {
         //std::cout << "Updated font matrix in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         transformMatrixDirty = false;
     }
-    for (const std::unique_ptr<Component> &component : components) {
-        TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
-        textComponent->render();
-    }
+    renderComponents(rootComponent);
     glfwPollEvents();
     glfwSwapBuffers(window);
 }
@@ -194,13 +192,64 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     domDirty = true;
 }
 
-void Window::drawNode(const std::shared_ptr<Node> node) {
-    std::unique_ptr<Component> component = componentBuilder.build(node, y, windowWidth, windowHeight);
-    if (component) {
-        y -= component->height;
-        components.push_back(std::move(component));
+void Window::createComponentTree(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent) {
+    std::shared_ptr<Component> component = componentBuilder.build(node, parentComponent, windowWidth, windowHeight);
+    component->parent = parentComponent;
+    if (parentComponent) {
+        parentComponent->children.push_back(component);
+    }
+    for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
+        parent->height += component->height;
     }
     for (std::shared_ptr<Node> child : node->children) {
-        drawNode(child);
+        createComponentTree(child, component);
+    }
+}
+
+void Window::printComponentTree(const std::shared_ptr<Component> &component, int depth) {
+    for (int i = 0; i < depth; i++) {
+        std::cout << '\t';
+    }
+    TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+    if (textComponent) {
+        std::cout << "Y: " << std::fixed << textComponent->y << " HEIGHT: " << textComponent->height << " TEXT: " << textComponent->text << std::endl;
+    }
+    else {
+        std::cout << "Y: " << std::fixed << component->y << " HEIGHT: " << component->height << std::endl;
+    }
+    for (std::shared_ptr<Component> child : component->children) {
+        printComponentTree(child, depth + 1);
+    }
+}
+
+void Window::renderComponents(std::shared_ptr<Component> component) {
+    TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+    if (textComponent) {
+        textComponent->render();
+    }
+    if (component->children.empty()) {
+        return;
+    }
+    for (std::shared_ptr<Component> &child : component->children) {
+        renderComponents(child);
+    }
+}
+
+void Window::resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height) {
+    TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+    if (textComponent) {
+        textComponent->resize(0, component->parent->y - component->parent->height, width, height);
+        for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
+            parent->height += component->height;
+        }
+    }
+    else {
+        if (component->parent) {
+            component->y = component->parent->y - component->parent->height;
+        }
+        component->height = 0;
+    }
+    for (std::shared_ptr<Component> child : component->children) {
+        resizeComponentTree(child, width, height);
     }
 }

@@ -1,13 +1,14 @@
 #ifndef LIELEMENT_H
 #define LIELEMENT_H
 
+#include "Element.h"
 #include "../components/Component.h"
 #include "../components/TextComponent.h"
 #include "../../html/TextNode.h"
 
-class LIElement {
+class LIElement : public Element {
 public:
-    static std::unique_ptr<Component> render(const Node &node, int y, int windowWidth, int windowHeight);
+    virtual std::unique_ptr<Component> renderer(const std::shared_ptr<Node> node, const int y, const int windowWidth, const int windowHeight);
 };
 
 #endif

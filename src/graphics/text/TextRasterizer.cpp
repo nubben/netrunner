@@ -86,7 +86,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         int y1=y0+ftBitmap.rows;
         y0max=std::max(y0max, y0);
         y1max=std::max(y1max, y1);
-        
+
         if (cx+x >= windowWidth) {
             std::cout << "hit edge" << std::endl;
             cx -= cx;
@@ -141,14 +141,14 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         // figure out glyph starting point
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
         int y0=(int)floor(yo+slot->bitmap_top);
-        
+
         int bump=0;
         if (y0) {
             // (25-36)-25 = 0-11
             // 36-(25-36) = 11-0
             bump=y0max-y0;
         }
-        
+
         for (unsigned int iy = 0; iy < ftBitmap.rows; iy++) {
             memcpy(line->textureData.get() + ((cx - x) + slot->bitmap_left) + ((iy + cy)+bump) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
         }
@@ -160,6 +160,9 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             cx -= cx;
             cy += std::ceil(1.2f * fontSize);
         }
+
+        cx += xa;
+        cy += ya;
     }
     // make one single glyph
     glyphCount=1;

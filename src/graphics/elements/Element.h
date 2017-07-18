@@ -1,13 +1,15 @@
-#ifndef H3ELEMENT_H
-#define H3ELEMENT_H
+#ifndef ELEMENT_H
+#define ELEMENT_H
 
-#include "Element.h"
+#include <functional>
+#include <memory>
 #include "../components/Component.h"
-#include "../components/TextComponent.h"
-#include "../../html/TextNode.h"
+#include "../../html/Node.h"
 
-class H3Element : public Element {
+class Element {
 public:
+    bool isInline = false;
+    virtual ~Element();
     virtual std::unique_ptr<Component> renderer(const std::shared_ptr<Node> node, const int y, const int windowWidth, const int windowHeight);
 };
 
