@@ -23,7 +23,10 @@ USE AT YOUR OWN RISK!
 - md5sum (for shader compilation) https://spit.mixtape.moe/view/765a1dc1
 
 ## Binaries
-20170715 OSX binary https://my.mixtape.moe/jvgpdy
+### Linux
+https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner
+### OSX
+20170717 binary https://my.mixtape.moe/zdleaf
 
 ## Milestones
 - Browse 4chan /g/ board
