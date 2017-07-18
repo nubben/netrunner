@@ -69,7 +69,7 @@ TextComponent::~TextComponent() {
     }
 }
 
-#define posMac(p) p*9
+#define posMac(p) p*9 // 9 floats = 3 positions + 4 color channels + 2 S&T (texture mapping)
 
 inline void setVertices(std::unique_ptr<float[]> &vertices, int p, unsigned int color) {
     vertices[posMac(p) + 2] = 0.0f;

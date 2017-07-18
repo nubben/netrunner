@@ -1,8 +1,8 @@
 # Netrunner
 
-is an implementation of a new web browser written in C++ utilizing OpenGL. This is a new brand engine.
+is an implementation of a new web browser written in C++ utilizing OpenGL. This is a brand new engine.
 
-Status: You can give it a url and it'll download, parser, and render the text to framebuffer
+Status: You can give it a url and it'll download, parser, and render the text from the page
 
 ## Odili's vision
 A modern web browser is a huge project. I'd like to see this broken into several composeable pieces.
