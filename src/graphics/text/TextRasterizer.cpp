@@ -154,15 +154,14 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
 
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
-
         cx += xa;
+        //cy += ya;
+
         if (cx >= windowWidth) {
             cx -= cx;
             cy += std::ceil(1.2f * fontSize);
         }
 
-        cx += xa;
-        cy += ya;
     }
     // make one single glyph
     glyphCount=1;
