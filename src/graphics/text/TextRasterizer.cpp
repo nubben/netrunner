@@ -36,7 +36,7 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
-std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &awidth, float &height, unsigned int &glyphCount) const {
+std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &width, float &height, unsigned int &glyphCount) const {
     std::cout << "rasterizing [" << text << "] at " << x << "x" << y << " window:" << windowWidth << "x" << windowHeight << std::endl;
     hb_buffer_reset(buffer);
     hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
@@ -60,7 +60,6 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     int cy = 0;
     int xmax = 0;
     int y0max = 0, y1max = 0;
-    float width = 0;
     int lines = 1;
     for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
@@ -76,11 +75,6 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         const float ya = static_cast<float>(glyphPos[i].y_advance) / 64; //mostly 0s
 
-        //std::cout << "glyph:" << xa << "x" << ya << std::endl;
-
-        cx += xa;
-        cy += ya; // is normal for y0 at bottom
-
         if (cx + x >= windowWidth) {
             //std::cout << "multine text: [" << text << "] new line:" << cy << std::endl;
             xmax = windowWidth - x; // wrap to the beginning of the element
@@ -88,6 +82,11 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
             lines++;
         }
+
+        //std::cout << "glyph:" << xa << "x" << ya << std::endl;
+
+        cx += xa;
+        cy += ya; // is normal for y0 at bottom
 
         const FT_Bitmap ftBitmap = slot->bitmap;
 
@@ -181,7 +180,6 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     glyphCount=1;
     //std::cout << "final size: " << (int)width << "x" << (int)height << std::endl;
     //std::cout << "at: " << (int)line->x0 << "x" << (int)line->y0 << " to: " << (int)line->x1 << "x" << (int)line->y1 <<std::endl;
-    awidth = xmax;
 
     return glyphs;
 }
