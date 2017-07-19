@@ -36,7 +36,7 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
-std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &height, unsigned int &glyphCount) const {
+std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &awidth, float &height, unsigned int &glyphCount) const {
     std::cout << "rasterizing [" << text << "] at " << x << "x" << y << " window:" << windowWidth << "x" << windowHeight << std::endl;
     hb_buffer_reset(buffer);
     hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
@@ -92,8 +92,8 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         const FT_Bitmap ftBitmap = slot->bitmap;
 
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
-        int y0 = (int)floor(yo + slot->bitmap_top);
-        int y1 = y0 + ftBitmap.rows;
+        int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
+        int y1 = y0 + static_cast<int>(ftBitmap.rows);
         y0max=std::max(y0max, y0);
         y1max=std::max(y1max, y1);
         xmax=std::max(xmax, cx);
@@ -109,7 +109,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         height=y1max;
     }
     if (xmax==windowWidth - x) {
-        std::cout << "Wrapped text[" << text << "] over " << lines << " lines " << (int)xmax << "x" << (int)height << std::endl;
+        std::cout << "Wrapped text[" << text << "] over " << lines << " lines " << xmax << "x" << static_cast<int>(height) << std::endl;
     }
 
     std::unique_ptr<Glyph[]> glyphs = std::make_unique<Glyph[]>(1);
@@ -124,13 +124,13 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     line->y0 = y;
     line->x1 = x + width;
     line->y1 = y - height;
-    //std::cout << "xd: " << (int)(line->x1-line->x0) << " yd: " << (int)(line->y0-line->y1) << std::endl;
+    //std::cout << "xd: " << static_cast<int>(line->x1-line->x0) << " yd: " << static_cast<int>(line->y0-line->y1) << std::endl;
 
     // texture coords
     line->s0 = 0.0f;
     line->t0 = 0.0f;
-    line->s1 = static_cast<float>(width) / line->textureWidth;
-    line->t1 = static_cast<float>(height) / line->textureHeight;
+    line->s1 = width / line->textureWidth;
+    line->t1 = height / line->textureHeight;
     //std::cout << "s1: " << line->s1 << " t1: " << line->t1 << std::endl;
 
     // copy all glyphs into one single glyph
@@ -152,7 +152,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
 
         // figure out glyph starting point
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
-        int y0 = (int)floor(yo + slot->bitmap_top);
+        int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
 
         int bump = 0; // Y adjust for this glyph
         if (y0) {
@@ -172,7 +172,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             // source is 0 to (0:iy:rows)
             // dest is cx+bl, (0:iy:rows)+(0:cy:height)+bump
             //std::cout << "placing glyph row at " << (cx + slot->bitmap_left) << "x" << ((iy + cy) + bump) << std::endl;
-            memcpy(line->textureData.get() + (cx + slot->bitmap_left) + ((iy + cy) + bump) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
+            memcpy(line->textureData.get() + (cx + slot->bitmap_left) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
         }
 
         cx += xa;
@@ -181,6 +181,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     glyphCount=1;
     //std::cout << "final size: " << (int)width << "x" << (int)height << std::endl;
     //std::cout << "at: " << (int)line->x0 << "x" << (int)line->y0 << " to: " << (int)line->x1 << "x" << (int)line->y1 <<std::endl;
+    awidth = xmax;
 
     return glyphs;
 }

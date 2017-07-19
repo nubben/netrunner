@@ -27,7 +27,7 @@ private:
 public:
     TextRasterizer(const std::string &fontPath, const int size, const unsigned int resolution, const bool bold);
     ~TextRasterizer();
-    std::unique_ptr<Glyph[]> rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &height, unsigned int &glyphCount) const;
+    std::unique_ptr<Glyph[]> rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &width, float &height, unsigned int &glyphCount) const;
     bool isUnicodeBMP(const FT_Face &face) const;
     FT_Library lib;
     hb_font_t *font;

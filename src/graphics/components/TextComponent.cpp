@@ -2,9 +2,11 @@
 #include <iostream>
 #include <ctime>
 
+#define posMac(p) (p * (3 + 4 + 2)) // 3 positions + 4 color channels + 2 S&T (texture mapping)
+
 extern TextRasterizerCache *rasterizerCache;
 
-TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
+TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
     //const std::clock_t begin = clock();
     text = rawText;
     x = rawX;
@@ -69,14 +71,12 @@ TextComponent::~TextComponent() {
     }
 }
 
-#define posMac(p) p*9 // 9 floats = 3 positions + 4 color channels + 2 S&T (texture mapping)
-
 inline void setVerticesColor(std::unique_ptr<float[]> &vertices, int p, unsigned int color) {
-    vertices[posMac(p) + 2] = 0.0f;
-    vertices[posMac(p) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-    vertices[posMac(p) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-    vertices[posMac(p) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-    vertices[posMac(p) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+    vertices[static_cast<size_t>(posMac(p) + 2)] = 0.0f;
+    vertices[static_cast<size_t>(posMac(p) + 3)] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+    vertices[static_cast<size_t>(posMac(p) + 4)] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+    vertices[static_cast<size_t>(posMac(p) + 5)] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+    vertices[static_cast<size_t>(posMac(p) + 6)] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
 }
 
 void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {

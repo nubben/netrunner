@@ -11,7 +11,7 @@
 
 class TextComponent : public Component {
 private:
-    int fontSize;
+    unsigned int fontSize;
     bool bold;
     unsigned int color;
     const unsigned int indices[6] = {
@@ -28,7 +28,7 @@ private:
 
 public:
     std::string text;
-    TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight);
+    TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight);
     ~TextComponent();
     void rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight);
     void render();

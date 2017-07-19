@@ -9,7 +9,7 @@ private:
     std::map<unsigned int, std::shared_ptr<TextRasterizer> > fontSizes_bold;
     std::map<unsigned int, std::shared_ptr<TextRasterizer> > fontSizes_notbold;
 public:
-    std::shared_ptr<TextRasterizer> loadFont(const int size, const bool bold);
+    std::shared_ptr<TextRasterizer> loadFont(const unsigned int size, const bool bold);
 };
 
 #endif
