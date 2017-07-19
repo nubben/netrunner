@@ -1,4 +1,5 @@
 #include "HTTPResponse.h"
+#include <iostream>
 
 HTTPResponse::HTTPResponse(const std::string &rawResponse) {
     int state = 0;
@@ -32,6 +33,7 @@ HTTPResponse::HTTPResponse(const std::string &rawResponse) {
         }
     }
     body = rawResponse.substr(cursor, rawResponse.length() - cursor - 1);
-
+    std::cout << "Body is [" << body << "]" << std::endl;
     statusCode = stoi(status);
+    std::cout << "Status is " << status << std::endl;
 }

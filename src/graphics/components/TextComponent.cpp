@@ -2,7 +2,10 @@
 #include <iostream>
 #include <ctime>
 
+extern TextRasterizerCache *rasterizerCache;
+
 TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
+    //const std::clock_t begin = clock();
     text = rawText;
     x = rawX;
     y = rawY;
@@ -10,12 +13,14 @@ TextComponent::TextComponent(const std::string &rawText, const int rawX, const i
     bold = bolded;
     color = hexColor;
 
+    // html entity decode
     sanitize(text);
 
+    // load font, rasterize, save vertices
     rasterize(rawX, rawY, windowWidth, windowHeight);
 
+    // send to video card
     glGenBuffers(1, &elementBufferObject);
-
     for (unsigned int i = 0; i < glyphVertices.size(); i++) {
         const Glyph &glyph = glyphs[i];
         const std::unique_ptr<float[]> &glyphVertice = glyphVertices[i];
@@ -26,9 +31,11 @@ TextComponent::TextComponent(const std::string &rawText, const int rawX, const i
 
         glBindVertexArray(vertexArrayObjects.back());
 
+        // the data array
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
         glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
 
+        // indexes of the array
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
@@ -45,9 +52,12 @@ TextComponent::TextComponent(const std::string &rawText, const int rawX, const i
         glGenTextures(1, &textures.back());
         glBindTexture(GL_TEXTURE_2D, textures.back());
 
+        // upload texture
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get());
         glGenerateMipmap(GL_TEXTURE_2D);
     }
+    //const std::clock_t end = clock();
+    //std::cout << "buffering text [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
 }
 
 TextComponent::~TextComponent() {
@@ -59,8 +69,19 @@ TextComponent::~TextComponent() {
     }
 }
 
+#define posMac(p) p*9 // 9 floats = 3 positions + 4 color channels + 2 S&T (texture mapping)
+
+inline void setVerticesColor(std::unique_ptr<float[]> &vertices, int p, unsigned int color) {
+    vertices[posMac(p) + 2] = 0.0f;
+    vertices[posMac(p) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
+    vertices[posMac(p) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
+    vertices[posMac(p) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
+    vertices[posMac(p) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
+}
+
 void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
-    const std::unique_ptr<TextRasterizer> textRasterizer = std::make_unique<TextRasterizer>("DejaVuSerif.ttf", fontSize, 72, bold);
+    //const std::clock_t begin = clock();
+    const std::shared_ptr<TextRasterizer> textRasterizer=rasterizerCache->loadFont(fontSize, bold);
     unsigned int glyphCount;
     glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, width, height, glyphCount);
     if (glyphs == nullptr) {
@@ -69,7 +90,9 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
 
     glyphVertices.clear();
     for (unsigned int i = 0; i < glyphCount; i++) {
+    //for(std::vector<Glyph>::iterator it=glyphs->begin(); it!=glyphs->end(); ++it) {
         const Glyph &glyph = glyphs[i];
+        //Glyph &glyph=*it;
 
         float vx0 = glyph.x0;
         float vy0 = glyph.y0;
@@ -79,56 +102,50 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
         pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
         std::unique_ptr<float[]> vertices = std::make_unique<float[]>(36);
-        vertices[(0 * (3 + 4 + 2)) + 0] = vx0;
-        vertices[(0 * (3 + 4 + 2)) + 1] = vy0;
-        vertices[(0 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(0 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        vertices[(0 * (3 + 4 + 2)) + 7] = glyph.s0;
-        vertices[(0 * (3 + 4 + 2)) + 8] = glyph.t0;
-        vertices[(1 * (3 + 4 + 2)) + 0] = vx0;
-        vertices[(1 * (3 + 4 + 2)) + 1] = vy1;
-        vertices[(1 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(1 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        vertices[(1 * (3 + 4 + 2)) + 7] = glyph.s0;
-        vertices[(1 * (3 + 4 + 2)) + 8] = glyph.t1;
-        vertices[(2 * (3 + 4 + 2)) + 0] = vx1;
-        vertices[(2 * (3 + 4 + 2)) + 1] = vy1;
-        vertices[(2 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(2 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        vertices[(2 * (3 + 4 + 2)) + 7] = glyph.s1;
-        vertices[(2 * (3 + 4 + 2)) + 8] = glyph.t1;
-        vertices[(3 * (3 + 4 + 2)) + 0] = vx1;
-        vertices[(3 * (3 + 4 + 2)) + 1] = vy0;
-        vertices[(3 * (3 + 4 + 2)) + 2] = 0.0f;
-        vertices[(3 * (3 + 4 + 2)) + 3] = (static_cast<float>((color >> 24) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 4] = (static_cast<float>((color >> 16) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 5] = (static_cast<float>((color >>  8) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 6] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
-        vertices[(3 * (3 + 4 + 2)) + 7] = glyph.s1;
-        vertices[(3 * (3 + 4 + 2)) + 8] = glyph.t0;
+        vertices[posMac(0) + 0] = vx0;
+        vertices[posMac(0) + 1] = vy0;
+        setVerticesColor(vertices, 0, color);
+        vertices[posMac(0) + 7] = glyph.s0;
+        vertices[posMac(0) + 8] = glyph.t0;
+
+        vertices[posMac(1) + 0] = vx0;
+        vertices[posMac(1) + 1] = vy1;
+        setVerticesColor(vertices, 1, color);
+        vertices[posMac(1) + 7] = glyph.s0;
+        vertices[posMac(1) + 8] = glyph.t1;
+
+        vertices[posMac(2) + 0] = vx1;
+        vertices[posMac(2) + 1] = vy1;
+        setVerticesColor(vertices, 2, color);
+        vertices[posMac(2) + 7] = glyph.s1;
+        vertices[posMac(2) + 8] = glyph.t1;
+
+        vertices[posMac(3) + 0] = vx1;
+        vertices[posMac(3) + 1] = vy0;
+        setVerticesColor(vertices, 3, color);
+        vertices[posMac(3) + 7] = glyph.s1;
+        vertices[posMac(3) + 8] = glyph.t0;
 
         glyphVertices.push_back(std::move(vertices));
     }
+    //const std::clock_t end = clock();
+    //std::cout << "rasterize text [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
 }
 
 void TextComponent::render() {
+    //std::cout << "TextComponent::render [" << text << "]" << std::endl;
     if (verticesDirty) {
+        // only called on resize
+        //const std::clock_t begin = clock();
         for (unsigned int i = 0; i < vertexBufferObjects.size(); i++) {
             glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects[i]);
             glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), glyphVertices[i].get(), GL_STATIC_DRAW);
         }
         verticesDirty = false;
+        //const std::clock_t end = clock();
+        //std::cout << "undirty TextComponent render [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
     }
-    for (unsigned int i = vertexArrayObjects.size(); i > 0; i--) {
+    for (unsigned long i = vertexArrayObjects.size(); i > 0; i--) {
         glBindVertexArray(vertexArrayObjects[i - 1]);
         glBindTexture(GL_TEXTURE_2D, textures[i - 1]);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -139,6 +156,13 @@ void TextComponent::resize(const int rawX, const int rawY, const int windowWidth
     x = rawX;
     y = rawY;
     rasterize(rawX, rawY, windowWidth, windowHeight);
+    
+    // reupload NEW texture to video card
+    const Glyph &glyph = glyphs[0];
+    glBindTexture(GL_TEXTURE_2D, textures.back()); // select texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get()); // update texture
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
     verticesDirty = true;
 }
 

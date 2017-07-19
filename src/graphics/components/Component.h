@@ -8,6 +8,7 @@
 class Component {
 public:
     virtual ~Component();
+    bool verticesDirty = false;
     std::shared_ptr<Component> parent = nullptr;
     std::vector<std::shared_ptr<Component>> children;
     float x;

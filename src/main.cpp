@@ -72,10 +72,10 @@ int main(int argc, char *argv[]) {
     request->sendRequest(handleRequest);
     window->init();
     while (!glfwWindowShouldClose(window->window)) {
-        const std::clock_t begin = clock();
+        //const std::clock_t begin = clock();
         window->render();
-        const std::clock_t end = clock();
-//        std::cout << '\r' << std::fixed << (((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
+        //const std::clock_t end = clock();
+        //std::cout << '\r' << std::fixed << (((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
     }
     return 0;
 }

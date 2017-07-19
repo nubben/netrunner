@@ -23,8 +23,11 @@ bool Window::init() {
     }
     initGL();
 
+    //UI
     boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
-    boxComponents.push_back(std::make_unique<BoxComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
+
+    //Mascot
+    boxComponents.push_back(std::make_unique<AnimeComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
 
     rootComponent->y = 900;
 
@@ -121,6 +124,8 @@ bool Window::initGL() {
     glDeleteShader(textureVertexShader);
     glDeleteShader(textureFragmentShader);
 
+    std::cout << "OpenGL setup" << std::endl;
+
     return true;
 }
 
@@ -163,8 +168,7 @@ void Window::render() {
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
-        printComponentTree(rootComponent, 0);
-
+        //printComponentTree(rootComponent, 0);
         domDirty = false;
     }
 
@@ -173,10 +177,14 @@ void Window::render() {
     for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
         boxComponent->render();
     }
+    // it's quick but done on scroll
     glUseProgram(fontProgram);
     if (transformMatrixDirty) {
+        //const std::clock_t begin = clock();
         GLint transformLocation = glGetUniformLocation(fontProgram, "transform");
         glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformMatrix);
+        //const std::clock_t end = clock();
+        //std::cout << "Updated font matrix in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         transformMatrixDirty = false;
     }
     renderComponents(rootComponent);

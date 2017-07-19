@@ -13,7 +13,7 @@ const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder
 };
 
 std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent, int windowWidth, int windowHeight) {
-    std::unique_ptr<Component> component;
+    std::shared_ptr<Component> component;
     std::string tag;
 
     if (node->nodeType == NodeType::TAG) {

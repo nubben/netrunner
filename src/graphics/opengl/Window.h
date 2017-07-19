@@ -1,6 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "../components/AnimeComponent.h"
 #include "../components/BoxComponent.h"
 #include "../components/TextComponent.h"
 #include "../components/Component.h"
