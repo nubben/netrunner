@@ -163,7 +163,7 @@ void Window::render() {
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
-//        printComponentTree(rootComponent, 0);
+        printComponentTree(rootComponent, 0);
 
         domDirty = false;
     }
@@ -191,22 +191,22 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
 
 void Window::createComponentTree(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent) {
     std::shared_ptr<Component> component = componentBuilder.build(node, parentComponent, windowWidth, windowHeight);
+
     component->parent = parentComponent;
     if (parentComponent) {
         parentComponent->children.push_back(component);
     }
-    for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
+
+    int heightIncrease = (parentComponent->y - parentComponent->height) - (component->y - component->height);
+    for (std::shared_ptr<Component> parent = parentComponent; parent != nullptr; parent = parent->parent) {
         parent->width += component->width;
-        if (!component->isInline) {
-            parent->height += component->height;
-        }
-        else {
-            parent->height += component->height - parent->height;
-        }
+        parent->height += heightIncrease;
     }
+
     for (std::shared_ptr<Node> child : node->children) {
         createComponentTree(child, component);
     }
+
 }
 
 void Window::printComponentTree(const std::shared_ptr<Component> &component, int depth) {
@@ -215,10 +215,10 @@ void Window::printComponentTree(const std::shared_ptr<Component> &component, int
     }
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
-        std::cout << std::fixed << "X: " << textComponent->x << " Y: " << textComponent->y << " WIDTH: " << textComponent->width << " HEIGHT: " << textComponent->height << " TEXT: " << textComponent->text << std::endl;
+        std::cout << std::fixed << "X: " << textComponent->x << " Y: " << textComponent->y << " WIDTH: " << textComponent->width << " HEIGHT: " << textComponent->height << " INLINE: " << textComponent->isInline << " TEXT: " << textComponent->text << std::endl;
     }
     else {
-        std::cout << std::fixed << "X: " << component->x << " Y: " << component->y << " WIDTH: " << component->width << " HEIGHT: " << component->height << std::endl;
+        std::cout << std::fixed << "X: " << component->x << " Y: " << component->y << " WIDTH: " << component->width << " HEIGHT: " << component->height << " INLINE: " << component->isInline << std::endl;
     }
     for (std::shared_ptr<Component> child : component->children) {
         printComponentTree(child, depth + 1);
@@ -241,27 +241,22 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
 void Window::resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height) {
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
-        if (!textComponent->isInline) {
-            textComponent->resize(component->parent->x, component->parent->y - component->parent->height, width, height);
-        }
-        else {
-            textComponent->resize(component->parent->x + component->parent->parent->width, component->parent->parent->y, width, height);
-        }
+        textComponent->resize(component->parent->x + component->parent->width, component->parent->y, width, height);
 
+        int heightIncrease = (component->parent->y - component->parent->height) - (component->y - component->height);
         for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
             parent->width += component->width;
-            if (!component->isInline) {
-                parent->height += component->height;
-            }
-            else {
-                parent->height += component->height - parent->height;
-            }
+            parent->height += heightIncrease;
         }
     }
     else {
         if (component->parent) {
-            component->x = 0;
+            component->x = component->parent->x;
             component->y = component->parent->y - component->parent->height;
+        }
+        if (component->isInline) {
+            component->x += component->parent->width;
+            component->y += component->parent->height;
         }
         component->width = 0;
         component->height = 0;

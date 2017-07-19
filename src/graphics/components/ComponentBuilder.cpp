@@ -29,27 +29,28 @@ std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
         }
     }
 
+    int x = parentComponent->x;
     int y = parentComponent->y - parentComponent->height;
+    bool isInline = false;
 
     std::unordered_map<std::string, std::shared_ptr<Element>>::const_iterator elementPair = elementMap.find(tag);
     if (elementPair != elementMap.end()) {
         std::shared_ptr<Element> element = elementPair->second;
-        if (!element->isInline) {
-            component = element->renderer(node, 0, y, windowWidth, windowHeight);
-        }
-        else {
+        isInline = parentComponent->isInline || element->isInline;
+        if (dynamic_cast<TextNode*>(node.get()) || isInline) {
+            x += parentComponent->width;
             y += parentComponent->height;
-            component = element->renderer(node, parentComponent->parent->width, y, windowWidth, windowHeight);
-            if (component) {
-                component->isInline = true;
-            }
+            isInline = true;
         }
+        component = element->renderer(node, x, y, windowWidth, windowHeight);
     }
 
     if (!component) {
         component = std::make_unique<Component>();
+        component->x = x;
         component->y = y;
     }
+    component->isInline = isInline;
 
     return component;
 }
