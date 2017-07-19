@@ -16,7 +16,7 @@ LDFLAGS    = -O3
 endif
 
 EXECUTABLE = netrunner
-INCPATH    = -I /usr/include/freetype2 -I /usr/include/harfbuzz -I /usr/local/include/harfbuzz/
+INCPATH    = -I /usr/include/freetype2 -I /usr/include/harfbuzz
 LINK       = g++
 
 SRCDIR     = src
