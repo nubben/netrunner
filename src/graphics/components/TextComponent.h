@@ -19,7 +19,7 @@ private:
         0, 2, 3
     };
     //std::vector <Glyph> *glyphs;
-    std::unique_ptr<const Glyph[]> glyphs;
+    std::unique_ptr<Glyph[]> glyphs;
     std::vector<std::unique_ptr<float[]>> glyphVertices;
     std::vector<GLuint> vertexArrayObjects;
     std::vector<GLuint> vertexBufferObjects;
