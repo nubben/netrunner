@@ -22,11 +22,20 @@ USE AT YOUR OWN RISK!
 - harfbuzz (1.4.6 works) https://github.com/behdad/harfbuzz/releases
 - md5sum (for shader compilation) https://spit.mixtape.moe/view/765a1dc1
 
+### Package shortucts
+to install requirements
+
+#### debian/ubuntu
+`sudo apt-get install libfreetype6-dev libharfbuzz-dev libglew-dev libglfw3-dev`
+
+#### arch
+`sudo pacman -Suy glew glfw freetype2 harfbuzz`
+
 ## Binaries
 ### Linux
 https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner
 ### OSX
-20170717 binary https://my.mixtape.moe/zdleaf
+20170721 binary https://my.mixtape.moe/lbsgid.zip
 
 ## Milestones
 - Browse 4chan /g/ board
@@ -46,21 +55,23 @@ Join IRC, compile the code, figure out something you want to improve
 I don't think one on here could ever say they know what their doing without being laughed off the board. Security is a huge challenge to any project. We're going to do the best with the resources we have.
 
 ## Who
-- gyroninja (doesn't create /g/ threads)
+- gyroninja - Lead developer
 Linux Dev, Doing primary OOP planning and structure
 Repo: https://git.teknik.io/gyroninja/netrunner/
 
-- odilitime (doesn't create /g/ threads)
+- odilitime - Developer
 OSX Dev, focused on clean up
 Repo: https://gitgud.io/odilitime/netrunner/
-Discord: https://discord.gg/YYJHWsa
+Discord: https://discord.gg/ffWabPn
 
-- RetroTech (maybe create /g/ threads/?)
-Website? g threads? Requirements gathering?
+- RetroTech - Web / Sys Admin
+Created website
+
+- Someone else that's making the /g/ threads?
 Repo? https://github.com/5yph3r/Netrunner/
 Repo? https://git.teknik.io/eti/netrunner/
 
-We coordinate on irc.rizon.net #/g/netrunner
+We coordinate on irc.rizon.net #/g/netrunner or Odili's discord: https://discord.gg/ffWabPn
 
 ## Documentation
 
