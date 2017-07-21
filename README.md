@@ -56,20 +56,20 @@ I don't think one on here could ever say they know what their doing without bein
 
 ## Who
 - gyroninja - Lead developer
-Linux Dev, Doing primary OOP planning and structure
-Repo: https://git.teknik.io/gyroninja/netrunner/
+  - Linux Dev, Doing primary OOP planning and structure
+  - Repo: https://git.teknik.io/gyroninja/netrunner/
+
 
 - odilitime - Developer
-OSX Dev, focused on clean up
-Repo: https://gitgud.io/odilitime/netrunner/
-Discord: https://discord.gg/ffWabPn
+  - OSX Dev, focused on clean up
+  - Repo: https://gitgud.io/odilitime/netrunner/
 
 - RetroTech - Web / Sys Admin
-Created website
+  - Created website
 
 - Someone else that's making the /g/ threads?
-Repo? https://github.com/5yph3r/Netrunner/
-Repo? https://git.teknik.io/eti/netrunner/
+  - Repo? https://github.com/5yph3r/Netrunner/
+  - Repo? https://git.teknik.io/eti/netrunner/
 
 We coordinate on irc.rizon.net #/g/netrunner or Odili's discord: https://discord.gg/ffWabPn
 
