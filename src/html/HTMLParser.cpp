@@ -38,9 +38,11 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
     std::vector<unsigned int> starts;
     unsigned int cursor;
     int state = 0;
+    int prependWhiteSpace=false;
     for (cursor = 0; cursor < html.length(); cursor++) { // TODO handle trying to look ahead past string
         if (state == 0) { // Neutral
             if (html[cursor] == ' ' || html[cursor] == '\t' || html[cursor] == '\r' || html[cursor] == '\n') {
+                prependWhiteSpace=true;
                 continue;
             }
             else if (html[cursor] == '<') {
@@ -97,6 +99,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
         else if (state == 1) { // Skip Over Element
             if (html[cursor] == '>') {
                 state = 0;
+                prependWhiteSpace=false;
             }
         }
         else if (state == 2) { // Tag
@@ -105,11 +108,12 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                 starts.pop_back();
                 parseTag(element, *dynamic_cast<TagNode*>(currentNode.get()));
                 state = 0;
+                prependWhiteSpace=false;
             }
         }
         else if (state == 3) { // Text
             if (html[cursor + 1] == '<') {
-                dynamic_cast<TextNode*>(currentNode.get())->text = html.substr(starts.back(), cursor - starts.back() + 1);
+                dynamic_cast<TextNode*>(currentNode.get())->text = (prependWhiteSpace?" ":"") + html.substr(starts.back(), cursor - starts.back() + 1);
                 starts.pop_back();
                 if (currentNode && currentNode->parent) {
                   currentNode = currentNode->parent;
@@ -117,6 +121,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                   std::cout << "HTMLParser::Parse - currentNode/parent is null - textNode state3" << std::endl;
                 }
                 state = 0;
+                prependWhiteSpace=false;
             }
         }
     }
