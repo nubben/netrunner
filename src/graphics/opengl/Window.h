@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 class Window {
 private:
