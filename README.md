@@ -4,7 +4,7 @@ is an implementation of a new web browser written in C++ utilizing OpenGL. This 
 
 Status: You can give it a url and it'll download, parser, and render the text from the page
 
-## Odili's vision
+## Odilitime's vision
 A modern web browser is a huge project. I'd like to see this broken into several composeable pieces.
 Network engine separate from the parsing engine, separate from the compositing engine separate from the renderer.
 This way it could be used a document viewer or an editor as well.
@@ -61,3 +61,20 @@ Repo? https://github.com/5yph3r/Netrunner/
 Repo? https://git.teknik.io/eti/netrunner/
 
 We coordinate on irc.rizon.net #/g/netrunner
+
+## Documentation
+
+### Overview
+- networking - downloads requested files
+- html - HTML parser
+- graphics - has the various interface interface
+  - opengl - our opengl Renderer
+  - text - our text rasterizer
+  - component - our renderer classes
+  - element - our DOM tree classes
+
+### Class Types
+- Nodes DOM tree objects
+- Elements Individual tag types
+- Components (gameobjects) renderer entities
+
