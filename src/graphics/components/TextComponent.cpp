@@ -83,6 +83,10 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
     //const std::clock_t begin = clock();
     const std::shared_ptr<TextRasterizer> textRasterizer=rasterizerCache->loadFont(fontSize, bold);
     unsigned int glyphCount;
+    // we need to know how much width we have between x and windowWidth
+    // and preferrable where the inline starts
+    // my inline start is parent->children adding width from start to me
+    // actually the run of all inline before me, starting at parent x as a minimum
     glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, width, height, glyphCount);
     if (glyphs == nullptr) {
         return;
@@ -156,13 +160,27 @@ void TextComponent::resize(const int rawX, const int rawY, const int windowWidth
     x = rawX;
     y = rawY;
     rasterize(rawX, rawY, windowWidth, windowHeight);
-    
+
+    // make sure we have glyphs
+    if (!glyphVertices.size()) {
+        std::cout << "TextComponent::resize - no glyphs" << std::endl;
+        return;
+    }
+
     // reupload NEW texture to video card
     const Glyph &glyph = glyphs[0];
+    if (!glyphs) {
+        std::cout << "TextComponent::resize - glyph points no where" << std::endl;
+        return;
+    }
+    if (!textures.size()) {
+        textures.push_back(0);
+        glGenTextures(1, &textures.back());
+    }
     glBindTexture(GL_TEXTURE_2D, textures.back()); // select texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get()); // update texture
     glGenerateMipmap(GL_TEXTURE_2D);
-    
+
     verticesDirty = true;
 }
 

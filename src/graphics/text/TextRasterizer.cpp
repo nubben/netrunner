@@ -36,8 +36,13 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
+// we don't need x,y here except we do need to know how much width we have available
 std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &width, float &height, unsigned int &glyphCount) const {
-    std::cout << "rasterizing [" << text << "] at " << x << "x" << y << " window:" << windowWidth << "x" << windowHeight << std::endl;
+    //std::cout << "rasterizing [" << text << "] at " << x << "x" << y << " window:" << windowWidth << "x" << windowHeight << std::endl;
+    if (x>windowWidth) {
+        std::cout << "TextRasterizer::rasterize - x [" << static_cast<int>(x) << "] requested outside of window width [" << static_cast<int>(windowWidth)<< "] for text[" << text << "]" << std::endl;
+        return nullptr;
+    }
     hb_buffer_reset(buffer);
     hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
     hb_buffer_set_language(buffer, hb_language_from_string("en", 2));
@@ -117,6 +122,10 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     line->textureHeight = pow(2, ceil(log(height) / log(2)));
     //std::cout << "text texture size:" << line->textureWidth << "x" << line->textureHeight << std::endl;
     line->textureData = std::make_unique<unsigned char[]>(static_cast<size_t>(line->textureWidth * line->textureHeight));
+    if (!line->textureData) {
+        std::cout << "failed to create texture" << static_cast<int>(width) << "X" << static_cast<int>(height) << std::endl;
+        return nullptr;
+    }
 
     // translation information
     line->x0 = x; // wrap to element start
