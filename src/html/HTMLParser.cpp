@@ -40,14 +40,14 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
     int state = 0;
     int prependWhiteSpace=false;
     for (cursor = 0; cursor < html.length(); cursor++) { // TODO handle trying to look ahead past string
-        if (state == 0) { // Neutral
+        if (state == 0) { // Outside tag
             if (html[cursor] == ' ' || html[cursor] == '\t' || html[cursor] == '\r' || html[cursor] == '\n') {
                 prependWhiteSpace=true;
                 continue;
             }
             else if (html[cursor] == '<') {
                 if (html[cursor + 1] == '!') {
-                    state = 1;
+                    state = 4;
                 }
                 else if (html[cursor + 1] == '/') {
                     if (currentNode && currentNode->parent) {
@@ -55,8 +55,10 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                     } else {
                       std::cout << "HTMLParser::Parse - currentNode/parent is null - close tag" << std::endl;
                     }
-                    state = 1;
+                    state = 1; // ignore closing tags
                 }
+                // don't need to ignore these tags
+                /*
                 else if (
                     (html[cursor + 1] == 'h' && html[cursor + 2] == 'r') ||
                     (html[cursor + 1] == 'b' && html[cursor + 2] == 'r') ||
@@ -68,6 +70,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                     ) {
                     state = 1;
                 }
+                 */
                 else {
                     std::shared_ptr<TagNode> tagNode = std::make_shared<TagNode>();
                     if (currentNode) {
@@ -99,6 +102,13 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
         else if (state == 1) { // Skip Over Element
             if (html[cursor] == '>') {
                 state = 0;
+                prependWhiteSpace=false;
+            }
+        }
+        else if (state == 4) { // HTML Comment
+            if (html[cursor] == '-' && html[cursor + 1] == '-' && html[cursor + 2] == '>') {
+                state = 0;
+                cursor += 2; // advance cursor to end of comment
                 prependWhiteSpace=false;
             }
         }
