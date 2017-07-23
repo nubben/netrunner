@@ -61,6 +61,7 @@ bool Window::initGLFW() {
         for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
             boxComponent->resize(width, height);
         }
+        std::cout << "resizing" << std::endl;
         thiz->resizeComponentTree(thiz->rootComponent, width, height);
         thiz->printComponentTree(thiz->rootComponent, 0);
     });
@@ -168,7 +169,7 @@ void Window::render() {
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
-        //printComponentTree(rootComponent, 0);
+        printComponentTree(rootComponent, 0);
         domDirty = false;
     }
 
@@ -197,6 +198,83 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     domDirty = true;
 }
 
+// reposition component based on parent position
+void repositionComponent(const std::shared_ptr<Component> &component) {
+    std::shared_ptr<Component> prev = nullptr;
+    int x = 0, y = 0;
+    if (component->parent) {
+        for (std::shared_ptr<Component> child : component->parent->children) {
+            if (child == component) {
+                break;
+            }
+            prev = child;
+        }
+        x = component->parent->x;
+        y = component->parent->y;
+    } else {
+        std::cout << "no parent" << std::endl;
+    }
+    if (prev) {
+        TextComponent *textComponent = dynamic_cast<TextComponent*>(prev.get());
+        // 2nd or last
+        if (prev->isInline) {
+            // last was inline
+            if (component->isInline) {
+                x = prev->x + prev->width;
+                y = prev->y; // keep on same line
+                // unless it wraps
+                if (textComponent) {
+                    if (textComponent->inLineYPos) {
+                        // did wrap
+                        std::cout << "previous line at " << y << " wrapped at " << textComponent->inLineYPos << std::endl;
+                    } else {
+                        // previous line didn't wrap
+                    }
+                }
+            } else {
+                // we're block
+                y = prev->y - prev->height;
+            }
+        } else {
+            // last was block
+            y = prev->y - prev->height;
+        }
+    } else {
+        // first, there will be no width to add
+    }
+    //std::cout << "moving component to " << (int)x << "x" << (int)y << std::endl;
+    component->x = x;
+    component->y = y;
+}
+
+// measure current, apply changes to parent
+void updateComponentSize(const std::shared_ptr<Component> &component) {
+    unsigned int maxWidth = 0; // float?
+
+    // find max width of all siblings
+    for (std::shared_ptr<Component> child : component->parent->children) {
+        maxWidth = std::max(maxWidth, static_cast<unsigned int>(child->width));
+    }
+    //std::cout << "new size " << maxWidth << "x" << maxHeight << std::endl;
+    
+    // make deltas by comparing max to delta
+    //int widthIncrease = maxWidth - component->width;
+    //int heightIncrease = maxHeight - component->height;
+    //std::cout << "widthIncrease: " << widthIncrease << std::endl;
+    
+    // this works, not sure why, but it is the height delta
+    // and if we aggregate all the height deltas together, we get the correct height
+    int heightIncrease = (component->parent->y - component->parent->height) - (component->y - component->height);
+    
+    // apply adjustment to all parents (instead of recalculating each)
+    for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
+        //parent->width += widthIncrease;
+        parent->height += heightIncrease;
+        parent->width = std::max(static_cast<unsigned int>(parent->width), maxWidth);
+        //parent->height = std::max(static_cast<unsigned int>(parent->height), maxHeight);
+    }
+}
+
 void Window::createComponentTree(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent) {
     std::shared_ptr<Component> component = componentBuilder.build(node, parentComponent, windowWidth, windowHeight);
 
@@ -206,32 +284,13 @@ void Window::createComponentTree(const std::shared_ptr<Node> node, const std::sh
         // add new component as child to parent
         parentComponent->children.push_back(component);
     }
-
-    // adjust width of parents if we're not a block component
-    if (component->isInline) {
-        for (std::shared_ptr<Component> parent = parentComponent; parent != nullptr; parent = parent->parent) {
-            parent->width += component->width; // update parents width with our child width
-        }
-    }
-
+    
     // create children elements
-    int maxHeight=0;
     for (std::shared_ptr<Node> child : node->children) {
         createComponentTree(child, component);
-        if (child->component) {
-            maxHeight=std::max(maxHeight, static_cast<int>(child->component->height));
-            // update width
-            /*
-            for (std::shared_ptr<Component> parent = parentComponent; parent != nullptr; parent = parent->parent) {
-                parent->width+=child->component->width;
-            }
-            */
-        }
     }
-    // update height
-    for (std::shared_ptr<Component> parent = parentComponent; parent != nullptr; parent = parent->parent) {
-        parent->height+=maxHeight;
-    }
+    // update parents
+    updateComponentSize(component);
 }
 
 void Window::printComponentTree(const std::shared_ptr<Component> &component, int depth) {
@@ -272,50 +331,9 @@ void Window::resizeComponentTree(const std::shared_ptr<Component> &component, co
     // is all text considered inline?
     if (textComponent) {
         // FIXME: what if no parent
-        // + parent->width is wrong here
-        // for all parent's children
-        int maxParentWidth = 0; // float?
-        for (std::shared_ptr<Component> child : component->parent->children) {
-            // find max width
-            maxParentWidth = std::max(maxParentWidth, static_cast<int>(child->width));
-        }
-        int found=0;
-        std::shared_ptr<Component> prev=0;
-        for (std::shared_ptr<Component> child : component->parent->children) {
-            if (child==component) {
-                found=1;
-                break;
-            }
-            prev=child;
-        }
-        int x=component->parent->x;
-        int y=component->parent->y;
-        if (found && prev) {
-            // 2nd or last
-            if (prev->isInline) {
-                if (component->isInline) {
-                    x=prev->x+prev->width;
-                    y=prev->y; // keep on same line
-                }
-            } else {
-                // last was block
-                y=prev->y-prev->height;
-            }
-        } else {
-            // first, there will be no width to add
-        }
-        textComponent->resize(x, y, width, height);
-
-        // update parent sizes
-        // does anything reset them?
-        int heightIncrease = (component->parent->y - component->parent->height) - (component->y - component->height);
-        // look at old width vs new max width
-        int widthIncrease = maxParentWidth - component->parent->width;
-        //std::cout << "widthIncrease: " << widthIncrease << std::endl;
-        for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
-            parent->width += widthIncrease;
-            parent->height += heightIncrease;
-        }
+        repositionComponent(component);
+        textComponent->resize(component->x, component->y, width, height);
+        updateComponentSize(component);
     }
     else {
         //std::cout << "inlined: " << component->isInline << std::endl;
@@ -323,60 +341,7 @@ void Window::resizeComponentTree(const std::shared_ptr<Component> &component, co
         if (component->parent) {
             component->x = component->parent->x;
             component->y = component->parent->y - component->parent->height;
-            std::shared_ptr<Component> last=0;
-            int found=0;
-            for (std::shared_ptr<Component> child : component->parent->children) {
-                if (child==component) {
-                    found=1;
-                    break;
-                }
-                last=child;
-            }
-            if (found && last) {
-                //std::cout << "previous inLine was " << last->isInline << " at " << static_cast<int>(last->x) << "," << static_cast<int>(last->y)<< std::endl;
-                if (last->isInline) {
-                    if (component->isInline) {
-                      //std::cout << "we're inline put at: " << static_cast<int>(last->x) << "+" << static_cast<int>(last->width) << std::endl;
-                      component->x += last->x+static_cast<int>(last->width);
-                      // copy last known inline starting y position
-                      // tho if there's a wrap we should start from there
-                      // so if x is 3 lines, we need to start at line #2
-                      // well we don't know what a line is and height can vary between components
-                      // maybe we shouldn't wrap in the rasterizer but here
-                      // you'd give the rasterizer a width and the text
-                      // and it returns a component per line
-                      // or a text component needs to set an ending y point
-                      //
-                      // two inline components, first is 3 lines tall, where does the 2nd's y position start
-                        // at the 2nd line but how do you calculate that if each inline component can have different sizes
-                        // (line-height/font-size)
-                      component->y = last->y;
-                    } else {
-                      // span to div
-                      component->y = last->y-last->height;
-                    }
-                } else {
-                    if (component->isInline) {
-                        //std::cout << "we're inline but previous wasnt, forcing parent x" << std::endl;
-                        component->x = component->parent->x;
-                    } else {
-
-                    }
-                }
-            } else {
-              // no prev
-              // if last is null, we're likely the first child and should be at parent->x
-              // if not found, we're p. fucked eh?
-            }
-        }
-        // if we're inline, increase our position by parent's w/h
-        // parent has a block element, bumps the width to 698
-        // we're inline
-        // we need to start at 0 because our previous component wasn't inLine
-        // this doesn't make any sense
-        if (component->isInline) {
-            // start at the top of parent
-            //component->y += component->parent->height;
+            repositionComponent(component);
         }
         // we're renderless so we have no w/h
         component->width = 0;
