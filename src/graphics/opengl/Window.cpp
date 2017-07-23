@@ -223,6 +223,7 @@ void repositionComponent(const std::shared_ptr<Component> &component) {
                 x = prev->x + prev->width;
                 y = prev->y; // keep on same line
                 // unless it wraps
+                /*
                 if (textComponent) {
                     if (textComponent->inLineYPos) {
                         // did wrap
@@ -231,6 +232,7 @@ void repositionComponent(const std::shared_ptr<Component> &component) {
                         // previous line didn't wrap
                     }
                 }
+                */
             } else {
                 // we're block
                 y = prev->y - prev->height;
