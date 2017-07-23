@@ -14,6 +14,8 @@
 #include "../elements/LIElement.h"
 #include "../elements/PElement.h"
 #include "../elements/SPANElement.h"
+#include "../elements/DIVElement.h"
+#include "../elements/STRONGElement.h"
 #include "../../html/TagNode.h"
 #include "../../html/TextNode.h"
 #include "../../html/Node.h"
