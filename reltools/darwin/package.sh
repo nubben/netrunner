@@ -15,6 +15,6 @@ install_name_tool -change /usr/local/lib/libfreetype.6.dylib libfreetype.6.dylib
 install_name_tool -change /usr/local/lib/libharfbuzz.0.dylib libharfbuzz.0.dylib netrunner
 otool -L netrunner
 cd ..
-zip -r -X netrunner-$(date +%F).zip netrunner-$(date +%F)
+zip -r -X netrunner-$(date +%F)-darwin.zip netrunner-$(date +%F)
 rm -fr netrunner-$(date +%F)
 # https://gitgud.io/snippets/29
