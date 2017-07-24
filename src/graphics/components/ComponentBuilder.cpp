@@ -1,6 +1,8 @@
 #include "ComponentBuilder.h"
 #include <iostream>
 
+std::pair<int, int> getPos(const std::shared_ptr<Component> &parent, bool isInline);
+
 const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder::elementMap {
     {"a", std::make_shared<AElement>()},
     {"blockquote", std::make_shared<BLOCKQUOTEElement>()},

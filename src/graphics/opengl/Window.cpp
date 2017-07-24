@@ -7,6 +7,9 @@
 #include <ctime>
 #include <iostream>
 
+void updateComponentSize(const std::shared_ptr<Component> &component);
+void repositionComponent(const std::shared_ptr<Component> &component);
+
 Window::~Window() {
     glDeleteProgram(fontProgram);
     glDeleteProgram(textureProgram);
