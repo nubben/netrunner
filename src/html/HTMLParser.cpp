@@ -46,7 +46,7 @@ std::shared_ptr<Node> HTMLParser::parse(const std::string &html) const {
                 continue;
             }
             else if (html[cursor] == '<') {
-                if (html[cursor + 1] == '!') {
+                if (html[cursor + 1] == '!' && html[cursor + 2] == '-'  && html[cursor + 3] == '-' ) {
                     state = 4;
                 }
                 else if (html[cursor + 1] == '/') {
