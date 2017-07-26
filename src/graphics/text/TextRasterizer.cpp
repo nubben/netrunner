@@ -37,9 +37,17 @@ TextRasterizer::~TextRasterizer() {
 }
 
 // we don't need x,y here except we do need to know how much width we have available
+// we need to know x and y it left off at
+// x in case we line wrap, so we know where we left off for inline
+// y in case of multiline wrap, where the last line ended for inline
 std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &width, float &height, unsigned int &glyphCount) const {
     //std::cout << "rasterizing [" << text << "] at " << x << "x" << y << " window:" << windowWidth << "x" << windowHeight << std::endl;
-    if (x>windowWidth) {
+    if (x == windowWidth) {
+        std::cout << "TextRasterizer::rasterize - x [" << static_cast<int>(x) << "] matches window width [" << static_cast<int>(windowWidth)<< "] for text[" << text << "] no room to render anything" << std::endl;
+        return nullptr;
+       
+    }
+    if (x > windowWidth) {
         std::cout << "TextRasterizer::rasterize - x [" << static_cast<int>(x) << "] requested outside of window width [" << static_cast<int>(windowWidth)<< "] for text[" << text << "]" << std::endl;
         return nullptr;
     }
@@ -79,9 +87,9 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         const float ya = static_cast<float>(glyphPos[i].y_advance) / 64; //mostly 0s
-
+        
         if (cx + x >= windowWidth) {
-            //std::cout << "multine text: [" << text << "] new line:" << cy << std::endl;
+            //std::cout << "multine text: [" << text << "] new line:" << cy << " x: " << (int)x << "+ cx:" << (int)cx << std::endl;
             xmax = windowWidth - x; // wrap to the beginning of the element
             cx -= xmax;
             cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
@@ -107,10 +115,12 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
     height = -cy;
     width = xmax;
+    //std::cout << "y1max: " << y1max << " lines: " << lines << std::endl;
     y1max *= lines;
-    //std::cout << "now:" << width << "x" << height << std::endl;
+    //std::cout << "initial:" << (int)width << "x" << (int)height << std::endl;
     if (height<y1max) {
         height=y1max;
+        //std::cout << "adjusted:" << (int)width << "x" << (int)height << std::endl;
     }
     if (xmax==windowWidth - x) {
         std::cout << "Wrapped text[" << text << "] over " << lines << " lines " << xmax << "x" << static_cast<int>(height) << std::endl;
