@@ -11,8 +11,12 @@ void updateComponentSize(const std::shared_ptr<Component> &component);
 void repositionComponent(const std::shared_ptr<Component> &component);
 
 Window::~Window() {
-    glDeleteProgram(fontProgram);
-    glDeleteProgram(textureProgram);
+    if (fontProgram) {
+        glDeleteProgram(fontProgram);
+    }
+    if (textureProgram) {
+        glDeleteProgram(textureProgram);
+    }
 
     glfwTerminate();
 }
@@ -218,7 +222,7 @@ void repositionComponent(const std::shared_ptr<Component> &component) {
         std::cout << "no parent" << std::endl;
     }
     if (prev) {
-        TextComponent *textComponent = dynamic_cast<TextComponent*>(prev.get());
+        //TextComponent *textComponent = dynamic_cast<TextComponent*>(prev.get());
         // 2nd or last
         if (prev->isInline) {
             // last was inline
