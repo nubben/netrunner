@@ -12,7 +12,7 @@ CXXFLAGS   = -O3 -std=c++1y
 WARNINGS   =
 LIBS       = -L/usr/local/lib -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -lGLEW -lfreetype -lharfbuzz
 LDFLAGS    = -O3
-INCPATH    = -I /usr/local/include/freetype2 -I /usr/local/include/harfbuzz
+INCPATH    = -I /usr/local/include -I /usr/local/include/freetype2 -I /usr/local/include/harfbuzz
 endif
 
 EXECUTABLE = netrunner
@@ -35,7 +35,6 @@ ifeq ($(UNAME), Darwin)
 shaders:
 ifneq ($(shell cat src/graphics/opengl/shaders/FontShader.vert src/graphics/opengl/shaders/FontShader.frag src/graphics/opengl/shaders/TextureShader.vert src/graphics/opengl/shaders/TextureShader.frag | md5sum), $(shell cat src/graphics/opengl/shaders/gen/hashsum))
 	@mkdir -p "src/graphics/opengl/shaders/gen"
-	@cat src/graphics/opengl/shaders/FontShader.vert src/graphics/opengl/shaders/FontShader.frag src/graphics/opengl/shaders/TextureShader.vert src/graphics/opengl/shaders/TextureShader.frag | md5sum > src/graphics/opengl/shaders/gen/hashsum;
 	@echo "#ifndef FONTSHADER_H\n#define FONTSHADER_H\n\nconst char *fontVertexShaderSource =\n" > src/graphics/opengl/shaders/gen/FontShader.h;
 	@cat src/graphics/opengl/shaders/FontShader.vert | awk '{if ($$0!="}") {print "\t\""$$0"\\n\""} else {print "\t\""$$0"\";\n"}}' >> src/graphics/opengl/shaders/gen/FontShader.h;
 	@echo "const char *fontFragmentShaderSource =\n" >> src/graphics/opengl/shaders/gen/FontShader.h;
@@ -46,6 +45,7 @@ ifneq ($(shell cat src/graphics/opengl/shaders/FontShader.vert src/graphics/open
 	@echo "const char *textureFragmentShaderSource =\n" >> src/graphics/opengl/shaders/gen/TextureShader.h;
 	@cat src/graphics/opengl/shaders/TextureShader.frag | awk '{if ($$0!="}") {print "\t\""$$0"\\n\""} else {print "\t\""$$0"\";\n"}}' >> src/graphics/opengl/shaders/gen/TextureShader.h;
 	@echo "#endif\n" >> src/graphics/opengl/shaders/gen/TextureShader.h;
+	@cat src/graphics/opengl/shaders/FontShader.vert src/graphics/opengl/shaders/FontShader.frag src/graphics/opengl/shaders/TextureShader.vert src/graphics/opengl/shaders/TextureShader.frag | md5sum > src/graphics/opengl/shaders/gen/hashsum;
 endif
 else
 shaders:
