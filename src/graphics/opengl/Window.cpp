@@ -85,6 +85,7 @@ bool Window::initGLFW() {
     glfwSetMouseButtonCallback(window, [](GLFWwindow *win, int button, int action, int mods) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+            std::cout << "left release" << std::endl;
             std::shared_ptr<Component> clickedComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
             if (clickedComponent) {
                 if (clickedComponent->onClick) {
@@ -201,6 +202,8 @@ void Window::render() {
 }
 
 void Window::setDOM(const std::shared_ptr<Node> rootNode) {
+    // reset rootComponent
+    rootComponent=std::make_shared<Component>();
     domRootNode = rootNode;
     domDirty = true;
 }

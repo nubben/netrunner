@@ -46,7 +46,7 @@ public:
     bool domDirty = false;
     ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
-    const std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
+    std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
     double cursorX = 0;
     double cursorY = 0;
 };
