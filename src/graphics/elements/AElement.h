@@ -6,6 +6,8 @@
 #include "../components/TextComponent.h"
 #include "../../html/TextNode.h"
 
+void navTo(std::string url); // forward declaration
+
 class AElement : public Element {
 public:
     AElement();

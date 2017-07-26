@@ -13,6 +13,38 @@ const std::string getHostFromURL(const std::string &url);
 void handleRequest(const HTTPResponse &response);
 
 const std::unique_ptr<Window> window = std::make_unique<Window>();
+std::string currentURL="";
+
+void navTo(std::string url) {
+    std::cout << "go to: " << url << std::endl;
+    std::size_t dSlashPos=url.find("//");
+    if (dSlashPos!=std::string::npos) {
+        // remote
+        // check for relative
+        if (dSlashPos==0) {
+            // we only support http atm
+            url="http:"+url;
+        }
+    } else {
+        if (url[0]=='/') {
+            // absolute URL
+            url="http://"+getHostFromURL(currentURL)+url;
+        } else {
+            // relative URL
+            url="http://"+getHostFromURL(currentURL)+getDocumentFromURL(currentURL)+url;
+        }
+    }
+    // strip # off
+    std::size_t hashPos=url.find("#");
+    if (hashPos!=std::string::npos) {
+        url=url.substr(0, hashPos);
+    }
+    std::cout << "go to: " << url << std::endl;
+    std::shared_ptr<Node> rootNode = std::make_shared<Node>(NodeType::ROOT);
+    window->setDOM(rootNode);
+    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(url), getDocumentFromURL(url));
+    request->sendRequest(handleRequest);
+}
 
 const std::string getDocumentFromURL(const std::string &url) {
     int slashes = 0;
@@ -68,7 +100,8 @@ int main(int argc, char *argv[]) {
         std::cout << "./netrunner <url>" << std::endl;
         return 1;
     }
-    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(argv[1]), getDocumentFromURL(argv[1]));
+    currentURL=argv[1];
+    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(currentURL), getDocumentFromURL(currentURL));
     request->sendRequest(handleRequest);
     window->init();
     while (!glfwWindowShouldClose(window->window)) {

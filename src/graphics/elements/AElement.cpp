@@ -16,6 +16,7 @@ std::unique_ptr<Component> AElement::renderer(const std::shared_ptr<Node> node, 
             if (hrefPair != tagNode->properties.end()) {
                 component->onClick = [hrefPair]() {
                     std::cout << "Direct to: " << hrefPair->second << std::endl;
+                    navTo(hrefPair->second);
                 };
             }
         }
