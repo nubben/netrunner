@@ -1,7 +1,7 @@
 #include "ComponentBuilder.h"
 #include <iostream>
 
-std::pair<int, int> getPos(const std::shared_ptr<Component> &parent, bool isInline);
+std::pair<int, int> getPos(const std::shared_ptr<Component> &parent, bool isInline, int windowWidth);
 
 const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder::elementMap {
     {"a", std::make_shared<AElement>()},
@@ -12,13 +12,14 @@ const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder
     {"li", std::make_shared<LIElement>()},
     {"p", std::make_shared<PElement>()},
     {"span", std::make_shared<SPANElement>()},
+    {"aside", std::make_shared<SPANElement>()},
     {"div", std::make_shared<DIVElement>()},
     {"br", std::make_shared<DIVElement>()},
     {"strong", std::make_shared<STRONGElement>()},
     {"b", std::make_shared<STRONGElement>()}
 };
 
-std::pair<int, int> getPos(const std::shared_ptr<Component> &parent, bool isInline) {
+std::pair<int, int> getPos(const std::shared_ptr<Component> &parent, bool isInline, int windowWidth) {
     // get last component
     std::pair<int, int> res;
     if (!parent->children.size()) {
@@ -43,6 +44,11 @@ std::pair<int, int> getPos(const std::shared_ptr<Component> &parent, bool isInli
         } else {
             // last was block
             y = prev->y - prev->height;
+        }
+        // really only inline but can't hurt block AFAICT
+        if (x == windowWidth) {
+            x=0;
+            y-=prev->height; // how far down do we need to wrap?, the previous height?
         }
     } else {
         // first, there will be no width to add
@@ -82,8 +88,9 @@ std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
             isInline = true;
             //TextNode *textNode = dynamic_cast<TextNode*>(node.get());
             //std::cout << "text node: " << textNode->text << std::endl;
+            //std::cout << "text: " << textNode->text << std::endl;
         }
-        std::tie(x,y)=getPos(parentComponent, isInline);
+        std::tie(x,y)=getPos(parentComponent, isInline, windowWidth);
         //auto [x, y]=getPos(parentComponent, isInline);
         //std::cout << "Placing at " << (int)x << "x" << (int)y << " between " << windowWidth << "x" << windowHeight << std::endl;
         component = element->renderer(node, x, y, windowWidth, windowHeight);
