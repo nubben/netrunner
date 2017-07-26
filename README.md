@@ -33,9 +33,13 @@ to install requirements
 
 ## Binaries
 ### Linux
+20170723 binary package https://my.mixtape.moe/hysamb.zip
+
+nightly binary only (no font files)
 https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner
+
 ### OSX
-20170721 binary https://my.mixtape.moe/lbsgid.zip
+20170725 binary package https://my.mixtape.moe/mtfmga.zip
 
 ## Milestones
 - Browse 4chan /g/ board
