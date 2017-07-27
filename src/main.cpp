@@ -17,7 +17,11 @@ std::string currentURL="";
 
 void navTo(std::string url) {
     std::cout << "go to: " << url << std::endl;
-    std::size_t dSlashPos=url.find("//");
+    //
+    // All of this needs to be redone correctly
+    // this is just temporary hack code, so I can get to specific pages for debugging
+    //
+    const std::size_t dSlashPos=url.find("//");
     if (dSlashPos!=std::string::npos) {
         // remote
         // check for relative
@@ -26,12 +30,49 @@ void navTo(std::string url) {
             url="http:"+url;
         }
     } else {
-        if (url[0]=='/') {
-            // absolute URL
-            url="http://"+getHostFromURL(currentURL)+url;
+        // https://github.com/unshiftio/url-parse/blob/master/index.js#L111
+        //auto const lastSlashPos=url.find_last_of('/');
+        // could collapse ./|/. to . and /./ to /
+        if (url=="." || url=="./") {
+            auto const lastSlashPos=getDocumentFromURL(currentURL).find_last_of('/');
+            if (lastSlashPos!=std::string::npos) {
+                url="http://"+getHostFromURL(currentURL)+getDocumentFromURL(currentURL).substr(0, lastSlashPos)+'/';
+            }
         } else {
-            // relative URL
-            url="http://"+getHostFromURL(currentURL)+getDocumentFromURL(currentURL)+url;
+            if (url[0]=='/') {
+                // absolute URL
+                url="http://"+getHostFromURL(currentURL)+url;
+            } else {
+                // relative URL
+                const std::string path=getDocumentFromURL(currentURL);
+                std::cout << "old path: " << path << std::endl;
+                if (url.length()>1 && url[0]=='.' && url[1]=='.') {
+                    // are we at / ?
+                    if (path=="/") {
+                        // if so, remove ../
+                        if (url.length()>2) {
+                            url=url.substr(3);
+                        } else {
+                            url=url.substr(2);
+                        }
+                        url=path+url;
+                    } else {
+                        // .. but we're not in /
+                        // make sure not a filename
+                        auto const inDir=path.find_last_of("/");
+                        if (inDir!=std::string::npos) {
+                            // now take off a directory
+                            auto const inDir2=path.substr(0, inDir).find_last_of("/");
+                            url=path.substr(0, inDir2+1)+url.substr(2);
+                        } else {
+                            url=path+url;
+                        }
+                    }
+                } else {
+                    url=path+url;
+                }
+                url="http://"+getHostFromURL(currentURL)+url;
+            }
         }
     }
     // strip # off
@@ -43,6 +84,7 @@ void navTo(std::string url) {
     std::shared_ptr<Node> rootNode = std::make_shared<Node>(NodeType::ROOT);
     window->setDOM(rootNode);
     const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(url), getDocumentFromURL(url));
+    currentURL=url;
     request->sendRequest(handleRequest);
 }
 
@@ -75,6 +117,7 @@ const std::string getHostFromURL(const std::string &url) {
 }
 
 void handleRequest(const HTTPResponse &response) {
+    std::cout << "main:::handleRequest - statusCode: " << response.statusCode << std::endl;
     if (response.statusCode == 200) {
         const std::unique_ptr<HTMLParser> parser = std::make_unique<HTMLParser>();
         const std::clock_t begin = clock();
