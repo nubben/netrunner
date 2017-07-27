@@ -34,10 +34,8 @@ bool Window::init() {
     boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
 
     //Mascot
-    boxComponents.push_back(std::make_unique<AnimeComponent>(-512, 0.0f, 512, 512, windowWidth, windowHeight));
-
-    rootComponent->y = 900;
-
+    boxComponents.push_back(std::make_unique<AnimeComponent>(-256.0f, 0.0f, 512, 512, windowWidth, windowHeight));
+    
     return true;
 }
 
@@ -52,14 +50,17 @@ bool Window::initGLFW() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(640, 480, "NetRunner", nullptr, nullptr);
+    window = glfwCreateWindow(1024, 640, "NetRunner", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         std::cout << "Could not create window" << std::endl;
         return false;
     }
+    // replace first parameter of all these callbacks with our window object instead of a GLFWwindow
     glfwSetWindowUserPointer(window, this);
+    // set window w/h
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+    // set up event callbacks
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *win, int width, int height) {
         glViewport(0, 0, width, height);
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -68,9 +69,9 @@ bool Window::initGLFW() {
         for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
             boxComponent->resize(width, height);
         }
-        std::cout << "resizing" << std::endl;
+        //std::cout << "resizing" << std::endl;
         thiz->resizeComponentTree(thiz->rootComponent, width, height);
-        thiz->printComponentTree(thiz->rootComponent, 0);
+        //thiz->printComponentTree(thiz->rootComponent, 0);
     });
     glfwSetCursorPosCallback(window, [](GLFWwindow *win, double xPos, double yPos) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -79,7 +80,19 @@ bool Window::initGLFW() {
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        // yOffset is a delta vector
         thiz->transformMatrix[13] += -yOffset * 0.1;
+        
+        // 2.0 is one screen height
+        // we draw from 0 downwards (y+), so can't scroll past our starting draw point
+        if (thiz->transformMatrix[13]<2) {
+            thiz->transformMatrix[13]=2;
+        }
+        // calculate scroll max by calculating how many screens are in the rootComponent's Height
+        if (thiz->transformMatrix[13]>std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f)) {
+            thiz->transformMatrix[13]=std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f);
+        }
+        std::cout << "scroll y is at " << thiz->transformMatrix[13] << "/" << (int)(thiz->transformMatrix[13]*10000) << std::endl;
         thiz->transformMatrixDirty = true;
     });
     glfwSetMouseButtonCallback(window, [](GLFWwindow *win, int button, int action, int mods) {
@@ -177,7 +190,7 @@ void Window::render() {
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
-        printComponentTree(rootComponent, 0);
+        //printComponentTree(rootComponent, 0);
         domDirty = false;
     }
 
@@ -201,15 +214,47 @@ void Window::render() {
     glfwSwapBuffers(window);
 }
 
+void deleteComponent(std::shared_ptr<Component> &component) {
+    // delete all my child first
+    for (std::shared_ptr<Component> child : component->children) {
+        deleteComponent(child);
+    }
+    component->parent=nullptr;
+    component->children.clear();
+    // now delete self
+}
+
+void deleteNode(std::shared_ptr<Node> node) {
+    for (std::shared_ptr<Node> child : node->children) {
+        deleteNode(child);
+    }
+    node->parent=nullptr;
+    node->children.clear();
+    node->component=nullptr; // disassociate component
+}
+
 void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     // reset rootComponent
-    rootComponent=std::make_shared<Component>();
+    if (rootComponent) {
+        deleteComponent(rootComponent);
+    }
+    if (domRootNode) {
+        deleteNode(domRootNode);
+    }
+
+    // reset scroll position
+    transformMatrix[13] = 2;
+    transformMatrixDirty = true;
+
+    // new root component
+    rootComponent = std::make_shared<Component>();
+    rootComponent->y = 0;
     domRootNode = rootNode;
     domDirty = true;
 }
 
 // reposition component based on parent position
-void repositionComponent(const std::shared_ptr<Component> &component) {
+void repositionComponent(const std::shared_ptr<Component> &component, int windowWidth) {
     std::shared_ptr<Component> prev = nullptr;
     int x = 0, y = 0;
     if (component->parent) {
@@ -246,6 +291,11 @@ void repositionComponent(const std::shared_ptr<Component> &component) {
             } else {
                 // we're block
                 y = prev->y - prev->height;
+            }
+            // really only inline but can't hurt block AFAICT
+            if (x == windowWidth) {
+                x=0;
+                y-=prev->height; // how far down do we need to wrap?, the previous height?
             }
         } else {
             // last was block
@@ -343,7 +393,7 @@ void Window::resizeComponentTree(const std::shared_ptr<Component> &component, co
     // is all text considered inline?
     if (textComponent) {
         // FIXME: what if no parent
-        repositionComponent(component);
+        repositionComponent(component, width);
         textComponent->resize(component->x, component->y, width, height);
         updateComponentSize(component);
     }
@@ -353,7 +403,7 @@ void Window::resizeComponentTree(const std::shared_ptr<Component> &component, co
         if (component->parent) {
             component->x = component->parent->x;
             component->y = component->parent->y - component->parent->height;
-            repositionComponent(component);
+            repositionComponent(component, width);
         }
         // we're renderless so we have no w/h
         component->width = 0;

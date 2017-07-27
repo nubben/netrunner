@@ -42,11 +42,11 @@ public:
     GLFWwindow *window;
     int windowWidth;
     int windowHeight;
-    std::shared_ptr<Node> domRootNode;
+    std::shared_ptr<Node> domRootNode = nullptr;
     bool domDirty = false;
     ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
-    std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
+    std::shared_ptr<Component> rootComponent = nullptr;
     double cursorX = 0;
     double cursorY = 0;
 };
