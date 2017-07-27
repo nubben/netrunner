@@ -5,57 +5,57 @@ is an implementation of a new web browser written in C++ utilizing OpenGL. This 
 Status: You can give it a url and it'll download, parser, and render the text from the page
 
 ## Odilitime's vision
-A modern web browser is a huge project. I'd like to see this broken into several composeable pieces.
+A modern web browser is a huge project. I'd like to see this broken into several composable pieces.
 Network engine separate from the parsing engine, separate from the compositing engine separate from the renderer.
 This way it could be used a document viewer or an editor as well.
 A browser development kit for developers.
 I'd like to develop text-based structures for communication between each piece.
 
-USE AT YOUR OWN RISK!
+**USE AT YOUR OWN RISK!**
 
-## Compliation Requirements
+## Compilation Requirements
 - gcc or llvm
 - opengl
-- glew (2.0 works) https://github.com/nigels-com/glew/releases
-- glfw (3.2.1 works) https://github.com/glfw/glfw/releases
-- freetype2 (2.8 works) https://www.freetype.org/download.html
-- harfbuzz (1.4.6 works) https://github.com/behdad/harfbuzz/releases
-- md5sum (for shader compilation) https://spit.mixtape.moe/view/765a1dc1
+- [glew (2.0 works)](https://github.com/nigels-com/glew/releases)
+- [glfw (3.2.1 works)](https://github.com/glfw/glfw/releases)
+- [freetype2 (2.8 works)](https://www.freetype.org/download.html)
+- [harfbuzz (1.4.6 works)](https://github.com/behdad/harfbuzz/releases)
+- [md5sum (for shader compilation)](https://spit.mixtape.moe/view/765a1dc1)
 
 ### Package shortucts
-to install requirements
-
-#### debian/ubuntu
+#### Debian (and derivates)
 `sudo apt-get install libfreetype6-dev libharfbuzz-dev libglew-dev libglfw3-dev`
 
-#### arch
+#### Arch (and derivates)
 `sudo pacman -Suy glew glfw freetype2 harfbuzz`
+
+#### Void
+`sudo xbps-install -S glew glfw harfbuzz-devel`
 
 ## Binaries
 ### Linux
-20170726 binary package https://my.mixtape.moe/xqvpqc.tar.gz
+[2017-07-26 binary package](https://my.mixtape.moe/xqvpqc.tar.gz)
 
-nightly binary only (no font files)
-https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner
+[nightly binary only (no font files)](https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner)
 
 ### OSX
-20170726 binary package https://my.mixtape.moe/iguajs.zip
+[2017-07-26 binary package](https://my.mixtape.moe/iguajs.zip)
 
 ## Milestones
 - Browse 4chan /g/ board
 
 ## FAQ
 - Why don't you use x engine?
-Because it didn't do what we wanted it.
+Because it didn't do what we wanted it to do.
 - You realize this project is a massive undertaking
-Yes
+Yes.
 - Why are you doing this?
 odilitime: To watch people get triggered on /g/
 - This code is awful?
 Yes, we're planning to throw it away. It's just a proof-of-concept at the moment.
 - How can I help?
 Join IRC, compile the code, figure out something you want to improve
-- What about security
+- What about security?
 I don't think one on here could ever say they know what their doing without being laughed off the board. Security is a huge challenge to any project. We're going to do the best with the resources we have.
 
 ## Who
@@ -75,7 +75,7 @@ I don't think one on here could ever say they know what their doing without bein
   - Repo? https://github.com/5yph3r/Netrunner/
   - Repo? https://git.teknik.io/eti/netrunner/
 
-We coordinate on irc.rizon.net #/g/netrunner or Odili's discord: https://discord.gg/ffWabPn
+We coordinate on [irc.rizon.net](https://www.rizon.net/chat) #/g/netrunner or [Odili's Discord](https://discord.gg/ffWabPn).
 
 ## Documentation
 
@@ -92,4 +92,3 @@ We coordinate on irc.rizon.net #/g/netrunner or Odili's discord: https://discord
 - Nodes DOM tree objects
 - Elements Individual tag types
 - Components (gameobjects) renderer entities
-
