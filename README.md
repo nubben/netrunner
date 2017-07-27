@@ -39,7 +39,7 @@ nightly binary only (no font files)
 https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner
 
 ### OSX
-20170725 binary package https://my.mixtape.moe/mtfmga.zip
+20170726 binary package https://my.mixtape.moe/iguajs.zip
 
 ## Milestones
 - Browse 4chan /g/ board
