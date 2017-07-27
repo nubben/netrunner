@@ -33,7 +33,7 @@ to install requirements
 
 ## Binaries
 ### Linux
-20170723 binary package https://my.mixtape.moe/hysamb.zip
+20170726 binary package https://my.mixtape.moe/xqvpqc.tar.gz
 
 nightly binary only (no font files)
 https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner
