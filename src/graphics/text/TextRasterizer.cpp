@@ -146,7 +146,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     line->textureHeight = pow(2, ceil(log(height) / log(2)));
     //std::cout << "text texture size:" << line->textureWidth << "x" << line->textureHeight << std::endl;
     // where do we crash?
-    size_t size=line->textureWidth * line->textureHeight; // here?
+    size_t size = static_cast<size_t>(line->textureWidth * line->textureHeight); // here?
     line->textureData = std::make_unique<unsigned char[]>(size); // here?
     if (!line->textureData) {
         std::cout << "failed to create texture" << static_cast<int>(width) << "X" << static_cast<int>(height) << std::endl;
