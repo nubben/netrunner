@@ -40,7 +40,11 @@ TextRasterizer::~TextRasterizer() {
 // we need to know x and y it left off at
 // x in case we line wrap, so we know where we left off for inline
 // y in case of multiline wrap, where the last line ended for inline
-std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int y, const int windowWidth, const int windowHeight, float &width, float &height, unsigned int &glyphCount) const {
+// and we'll need to know the starting x
+// we don't need the starting y tbh
+// even if windowWidth isn't a windowWidth, we still need some type of point to wrap on
+// can drop gylphcount
+std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, const int x, const int windowWidth, const int wrapToX, float &width, float &height, unsigned int &glyphCount, int &endingX, int &endingY, bool &wrapped) const {
     //std::cout << "rasterizing [" << text << "] at " << x << "x" << y << " window:" << windowWidth << "x" << windowHeight << std::endl;
     if (x == windowWidth) {
         std::cout << "TextRasterizer::rasterize - x [" << static_cast<int>(x) << "] matches window width [" << static_cast<int>(windowWidth)<< "] for text[" << text << "] no room to render anything" << std::endl;
@@ -74,6 +78,8 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     int xmax = 0;
     int y0max = 0, y1max = 0;
     int lines = 1;
+    wrapped = false;
+    int lineXStart = x;
     for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
             std::cout << "Could not load glyph" << std::endl;
@@ -88,12 +94,16 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         const float ya = static_cast<float>(glyphPos[i].y_advance) / 64; //mostly 0s
         
-        if (cx + x >= windowWidth) {
+        if (cx + lineXStart >= windowWidth) {
             //std::cout << "multine text: [" << text << "] new line:" << cy << " x: " << (int)x << "+ cx:" << (int)cx << std::endl;
-            xmax = windowWidth - x; // wrap to the beginning of the element
-            cx -= xmax;
+            //std::cout << "line #" << lines << " starts at " << lineXStart << " ends at " << lineXStart + cx << std::endl;
+            xmax = windowWidth - wrapToX; // the whole width of parent to the edge of windowWidth
+            //std::cout << "new width: " << xmax << std::endl;
+            cx = 0; // wrapToX (was -= xmax)
             cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
             lines++;
+            wrapped = true;
+            lineXStart = wrapToX; // change where we start
         }
 
         //std::cout << "glyph:" << xa << "x" << ya << std::endl;
@@ -115,33 +125,39 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
     height = -cy;
     width = xmax;
+    //std::cout << "lines: " << lines << " wrapToX: " << wrapToX << " startX: " << x << " xmax: " << xmax << std::endl;
     //std::cout << "y1max: " << y1max << " lines: " << lines << std::endl;
     y1max *= lines;
     //std::cout << "initial:" << (int)width << "x" << (int)height << std::endl;
-    if (height<y1max) {
-        height=y1max;
+    if (height < y1max) {
+        height = y1max;
         //std::cout << "adjusted:" << (int)width << "x" << (int)height << std::endl;
     }
+    /*
     if (xmax==windowWidth - x) {
         std::cout << "Wrapped text[" << text << "] over " << lines << " lines " << xmax << "x" << static_cast<int>(height) << std::endl;
     }
+    */
+    //std::cout << "text size: " << (int)width << "x" << (int)height << std::endl;
 
     std::unique_ptr<Glyph[]> glyphs = std::make_unique<Glyph[]>(1);
     Glyph *line = &glyphs[0]; // lazy alias
     line->textureWidth = pow(2, ceil(log(width) / log(2)));
     line->textureHeight = pow(2, ceil(log(height) / log(2)));
     //std::cout << "text texture size:" << line->textureWidth << "x" << line->textureHeight << std::endl;
-    line->textureData = std::make_unique<unsigned char[]>(static_cast<size_t>(line->textureWidth * line->textureHeight));
+    // where do we crash?
+    size_t size=line->textureWidth * line->textureHeight; // here?
+    line->textureData = std::make_unique<unsigned char[]>(size); // here?
     if (!line->textureData) {
         std::cout << "failed to create texture" << static_cast<int>(width) << "X" << static_cast<int>(height) << std::endl;
         return nullptr;
     }
 
     // translation information
-    line->x0 = x; // wrap to element start
-    line->y0 = y;
-    line->x1 = x + width;
-    line->y1 = y - height;
+    line->x0 = 0; // wrap to element start (wrapToX (0) or x)
+    line->y0 = 0;
+    line->x1 = width;
+    line->y1 = - height;
     //std::cout << "xd: " << static_cast<int>(line->x1-line->x0) << " yd: " << static_cast<int>(line->y0-line->y1) << std::endl;
 
     // texture coords
@@ -152,7 +168,9 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     //std::cout << "s1: " << line->s1 << " t1: " << line->t1 << std::endl;
 
     // copy all glyphs into one single glyph
-    cx = 0; // reset
+    // still neds to start at X
+    //std::cout << "starting at: " << x << std::endl;
+    cx = wrapped ? x : 0; // reset
     cy = 0;
     for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
@@ -180,8 +198,8 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         // if this char is too width for this line, advance to next line
-        if (x + xa + cx >= windowWidth) {
-            cx = 0;
+        if (cx + xa >= windowWidth) {
+            cx = wrapToX;
             cy += std::ceil(1.2f * fontSize);// 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
             //std::cout << "textWrap - cx reset to: " <<  cx << " cy is now: " << cy << std::endl;
         }
@@ -199,7 +217,8 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     glyphCount=1;
     //std::cout << "final size: " << (int)width << "x" << (int)height << std::endl;
     //std::cout << "at: " << (int)line->x0 << "x" << (int)line->y0 << " to: " << (int)line->x1 << "x" << (int)line->y1 <<std::endl;
-
+    endingX = cx; // maybe should be one xa less?
+    endingY = cy + std::ceil(1.2f * fontSize); // definitely should be one lineheight higher
     return glyphs;
 }
 
