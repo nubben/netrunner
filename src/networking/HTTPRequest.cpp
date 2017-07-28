@@ -16,7 +16,7 @@ HTTPRequest::HTTPRequest(const std::string &hostName, const std::string &doc) {
 
 bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const {
     struct addrinfo hints;
-    struct addrinfo *serverInfo;
+    struct addrinfo *serverInfo = nullptr;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -24,6 +24,7 @@ bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseC
     const int res = getaddrinfo(host.c_str(), "80", &hints, &serverInfo);
     if (res != 0) {
         std::cout << "Could not lookup " << host << ": " << res << std::endl;
+        freeaddrinfo(serverInfo);
         return false;
     }
 
