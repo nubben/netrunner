@@ -34,7 +34,7 @@ I'd like to develop text-based structures for communication between each piece.
 
 ## Binaries
 ### Linux
-[2017-07-26 binary package](https://my.mixtape.moe/xqvpqc.tar.gz)
+[2017-07-27 binary package](https://my.mixtape.moe/ltuspw.tar.gz)
 
 [nightly binary only (no font files)](https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner)
 
