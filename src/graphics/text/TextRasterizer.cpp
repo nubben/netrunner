@@ -93,6 +93,10 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         const float ya = static_cast<float>(glyphPos[i].y_advance) / 64; //mostly 0s
+
+        if (slot->bitmap_left < 0) {
+            xmax+=std::abs(slot->bitmap_left);
+        }
         
         if (cx + lineXStart >= windowWidth) {
             //std::cout << "multine text: [" << text << "] new line:" << cy << " x: " << (int)x << "+ cx:" << (int)cx << std::endl;
@@ -185,7 +189,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
 
         const FT_Bitmap ftBitmap = slot->bitmap;
-
+        
         // figure out glyph starting point
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
         int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
@@ -204,11 +208,25 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             //std::cout << "textWrap - cx reset to: " <<  cx << " cy is now: " << cy << std::endl;
         }
         //std::cout << "placing glyph[" << text[i] << "] at " <<  cx << " cy is now: " << cy << std::endl;
+        int slotLeft = slot->bitmap_left;
+        if (slotLeft < 0) {
+            if (cx == 0) {
+                // we can't start at less than 0 in the texture
+                slotLeft = 0;
+                // but we can adjust our starting position
+                // for this line?
+                // no, HACK:
+                line->x0+=slot->bitmap_left;
+                line->x1+=slot->bitmap_left;
+                // to unhack, we'd need to copy all the previous lines over X pixels to the right
+                // and then for all next lines indent by delta
+            }
+        }
         for (unsigned int iy = 0; iy < ftBitmap.rows; iy++) {
             // source is 0 to (0:iy:rows)
             // dest is cx+bl, (0:iy:rows)+(0:cy:height)+bump
             //std::cout << "placing glyph row at " << (cx + slot->bitmap_left) << "x" << ((iy + cy) + bump) << std::endl;
-            memcpy(line->textureData.get() + (cx + slot->bitmap_left) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
+            memcpy(line->textureData.get() + (cx + slotLeft) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
         }
 
         cx += xa;
