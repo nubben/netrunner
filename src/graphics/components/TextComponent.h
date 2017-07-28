@@ -24,6 +24,8 @@ private:
     std::vector<GLuint> vertexBufferObjects;
     GLuint elementBufferObject;
     std::vector<GLuint> textures;
+    int endingX=0;
+    int endingY=0;
 
 public:
     std::string text;
