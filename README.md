@@ -39,7 +39,7 @@ I'd like to develop text-based structures for communication between each piece.
 [nightly binary only (no font files)](https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner)
 
 ### OSX
-[2017-07-26 binary package](https://my.mixtape.moe/iguajs.zip)
+[2017-07-27 binary package](https://my.mixtape.moe/gbludd.zip)
 
 ## Milestones
 - Browse 4chan /g/ board
@@ -59,21 +59,34 @@ Join IRC, compile the code, figure out something you want to improve
 I don't think one on here could ever say they know what their doing without being laughed off the board. Security is a huge challenge to any project. We're going to do the best with the resources we have.
 
 ## Who
-- gyroninja - Lead developer
-  - Linux Dev, Doing primary OOP planning and structure
-  - Repo: https://git.teknik.io/gyroninja/netrunner/
 
-
-- odilitime - Developer
+- odilitime - Lead Developer
   - OSX Dev, focused on clean up
   - Repo: https://gitgud.io/odilitime/netrunner/
 
 - RetroTech - Web / Sys Admin
-  - Created website
+  - Created original website
+  - Helps manage archive of logos and threads
+  - set up etherpad for collaboration
 
-- Someone else that's making the /g/ threads?
+- gyroninja - Jenkins
+  - Was original Lead Developer (left to work on a servo-based project), Linux Dev, Did primary OOP planning and structure
+  - Repo: https://git.teknik.io/gyroninja/netrunner/
+
+- Gillman - archivist
+  - works with RetroTech on archival
+
+- Cygnus - Web
+  - Created nicer website
+
+- ETI
+  - did an early links repo
+  - contributed README clean up
+
+- anons that are making the /g/ threads
+  - Your threads keep us motivated
+  - Drop by irc/discord and say hi to us
   - Repo? https://github.com/5yph3r/Netrunner/
-  - Repo? https://git.teknik.io/eti/netrunner/
 
 We coordinate on [irc.rizon.net](https://www.rizon.net/chat) #/g/netrunner or [Odili's Discord](https://discord.gg/ffWabPn).
 
