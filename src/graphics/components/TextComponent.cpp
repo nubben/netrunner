@@ -87,10 +87,24 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
     // and preferrable where the inline starts
     // my inline start is parent->children adding width from start to me
     // actually the run of all inline before me, starting at parent x as a minimum
-    glyphs = textRasterizer->rasterize(text, rawX, rawY, windowWidth, windowHeight, width, height, glyphCount);
+    //std::cout << "TextComponent::rasterize pre-height: " << (int)height << std::endl;
+    int wrapToX = 0; // windowWidth - rawX;
+    bool wrapped;
+    glyphs = textRasterizer->rasterize(text, rawX, windowWidth, wrapToX, width, height, glyphCount, endingX, endingY, wrapped);
+    //std::cout << "TextComponent::rasterize done [" <<  text << "] - start x: " << rawX << " width: " << (int)width << " wrapWidth: " << windowWidth << " wrapTo: " << wrapToX << std::endl;
+    //std::cout << "TextComponent::rasterize post-height: " << (int)height << std::endl;
     if (glyphs == nullptr) {
         return;
     }
+    // did we wrap
+    int startX = rawX;
+    // if we didn't we have a nice little texture starting at rawX potentially up to windowWidth
+    // if we did wrap, then we start at wrapToX (0) and we're a big square texture
+    if (wrapped) {
+        //std::cout << "it's wrapped starting at " << wrapToX << std::endl;
+        startX = wrapToX;
+    }
+    //std::cout << "startX: " << startX << std::endl;
 
     glyphVertices.clear();
     for (unsigned int i = 0; i < glyphCount; i++) {
@@ -98,10 +112,12 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
         const Glyph &glyph = glyphs[i];
         //Glyph &glyph=*it;
 
-        float vx0 = glyph.x0;
-        float vy0 = glyph.y0;
-        float vx1 = glyph.x1;
-        float vy1 = glyph.y1;
+        float vx0 = startX;
+        float vy0 = glyph.y0 + rawY;
+        //std::cout << "glyph x from: " << (int)glyph.x0 << " to " << (int)glyph.x1 << std::endl;
+        float vx1 = startX + (glyph.x1 - glyph.x0);
+        float vy1 = glyph.y1 + rawY;
+        //std::cout << "textcomponent at " << (int)vx0 << "," << (int)vy0 << " to " << (int)vx1 << "," << (int)vy1 << std::endl;
         pointToViewport(vx0, vy0, windowWidth, windowHeight);
         pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
