@@ -64,10 +64,13 @@ bool Window::initGLFW() {
     // replace first parameter of all these callbacks with our window object instead of a GLFWwindow
     glfwSetWindowUserPointer(window, this);
     // set window w/h
-    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+    //glfwGetFramebufferSize(window, &windowWidth, &windowHeight); // in pixels
+    glfwGetWindowSize(window, &windowWidth, &windowHeight); // use screen coordinates (not pixels) more retina friendly
     // set up event callbacks
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *win, int width, int height) {
         glViewport(0, 0, width, height);
+    });
+    glfwSetWindowSizeCallback(window, [](GLFWwindow *win, int width, int height) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->windowWidth = width;
         thiz->windowHeight = height;
