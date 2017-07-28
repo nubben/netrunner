@@ -49,6 +49,9 @@ bool Window::initGLFW() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwSetErrorCallback([](int error, const char* description) {
+        std::cout << "glfw error [" << error << "]:" << description << std::endl;
+    });
 
     window = glfwCreateWindow(1024, 640, "NetRunner", nullptr, nullptr);
     if (!window) {
@@ -92,7 +95,7 @@ bool Window::initGLFW() {
         if (thiz->transformMatrix[13]>std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f)) {
             thiz->transformMatrix[13]=std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f);
         }
-        std::cout << "scroll y is at " << thiz->transformMatrix[13] << "/" << (int)(thiz->transformMatrix[13]*10000) << std::endl;
+        //std::cout << "scroll y is at " << thiz->transformMatrix[13] << "/" << (int)(thiz->transformMatrix[13]*10000) << std::endl;
         thiz->transformMatrixDirty = true;
     });
     glfwSetMouseButtonCallback(window, [](GLFWwindow *win, int button, int action, int mods) {
@@ -372,6 +375,10 @@ void Window::printComponentTree(const std::shared_ptr<Component> &component, int
 }
 
 void Window::renderComponents(std::shared_ptr<Component> component) {
+    if (!component) {
+        std::cout << "Window::renderComponents - got null passed" << std::endl;
+        return;
+    }
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
         textComponent->render();
