@@ -49,7 +49,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     if (x == windowWidth) {
         std::cout << "TextRasterizer::rasterize - x [" << static_cast<int>(x) << "] matches window width [" << static_cast<int>(windowWidth)<< "] for text[" << text << "] no room to render anything" << std::endl;
         return nullptr;
-       
+
     }
     if (x > windowWidth) {
         std::cout << "TextRasterizer::rasterize - x [" << static_cast<int>(x) << "] requested outside of window width [" << static_cast<int>(windowWidth)<< "] for text[" << text << "]" << std::endl;
@@ -97,7 +97,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         if (slot->bitmap_left < 0) {
             xmax+=std::abs(slot->bitmap_left);
         }
-        
+
         if (cx + lineXStart >= windowWidth) {
             //std::cout << "multine text: [" << text << "] new line:" << cy << " x: " << (int)x << "+ cx:" << (int)cx << std::endl;
             //std::cout << "line #" << lines << " starts at " << lineXStart << " ends at " << lineXStart + cx << std::endl;
@@ -189,7 +189,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
 
         const FT_Bitmap ftBitmap = slot->bitmap;
-        
+
         // figure out glyph starting point
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
         int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
@@ -226,7 +226,15 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             // source is 0 to (0:iy:rows)
             // dest is cx+bl, (0:iy:rows)+(0:cy:height)+bump
             //std::cout << "placing glyph row at " << (cx + slot->bitmap_left) << "x" << ((iy + cy) + bump) << std::endl;
-            memcpy(line->textureData.get() + (cx + slotLeft) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
+            //memcpy(line->textureData.get() + (cx + slotLeft) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
+            unsigned char *src=ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width);
+            unsigned char *dest=(unsigned char *)line->textureData.get() + (cx + slotLeft) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth);
+            for(unsigned int ix = 0; ix < ftBitmap.width; ix++) {
+                //std::cout << "putting:" << (int)src[ix] << " over " << (int)dest[ix] << std::endl;
+                if (src[ix] && src[ix]>dest[ix]) {
+                  dest[ix]=src[ix];
+                }
+            }
         }
 
         cx += xa;
