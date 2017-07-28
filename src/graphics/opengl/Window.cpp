@@ -8,7 +8,9 @@
 #include <iostream>
 
 void updateComponentSize(const std::shared_ptr<Component> &component);
-void repositionComponent(const std::shared_ptr<Component> &component);
+void repositionComponent(const std::shared_ptr<Component> &component, int windowWidth);
+void deleteComponent(std::shared_ptr<Component> &component);
+void deleteNode(std::shared_ptr<Node> node);
 
 Window::~Window() {
     if (fontProgram) {
