@@ -5,16 +5,9 @@
 #include <algorithm>
 #include "networking/HTTPRequest.h"
 #include "networking/HTTPResponse.h"
+#include "StringUtils.h"
 
 namespace {
-
-std::string getFilenameExtension(std::string const& fileName) {
-    auto dotPos = fileName.find_last_of('.');
-    if (dotPos != std::string::npos && dotPos + 1 != std::string::npos) {
-        return fileName.substr(dotPos + 1);
-    }
-    return "";
-}
 
 std::map<std::string, ResourceType> strToRT = {
     {"html", ResourceType::HTML},
