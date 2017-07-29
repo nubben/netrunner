@@ -80,6 +80,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     int lines = 1;
     wrapped = false;
     int lineXStart = x;
+    int leftPadding = 0;
     for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
             std::cout << "Could not load glyph" << std::endl;
@@ -91,13 +92,21 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             std::cout << "Could not render glyph" << std::endl;
             return nullptr;
         }
+        
+        // how much space does this character take
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         const float ya = static_cast<float>(glyphPos[i].y_advance) / 64; //mostly 0s
-
-        if (slot->bitmap_left < 0) {
-            xmax+=std::abs(slot->bitmap_left);
+        
+        
+        // do we need to padding the texture to the left for any lines
+        if (cx == 0) {
+            if (slot->bitmap_left < 0) {
+                // figure out max amount of padding we need
+                leftPadding = std::max(leftPadding, -slot->bitmap_left);
+            }
         }
-
+        
+        // wrap to next line on width
         if (cx + lineXStart >= windowWidth) {
             //std::cout << "multine text: [" << text << "] new line:" << cy << " x: " << (int)x << "+ cx:" << (int)cx << std::endl;
             //std::cout << "line #" << lines << " starts at " << lineXStart << " ends at " << lineXStart + cx << std::endl;
@@ -111,19 +120,25 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         }
 
         //std::cout << "glyph:" << xa << "x" << ya << std::endl;
-
+        
+        // update glyph space allocation
         cx += xa;
         cy += ya; // is normal for y0 at bottom
 
+        // update glyph maxes
         const FT_Bitmap ftBitmap = slot->bitmap;
-
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
         int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
         int y1 = y0 + static_cast<int>(ftBitmap.rows);
         y0max=std::max(y0max, y0);
         y1max=std::max(y1max, y1);
+        
+        // track new max width
         xmax=std::max(xmax, cx);
 
+    }
+    if (leftPadding) {
+        xmax+=leftPadding; // increase width;
     }
     // at least one line
     cy -= std::ceil(1.2f * fontSize); // 1.2 scalar from https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
@@ -158,9 +173,9 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     }
 
     // translation information
-    line->x0 = 0; // wrap to element start (wrapToX (0) or x)
+    line->x0 = -leftPadding; // wrap to element start (wrapToX (0) or x)
     line->y0 = 0;
-    line->x1 = width;
+    line->x1 = -leftPadding+width;
     line->y1 = - height;
     //std::cout << "xd: " << static_cast<int>(line->x1-line->x0) << " yd: " << static_cast<int>(line->y0-line->y1) << std::endl;
 
@@ -194,12 +209,7 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
         int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
 
-        int bump = 0; // Y adjust for this glyph
-        if (y0) {
-            // (25-36)-25 = 0-11
-            // 36-(25-36) = 11-0
-            bump = y0max - y0;
-        }
+        int bump = y0max - y0; // Y adjust for this glyph
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
         // if this char is too width for this line, advance to next line
         if (cx + xa >= windowWidth) {
@@ -208,28 +218,15 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
             //std::cout << "textWrap - cx reset to: " <<  cx << " cy is now: " << cy << std::endl;
         }
         //std::cout << "placing glyph[" << text[i] << "] at " <<  cx << " cy is now: " << cy << std::endl;
-        int slotLeft = slot->bitmap_left;
-        if (slotLeft < 0) {
-            if (cx == 0) {
-                // we can't start at less than 0 in the texture
-                slotLeft = 0;
-                // but we can adjust our starting position
-                // for this line?
-                // no, HACK:
-                line->x0+=slot->bitmap_left;
-                line->x1+=slot->bitmap_left;
-                // to unhack, we'd need to copy all the previous lines over X pixels to the right
-                // and then for all next lines indent by delta
-            }
-        }
-        for (unsigned int iy = 0; iy < ftBitmap.rows; iy++) {
+        
+        // place glyph bitmap data into texture
+        for (unsigned int iy = 0; iy < ftBitmap.rows; iy++) { // line by line
             // source is 0 to (0:iy:rows)
             // dest is cx+bl, (0:iy:rows)+(0:cy:height)+bump
             //std::cout << "placing glyph row at " << (cx + slot->bitmap_left) << "x" << ((iy + cy) + bump) << std::endl;
-            //memcpy(line->textureData.get() + (cx + slotLeft) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth), ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width), ftBitmap.width);
             unsigned char *src=ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width);
-            unsigned char *dest=(unsigned char *)line->textureData.get() + (cx + slotLeft) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth);
-            for(unsigned int ix = 0; ix < ftBitmap.width; ix++) {
+            unsigned char *dest=line->textureData.get() + (cx + leftPadding + slot->bitmap_left) + ((iy + static_cast<unsigned int>(cy)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(line->textureWidth);
+            for(unsigned int ix = 0; ix < ftBitmap.width; ix++) { // pixel by pixel
                 //std::cout << "putting:" << (int)src[ix] << " over " << (int)dest[ix] << std::endl;
                 if (src[ix] && src[ix]>dest[ix]) {
                   dest[ix]=src[ix];
@@ -239,12 +236,14 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
 
         cx += xa;
     }
-    // make one single glyph
-    glyphCount=1;
     //std::cout << "final size: " << (int)width << "x" << (int)height << std::endl;
     //std::cout << "at: " << (int)line->x0 << "x" << (int)line->y0 << " to: " << (int)line->x1 << "x" << (int)line->y1 <<std::endl;
     endingX = cx; // maybe should be one xa less?
     endingY = cy + std::ceil(1.2f * fontSize); // definitely should be one lineheight higher
+
+    // report a single glyph (since this one "glyph" represents the entire block of text)
+    glyphCount = 1;
+
     return glyphs;
 }
 
