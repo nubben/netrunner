@@ -51,6 +51,8 @@ bool Window::initGLFW() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+
     glfwSetErrorCallback([](int error, const char* description) {
         std::cout << "glfw error [" << error << "]:" << description << std::endl;
     });
@@ -74,12 +76,7 @@ bool Window::initGLFW() {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->windowWidth = width;
         thiz->windowHeight = height;
-        for (const std::unique_ptr<BoxComponent> &boxComponent : thiz->boxComponents) {
-            boxComponent->resize(width, height);
-        }
-        //std::cout << "resizing" << std::endl;
-        thiz->resizeComponentTree(thiz->rootComponent, width, height);
-        //thiz->printComponentTree(thiz->rootComponent, 0);
+        thiz->delayResize = 1;
     });
     glfwSetCursorPosCallback(window, [](GLFWwindow *win, double xPos, double yPos) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -154,7 +151,7 @@ bool Window::initGL() {
     glDeleteShader(textureVertexShader);
     glDeleteShader(textureFragmentShader);
 
-    std::cout << "OpenGL setup" << std::endl;
+    //std::cout << "OpenGL is set up" << std::endl;
 
     return true;
 }
@@ -193,6 +190,20 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
 }
 
 void Window::render() {
+    if (delayResize) {
+        delayResize--;
+        if (!delayResize) {
+            std::cout << "restarting drawing" << std::endl;
+            for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
+                boxComponent->resize(windowWidth, windowHeight);
+            }
+            //std::cout << "resizing" << std::endl;
+            resizeComponentTree(rootComponent, windowWidth, windowHeight);
+            //thiz->printComponentTree(thiz->rootComponent, 0);
+            renderDirty = true;
+        }
+        return;
+    }
     if (domDirty) {
         const std::clock_t begin = clock();
         createComponentTree(domRootNode, rootComponent);
@@ -200,26 +211,42 @@ void Window::render() {
         std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         //printComponentTree(rootComponent, 0);
         domDirty = false;
+        renderDirty = true;
     }
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(textureProgram);
-    for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
-        boxComponent->render();
+    if (renderDirty || transformMatrixDirty) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(textureProgram);
+        for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
+            boxComponent->render();
+        }
+        // it's quick but done on scroll
+        glUseProgram(fontProgram);
+        if (transformMatrixDirty) {
+            //const std::clock_t begin = clock();
+            GLint transformLocation = glGetUniformLocation(fontProgram, "transform");
+            glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformMatrix);
+            //const std::clock_t end = clock();
+            //std::cout << "Updated font matrix in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+            transformMatrixDirty = false;
+        }
+        renderComponents(rootComponent);
+        glfwSwapBuffers(window);
+        
+        // update 2nd buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(textureProgram);
+        for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
+            boxComponent->render();
+        }
+        // it's quick but done on scroll
+        glUseProgram(fontProgram);
+        renderComponents(rootComponent);
+        glfwSwapBuffers(window);
+        
+        renderDirty = false;
     }
-    // it's quick but done on scroll
-    glUseProgram(fontProgram);
-    if (transformMatrixDirty) {
-        //const std::clock_t begin = clock();
-        GLint transformLocation = glGetUniformLocation(fontProgram, "transform");
-        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, transformMatrix);
-        //const std::clock_t end = clock();
-        //std::cout << "Updated font matrix in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
-        transformMatrixDirty = false;
-    }
-    renderComponents(rootComponent);
-    glfwPollEvents();
     glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 void deleteComponent(std::shared_ptr<Component> &component) {
