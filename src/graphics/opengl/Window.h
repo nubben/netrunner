@@ -44,11 +44,13 @@ public:
     int windowHeight;
     std::shared_ptr<Node> domRootNode = nullptr;
     bool domDirty = false;
+    bool renderDirty = false;
     ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
     std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
     double cursorX = 0;
     double cursorY = 0;
+    unsigned int delayResize = 0;
 };
 
 #endif

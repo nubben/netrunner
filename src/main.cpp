@@ -127,7 +127,20 @@ void handleRequest(const HTTPResponse &response) {
         window->setDOM(rootNode);
     }
     else if (response.statusCode == 301) {
-        const std::string location = response.properties.at("Location");
+        std::string location;
+        if (response.properties.find("Location")==response.properties.end()) {
+            if (response.properties.find("location")==response.properties.end()) {
+                std::cout << "::handleRequest - got 301 without a location" << std::endl;
+                for(auto const &row : response.properties) {
+                    std::cout << "::handleRequest - " << row.first << "=" << response.properties.at(row.first) << std::endl;
+                }
+                return;
+            } else {
+                location = response.properties.at("location");
+            }
+        } else {
+            location = response.properties.at("Location");
+        }
         std::cout << "Redirect To: " << location << std::endl;
         const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(location), getDocumentFromURL(location));
         request->sendRequest(handleRequest);
@@ -147,9 +160,13 @@ int main(int argc, char *argv[]) {
     const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(currentURL), getDocumentFromURL(currentURL));
     request->sendRequest(handleRequest);
     window->init();
+    if (!window->window) {
+        return 1;
+    }
     while (!glfwWindowShouldClose(window->window)) {
         //const std::clock_t begin = clock();
         window->render();
+        glfwWaitEvents(); // block until something changes
         //const std::clock_t end = clock();
         //std::cout << '\r' << std::fixed << (((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) * 1000) << std::scientific << " ms/f    " << std::flush;
     }
