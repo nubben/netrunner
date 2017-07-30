@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include "StringUtils.h"
+#include "WebResource.h"
 
 void handleRequest(const HTTPResponse &response);
 
@@ -128,8 +129,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     currentURL=argv[1];
-    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(currentURL), getDocumentFromURL(currentURL));
-    request->sendRequest(handleRequest);
+
+    WebResource res = getWebResource(currentURL);
+    if (res.resourceType == ResourceType::INVALID) {
+        std::cout << "Invalid resource type" << std::endl;
+        return 1;
+    }
+
+    const HTMLParser parser;
+    const std::clock_t begin = clock();
+    std::shared_ptr<Node> rootNode = parser.parse(res.raw);
+    const std::clock_t end = clock();
+    std::cout << "Parsed document in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+    window->setDOM(rootNode);
+
     window->init();
     if (!window->window) {
         return 1;

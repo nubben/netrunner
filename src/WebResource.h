@@ -10,8 +10,7 @@ enum class ResourceType {
     JS
 };
 
-class WebResource {
-public:
+struct WebResource {
     WebResource();
     WebResource(ResourceType rtype, std::string const& rraw);
 

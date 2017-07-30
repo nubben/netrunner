@@ -15,6 +15,10 @@ std::map<std::string, ResourceType> strToRT = {
     {"js", ResourceType::JS}
 };
 
+bool isOnlineResource(std::string const& resourceName) {
+    return resourceName.find("http:") != std::string::npos;
+}
+
 }
 
 WebResource::WebResource() {
@@ -28,7 +32,10 @@ WebResource::WebResource(ResourceType rtype, std::string const& rraw) {
 }
 
 WebResource getWebResource(std::string resourceName) {
-    return WebResource(ResourceType::INVALID, "Not implemented");
+    if (isOnlineResource(resourceName)) {
+        return getOnlineWebResource(resourceName);
+    }
+    return getLocalWebResource(resourceName);
 }
 
 WebResource getLocalWebResource(std::string fileName) {
@@ -64,5 +71,18 @@ WebResource getLocalWebResource(std::string fileName) {
 }
 
 WebResource getOnlineWebResource(std::string url) {
-    return WebResource(ResourceType::INVALID, "Not implemented");
+    HTTPRequest request (getHostFromURL(url), getDocumentFromURL(url));
+    WebResource returnRes;
+
+    request.sendRequest([&](HTTPResponse const& response){
+        if (response.statusCode != 200) {
+            returnRes.resourceType = ResourceType::INVALID;
+            returnRes.raw = "Unsupported status code";
+        }
+        // TODO: Set resourceType based on Content-Type field.
+        returnRes.resourceType = ResourceType::HTML;
+        returnRes.raw = std::move(response.body);
+    });
+
+    return returnRes;
 }
