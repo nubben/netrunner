@@ -8,16 +8,17 @@
 #include "StringUtils.h"
 
 namespace {
+    
+    // only used for local files atm
+    std::map<std::string, ResourceType> strToRT = {
+        {"html", ResourceType::HTML},
+        {"css", ResourceType::CSS},
+        {"js", ResourceType::JS}
+    };
 
-std::map<std::string, ResourceType> strToRT = {
-    {"html", ResourceType::HTML},
-    {"css", ResourceType::CSS},
-    {"js", ResourceType::JS}
-};
-
-bool isOnlineResource(std::string const& resourceName) {
-    return resourceName.find("http:") != std::string::npos;
-}
+    bool isOnlineResource(std::string const& resourceName) {
+        return resourceName.find("://") != std::string::npos && resourceName.find("file://") == std::string::npos;
+    }
 
 }
 
