@@ -65,7 +65,7 @@ void Component::layout() {
                     //std::cout << "Component::layout - block *  p.x: " << (int)previous->x << " p.h: " << (int)previous->height << std::endl;
                 }
                 // really only inline but can't hurt block AFAICT
-                if (x == windowWidth) {
+                if (x >= windowWidth) {
                     x = 0;
                     y -= previous->height; // how far down do we need to wrap?, the previous height?
                 }
