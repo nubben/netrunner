@@ -9,6 +9,7 @@
 #include <memory>
 #include "StringUtils.h"
 #include "WebResource.h"
+#include "CommandLineParams.h"
 
 void handleRequest(const HTTPResponse &response);
 
@@ -128,6 +129,7 @@ int main(int argc, char *argv[]) {
         std::cout << "./netrunner <url|file.html>" << std::endl;
         return 1;
     }
+    initCLParams(argc, argv);
     std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
     currentURL=argv[1];
 
