@@ -7,9 +7,9 @@
 #include <ctime>
 #include <iostream>
 #include <memory>
+#include "StringUtils.h"
+#include "WebResource.h"
 
-const std::string getDocumentFromURL(const std::string &url);
-const std::string getHostFromURL(const std::string &url);
 void handleRequest(const HTTPResponse &response);
 
 const std::unique_ptr<Window> window = std::make_unique<Window>();
@@ -88,34 +88,6 @@ void navTo(std::string url) {
     request->sendRequest(handleRequest);
 }
 
-const std::string getDocumentFromURL(const std::string &url) {
-    int slashes = 0;
-    for (unsigned int i = 0; i < url.length(); i++) {
-        if (url[i] == '/') {
-            slashes++;
-            if (slashes == 3) {
-                return url.substr(i, url.length() - i);
-            }
-        }
-    }
-    return "";
-}
-
-const std::string getHostFromURL(const std::string &url) {
-    int slashes = 0;
-    unsigned int start = 0;
-    for (unsigned int i = 0; i < url.length(); i++) {
-        if (url[i] == '/') {
-            if (slashes == 2) {
-                return url.substr(start, i - start);
-            }
-            slashes++;
-            start = i + 1;
-        }
-    }
-    return "";
-}
-
 void handleRequest(const HTTPResponse &response) {
     std::cout << "main:::handleRequest - statusCode: " << response.statusCode << std::endl;
     if (response.statusCode == 200) {
@@ -153,12 +125,25 @@ void handleRequest(const HTTPResponse &response) {
 
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-        std::cout << "./netrunner <url>" << std::endl;
+        std::cout << "./netrunner <url|file.html>" << std::endl;
         return 1;
     }
+    std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
     currentURL=argv[1];
-    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(currentURL), getDocumentFromURL(currentURL));
-    request->sendRequest(handleRequest);
+
+    WebResource res = getWebResource(currentURL);
+    if (res.resourceType == ResourceType::INVALID) {
+        std::cout << "Invalid resource type" << std::endl;
+        return 1;
+    }
+
+    const HTMLParser parser;
+    const std::clock_t begin = clock();
+    std::shared_ptr<Node> rootNode = parser.parse(res.raw);
+    const std::clock_t end = clock();
+    std::cout << "Parsed document in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+    window->setDOM(rootNode);
+
     window->init();
     if (!window->window) {
         return 1;

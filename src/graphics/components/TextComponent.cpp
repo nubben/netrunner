@@ -9,33 +9,41 @@ extern TextRasterizerCache *rasterizerCache;
 TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
     //const std::clock_t begin = clock();
     text = rawText;
-    x = rawX;
-    y = rawY;
+    //x = rawX;
+    //y = rawY;
+    x = 0;
+    y = 0;
     fontSize = size;
     bold = bolded;
     color = hexColor;
 
     // html entity decode
     sanitize(text);
-
+    
+    
     // load font, rasterize, save vertices
-    rasterize(rawX, rawY, windowWidth, windowHeight);
+    //rasterize(x, y, windowWidth, windowHeight);
 
     // send to video card
     glGenBuffers(1, &elementBufferObject);
-    for (unsigned int i = 0; i < glyphVertices.size(); i++) {
-        const Glyph &glyph = glyphs[i];
-        const std::unique_ptr<float[]> &glyphVertice = glyphVertices[i];
+    //for (unsigned int i = 0; i < glyphVertices.size(); i++) {
+    //int i = 0;
+        //const Glyph &glyph = glyphs[i];
+        //const std::unique_ptr<float[]> &glyphVertice = glyphVertices[i];
+    
         vertexArrayObjects.push_back(0);
         vertexBufferObjects.push_back(0);
+
         glGenVertexArrays(1, &vertexArrayObjects.back());
         glGenBuffers(1, &vertexBufferObjects.back());
-
+    
         glBindVertexArray(vertexArrayObjects.back());
 
         // the data array
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjects.back());
-        glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
+        std::unique_ptr<float[]> vertices = std::make_unique<float[]>(36); // upload garbage for now
+        glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), vertices.get(), GL_STATIC_DRAW);
+        //glBufferData(GL_ARRAY_BUFFER, ((3 + 4 + 2) * 4) * sizeof(float), glyphVertice.get(), GL_STATIC_DRAW);
 
         // indexes of the array
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
@@ -49,15 +57,18 @@ TextComponent::TextComponent(const std::string &rawText, const int rawX, const i
 
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, (3 + 4 + 2) * sizeof(float), reinterpret_cast<void*>(7 * sizeof(float)));
         glEnableVertexAttribArray(2);
-
+    
+        /*
         textures.push_back(0);
         glGenTextures(1, &textures.back());
         glBindTexture(GL_TEXTURE_2D, textures.back());
+         */
 
         // upload texture
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get());
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glyph.textureWidth, glyph.textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, glyph.textureData.get());
+        //glGenerateMipmap(GL_TEXTURE_2D);
+
+    //}
     //const std::clock_t end = clock();
     //std::cout << "buffering text [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
 }
@@ -67,7 +78,9 @@ TextComponent::~TextComponent() {
     for (unsigned int i = 0; i < vertexArrayObjects.size(); i++) {
         glDeleteVertexArrays(1, &vertexArrayObjects[i]);
         glDeleteBuffers(1, &vertexBufferObjects[i]);
-        glDeleteTextures(1, &textures[i]);
+        if (textures.size()>i) {
+            glDeleteTextures(1, &textures[i]);
+        }
     }
 }
 
@@ -118,6 +131,13 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
         float vx1 = startX + (glyph.x1 - glyph.x0);
         float vy1 = glyph.y1 + rawY;
         //std::cout << "textcomponent at " << (int)vx0 << "," << (int)vy0 << " to " << (int)vx1 << "," << (int)vy1 << std::endl;
+        
+        // convert our local x,y,w,h into actual ogl coords
+        
+        // map vx0 between -1 and 1
+        //vx0 = ((vx0 / windowWidth) * 2) - 1;
+        //vy0 = ((vy0 / windowHeight) * 2) - 1;
+        
         pointToViewport(vx0, vy0, windowWidth, windowHeight);
         pointToViewport(vx1, vy1, windowWidth, windowHeight);
 
@@ -147,6 +167,7 @@ void TextComponent::rasterize(const int rawX, const int rawY, const int windowWi
         vertices[posMac(3) + 8] = glyph.t0;
 
         glyphVertices.push_back(std::move(vertices));
+        
     }
     //const std::clock_t end = clock();
     //std::cout << "rasterize text [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
@@ -165,17 +186,23 @@ void TextComponent::render() {
         //const std::clock_t end = clock();
         //std::cout << "undirty TextComponent render [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
     }
-    for (unsigned long i = vertexArrayObjects.size(); i > 0; i--) {
-        glBindVertexArray(vertexArrayObjects[i - 1]);
-        glBindTexture(GL_TEXTURE_2D, textures[i - 1]);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    // have to have a texture to draw
+    if (textures.size()) {
+        //std::cout << "has textures" << std::endl;
+        for (unsigned long i = vertexArrayObjects.size(); i > 0; i--) {
+            glBindVertexArray(vertexArrayObjects[i - 1]); // load vertices
+            glBindTexture(GL_TEXTURE_2D, textures[i - 1]); // load texture
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); // draw primitives using vertices and texture
+        }
+    //} else {
+        //std::cout << "no textures" << std::endl;
     }
 }
 
-void TextComponent::resize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
-    x = rawX;
-    y = rawY;
-    rasterize(rawX, rawY, windowWidth, windowHeight);
+void TextComponent::resize() {
+    //std::cout << "TextComponent::resize" << std::endl;
+    //std::cout << "TextComponent::resize - rasterizing at " << (int)x << "x" << (int)y << std::endl;
+    rasterize(x, y, windowWidth, windowHeight);
 
     // make sure we have glyphs
     if (!glyphVertices.size()) {
@@ -206,7 +233,7 @@ void TextComponent::pointToViewport(float &rawX, float &rawY, const int windowWi
 }
 
 void TextComponent::sanitize(std::string &str) {
-    size_t found = 0;
+    size_t found = 0; // position
     while ((found = str.find("&", found)) != std::string::npos) {
         if (str.substr(found, 4) == "&gt;") {
             str.replace(found, 4, ">");

@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 
+
 class Window {
 private:
     GLuint fontProgram = 0;
@@ -30,7 +31,7 @@ public:
     void createComponentTree(const std::shared_ptr<Node> rootNode, const std::shared_ptr<Component> &parentComponent);
     void printComponentTree(const std::shared_ptr<Component> &component, int depth);
     void renderComponents(std::shared_ptr<Component> component);
-    void resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height);
+    void resizeComponentTree(const std::shared_ptr<Component> &component, const int windowWidth, const int windowHeight);
     std::shared_ptr<Component> searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y);
     float transformMatrix[16] = {
         1, 0, 0, 0,
@@ -51,6 +52,9 @@ public:
     double cursorX = 0;
     double cursorY = 0;
     unsigned int delayResize = 0;
+    GLFWcursor* cursorHand;
+    GLFWcursor* cursorArrow;
+    GLFWcursor* cursorIbeam;
 };
 
 #endif

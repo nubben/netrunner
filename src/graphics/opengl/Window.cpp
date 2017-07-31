@@ -7,8 +7,6 @@
 #include <ctime>
 #include <iostream>
 
-void updateComponentSize(const std::shared_ptr<Component> &component);
-void repositionComponent(const std::shared_ptr<Component> &component, int windowWidth);
 void deleteComponent(std::shared_ptr<Component> &component);
 void deleteNode(std::shared_ptr<Node> node);
 
@@ -68,20 +66,35 @@ bool Window::initGLFW() {
     // set window w/h
     //glfwGetFramebufferSize(window, &windowWidth, &windowHeight); // in pixels
     glfwGetWindowSize(window, &windowWidth, &windowHeight); // use screen coordinates (not pixels) more retina friendly
+    
     // set up event callbacks
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *win, int width, int height) {
         glViewport(0, 0, width, height);
     });
     glfwSetWindowSizeCallback(window, [](GLFWwindow *win, int width, int height) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        //
         thiz->windowWidth = width;
         thiz->windowHeight = height;
         thiz->delayResize = 1;
     });
+    cursorHand = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    cursorArrow = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    cursorIbeam = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
     glfwSetCursorPosCallback(window, [](GLFWwindow *win, double xPos, double yPos) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->cursorX = xPos;
         thiz->cursorY = yPos;
+        std::shared_ptr<Component> hoverComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
+        if (hoverComponent) {
+            if (hoverComponent->onClick) {
+                glfwSetCursor(thiz->window, thiz->cursorHand);
+            } else {
+                glfwSetCursor(thiz->window, thiz->cursorIbeam);
+            }
+        } else {
+            glfwSetCursor(thiz->window, thiz->cursorArrow);
+        }
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
@@ -192,23 +205,40 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
 void Window::render() {
     if (delayResize) {
         delayResize--;
-        if (!delayResize) {
-            std::cout << "restarting drawing" << std::endl;
-            for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
-                boxComponent->resize(windowWidth, windowHeight);
-            }
-            //std::cout << "resizing" << std::endl;
-            resizeComponentTree(rootComponent, windowWidth, windowHeight);
-            //thiz->printComponentTree(thiz->rootComponent, 0);
-            renderDirty = true;
+        if (delayResize) {
+            return;
         }
-        return;
+        std::cout << "restarting drawing" << std::endl;
+        
+        for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
+            boxComponent->windowWidth = windowWidth;
+            boxComponent->windowHeight = windowHeight;
+            boxComponent->resize();
+        }
+        //std::cout << "resizing" << std::endl;
+        const std::clock_t begin = clock();
+        //resizeComponentTree(rootComponent, windowWidth, windowHeight);
+        rootComponent->windowWidth = windowWidth;
+        rootComponent->windowHeight = windowHeight;
+        rootComponent->layout();
+        const std::clock_t end = clock();
+        std::cout << "resized compoennts in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+
+        // recalculate scroll max by calculating how many screens are in the rootComponent's Height
+        if (transformMatrix[13]>std::max((rootComponent->height)/(windowHeight)*2.0f, 2.0f)) {
+            transformMatrix[13]=std::max((rootComponent->height)/(windowHeight)*2.0f, 2.0f);
+            transformMatrixDirty = true;
+        }
+        
+        //thiz->printComponentTree(thiz->rootComponent, 0);
+        //printComponentTree(rootComponent, 0);
+        renderDirty = true;
     }
     if (domDirty) {
         const std::clock_t begin = clock();
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
-        std::cout << "Parsed dom in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+        std::cout << "built & laid out components in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         //printComponentTree(rootComponent, 0);
         domDirty = false;
         renderDirty = true;
@@ -288,106 +318,30 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     domDirty = true;
 }
 
-// reposition component based on parent position
-void repositionComponent(const std::shared_ptr<Component> &component, int windowWidth) {
-    std::shared_ptr<Component> prev = nullptr;
-    int x = 0, y = 0;
-    if (component->parent) {
-        for (std::shared_ptr<Component> child : component->parent->children) {
-            if (child == component) {
-                break;
-            }
-            prev = child;
-        }
-        x = component->parent->x;
-        y = component->parent->y;
-    } else {
-        std::cout << "no parent" << std::endl;
-    }
-    if (prev) {
-        //TextComponent *textComponent = dynamic_cast<TextComponent*>(prev.get());
-        // 2nd or last
-        if (prev->isInline) {
-            // last was inline
-            if (component->isInline) {
-                x = prev->x + prev->width;
-                y = prev->y; // keep on same line
-                // unless it wraps
-                /*
-                if (textComponent) {
-                    if (textComponent->inLineYPos) {
-                        // did wrap
-                        std::cout << "previous line at " << y << " wrapped at " << textComponent->inLineYPos << std::endl;
-                    } else {
-                        // previous line didn't wrap
-                    }
-                }
-                */
-            } else {
-                // we're block
-                y = prev->y - prev->height;
-            }
-            // really only inline but can't hurt block AFAICT
-            if (x == windowWidth) {
-                x=0;
-                y-=prev->height; // how far down do we need to wrap?, the previous height?
-            }
-        } else {
-            // last was block
-            y = prev->y - prev->height;
-        }
-    } else {
-        // first, there will be no width to add
-    }
-    //std::cout << "moving component to " << (int)x << "x" << (int)y << std::endl;
-    component->x = x;
-    component->y = y;
-}
-
-// measure current, apply changes to parent
-void updateComponentSize(const std::shared_ptr<Component> &component) {
-    unsigned int maxWidth = 0; // float?
-
-    // find max width of all siblings
-    for (std::shared_ptr<Component> child : component->parent->children) {
-        maxWidth = std::max(maxWidth, static_cast<unsigned int>(child->width));
-    }
-    //std::cout << "new size " << maxWidth << "x" << maxHeight << std::endl;
-    
-    // make deltas by comparing max to delta
-    //int widthIncrease = maxWidth - component->width;
-    //int heightIncrease = maxHeight - component->height;
-    //std::cout << "widthIncrease: " << widthIncrease << std::endl;
-    
-    // this works, not sure why, but it is the height delta
-    // and if we aggregate all the height deltas together, we get the correct height
-    int heightIncrease = (component->parent->y - component->parent->height) - (component->y - component->height);
-    
-    // apply adjustment to all parents (instead of recalculating each)
-    for (std::shared_ptr<Component> parent = component->parent; parent != nullptr; parent = parent->parent) {
-        //parent->width += widthIncrease;
-        parent->height += heightIncrease;
-        parent->width = std::max(static_cast<unsigned int>(parent->width), maxWidth);
-        //parent->height = std::max(static_cast<unsigned int>(parent->height), maxHeight);
-    }
-}
-
 void Window::createComponentTree(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent) {
     std::shared_ptr<Component> component = componentBuilder.build(node, parentComponent, windowWidth, windowHeight);
-
+    
+    // ComponentBuilder now calls setParent and setParents adds children
+    //component->setParent(parentComponent);
     // set parent of the newly created component
-    component->parent = parentComponent;
-    if (parentComponent) {
+    //component->parent = parentComponent;
+    //if (parentComponent) {
         // add new component as child to parent
-        parentComponent->children.push_back(component);
+        //parentComponent->children.push_back(component);
+    //}
+    
+    if (node==domRootNode) {
+        // if this is the root node
+        component->reqWidth = windowWidth;
+        component->reqHeight = windowHeight;
     }
     
     // create children elements
     for (std::shared_ptr<Node> child : node->children) {
         createComponentTree(child, component);
     }
-    // update parents
-    updateComponentSize(component);
+    // update parents, creation brings them up to date
+    //updateComponentSize(component);
 }
 
 void Window::printComponentTree(const std::shared_ptr<Component> &component, int depth) {
@@ -396,10 +350,10 @@ void Window::printComponentTree(const std::shared_ptr<Component> &component, int
     }
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
-        std::cout << std::fixed << "X: " << textComponent->x << " Y: " << textComponent->y << " WIDTH: " << textComponent->width << " HEIGHT: " << textComponent->height << " INLINE: " << textComponent->isInline << " TEXT: " << textComponent->text << std::endl;
+        std::cout << std::fixed << "X: " << (int)textComponent->x << " Y: " << (int)textComponent->y << " WIDTH: " << (int)textComponent->width << " HEIGHT: " << (int)textComponent->height << " INLINE: " << textComponent->isInline << " TEXT: " << textComponent->text << std::endl;
     }
     else {
-        std::cout << std::fixed << "X: " << component->x << " Y: " << component->y << " WIDTH: " << component->width << " HEIGHT: " << component->height << " INLINE: " << component->isInline << std::endl;
+        std::cout << std::fixed << "X: " << (int)component->x << " Y: " << (int)component->y << " WIDTH: " << (int)component->width << " HEIGHT: " << (int)component->height << " INLINE: " << component->isInline << std::endl;
     }
     for (std::shared_ptr<Component> child : component->children) {
         printComponentTree(child, depth + 1);
@@ -420,36 +374,6 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
     }
     for (std::shared_ptr<Component> &child : component->children) {
         renderComponents(child);
-    }
-}
-
-// fuck not a tree, but left to right serialized instructions
-void Window::resizeComponentTree(const std::shared_ptr<Component> &component, const int width, const int height) {
-    // we could calculate the position before we determine text or not tbh
-
-    TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
-    // if dynamic cast fails?
-    // is all text considered inline?
-    if (textComponent) {
-        // FIXME: what if no parent
-        repositionComponent(component, width);
-        textComponent->resize(component->x, component->y, width, height);
-        updateComponentSize(component);
-    }
-    else {
-        //std::cout << "inlined: " << component->isInline << std::endl;
-        // if we have a parent, change our position based on parent's position
-        if (component->parent) {
-            component->x = component->parent->x;
-            component->y = component->parent->y - component->parent->height;
-            repositionComponent(component, width);
-        }
-        // we're renderless so we have no w/h
-        component->width = 0;
-        component->height = 0;
-    }
-    for (std::shared_ptr<Component> child : component->children) {
-        resizeComponentTree(child, width, height);
     }
 }
 
