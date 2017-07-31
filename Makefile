@@ -1,14 +1,16 @@
 UNAME := $(shell uname)
 CXX        = g++
 
-CXXFLAGS   = -O3 -flto=8 -std=c++14
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+
+CXXFLAGS   = -O3 -flto=8 -std=c++14 -DVERSION=\"$(GIT_VERSION)\"
 WARNINGS   = -Werror -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unused -Wzero-as-null-pointer-constant -Wuseless-cast
 LIBS       = -lglfw -lGL -lGLEW -lfreetype -lharfbuzz
 LDFLAGS    = -O3 -flto=8
 INCPATH    = -I /usr/include/freetype2 -I /usr/include/harfbuzz
 
 ifeq ($(UNAME), Darwin)
-CXXFLAGS   = -O3 -std=c++1y
+CXXFLAGS   = -O3 -std=c++1y -DVERSION=\"$(GIT_VERSION)\"
 WARNINGS   =
 LIBS       = -L/usr/local/lib -lglfw3 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -lGLEW -lfreetype -lharfbuzz
 LDFLAGS    = -O3
