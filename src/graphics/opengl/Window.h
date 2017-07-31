@@ -52,6 +52,9 @@ public:
     double cursorX = 0;
     double cursorY = 0;
     unsigned int delayResize = 0;
+    GLFWcursor* cursorHand;
+    GLFWcursor* cursorArrow;
+    GLFWcursor* cursorIbeam;
 };
 
 #endif

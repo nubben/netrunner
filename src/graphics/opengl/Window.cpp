@@ -78,10 +78,23 @@ bool Window::initGLFW() {
         thiz->windowHeight = height;
         thiz->delayResize = 1;
     });
+    cursorHand = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    cursorArrow = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    cursorIbeam = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
     glfwSetCursorPosCallback(window, [](GLFWwindow *win, double xPos, double yPos) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->cursorX = xPos;
         thiz->cursorY = yPos;
+        std::shared_ptr<Component> hoverComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
+        if (hoverComponent) {
+            if (hoverComponent->onClick) {
+                glfwSetCursor(thiz->window, thiz->cursorHand);
+            } else {
+                glfwSetCursor(thiz->window, thiz->cursorIbeam);
+            }
+        } else {
+            glfwSetCursor(thiz->window, thiz->cursorArrow);
+        }
     });
     glfwSetScrollCallback(window, [](GLFWwindow *win, double xOffset, double yOffset) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
