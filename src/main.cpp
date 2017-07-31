@@ -125,9 +125,10 @@ void handleRequest(const HTTPResponse &response) {
 
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-        std::cout << "./netrunner <url>" << std::endl;
+        std::cout << "./netrunner <url|file.html>" << std::endl;
         return 1;
     }
+    std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
     currentURL=argv[1];
 
     WebResource res = getWebResource(currentURL);
