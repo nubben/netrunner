@@ -78,7 +78,9 @@ TextComponent::~TextComponent() {
     for (unsigned int i = 0; i < vertexArrayObjects.size(); i++) {
         glDeleteVertexArrays(1, &vertexArrayObjects[i]);
         glDeleteBuffers(1, &vertexBufferObjects[i]);
-        glDeleteTextures(1, &textures[i]);
+        if (textures.size()>i) {
+            glDeleteTextures(1, &textures[i]);
+        }
     }
 }
 
