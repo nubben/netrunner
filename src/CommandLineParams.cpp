@@ -25,3 +25,17 @@ std::string getCLParamByIndex(unsigned int i) {
     }
     return "";
 }
+
+std::string getRelativeCLParam(std::string const& param, int i) {
+    for (unsigned int index = 0; index < params.size(); ++index) {
+        if (params[index] == param) {
+            int si = static_cast<int>(index);
+            unsigned int finalPos = static_cast<unsigned int>(si + i);
+            if (finalPos < params.size()) {
+                return params[finalPos];
+            }
+            return "";
+        }
+    }
+    return "";
+}

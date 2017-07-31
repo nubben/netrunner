@@ -11,4 +11,7 @@ bool getCLParam(std::string const& param);
 // 0 is the program name
 std::string getCLParamByIndex(unsigned int i);
 
+// USAGE: getRelativeCLParam("-example", 1) gives the param after -example
+std::string getRelativeCLParam(std::string const& param, int i);
+
 #endif

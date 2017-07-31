@@ -1,5 +1,8 @@
 #include "StringUtils.h"
 
+#include <iterator>
+#include <algorithm>
+
 /**
  * get an extension from a filename
  * @param a filename string
@@ -49,4 +52,18 @@ const std::string getHostFromURL(const std::string &url) {
         }
     }
     return "";
+}
+
+/**
+ * convert string to lowercase
+ * @param str string
+ * @return lowercased version of str
+ */
+const std::string toLowercase(const std::string &str) {
+    std::string returnString = "";
+    std::transform(str.begin(),
+                   str.end(),
+                   back_inserter(returnString),
+                   tolower);
+    return returnString;
 }
