@@ -36,7 +36,7 @@ bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseC
     }
 
     if (connect(sock, serverInfo->ai_addr, serverInfo->ai_addrlen) == -1) {
-        std::cout << "Could not connect: " << errno << std::endl;
+        std::cout << "Could not connect to: " << host << ":" << errno << std::endl;
         freeaddrinfo(serverInfo);
         return false;
     }
