@@ -25,7 +25,7 @@ public:
     BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight);
     ~BoxComponent();
     void render();
-    void resize(const int width, const int height);
+    void resize();
     void pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const ;
     void distanceToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const ;
 };

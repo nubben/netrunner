@@ -1,5 +1,6 @@
 #include "BoxComponent.h"
 #include <cmath>
+#include <iostream>
 
 BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight) {
     x = rawX;
@@ -21,7 +22,26 @@ BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWi
     float vWidth = rawWidth;
     float vHeight = rawHeight;
     pointToViewport(vx, vy, windowWidth, windowHeight);
+    
+    /*
+    // if has rawWidth > 1
+    if (std::abs(vWidth) > 1) {
+        // try to reduce vWidth < 1
+        vWidth /= windowWidth;
+    }
+    // if has rawWidth > 1
+    if (std::abs(vWidth) > 1) {
+        // try to reduce vWidth < 1
+        vWidth /= windowHeight;
+    }
+    // double w/h
+    vWidth *= 2;
+    vWidth *= 2;
+    */
+    // converts 512 to 1 and 1 to 2
+    //std::cout << "vWidth before: " << (int)vWidth << std::endl;
     distanceToViewport(vWidth, vHeight, windowWidth, windowHeight);
+    //std::cout << "vWidth after: " << (int)vWidth << std::endl;
 
     vertices[(0 * 5) + 0] = vx;
     vertices[(0 * 5) + 1] = vy + vHeight;
@@ -75,7 +95,7 @@ void BoxComponent::render() {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-void BoxComponent::resize(const int windowWidth, const int windowHeight) {
+void BoxComponent::resize() {
     float vx = x;
     float vy = y;
     float vWidth = width;
