@@ -1,8 +1,8 @@
 # Netrunner
 
-is an implementation of a new web browser written in C++ utilizing OpenGL. This is a brand new engine.
+is an implementation of a new web browser engine written in C++ utilizing OpenGL.
 
-Status: You can give it a url and it'll download, parser, and render the text from the page
+Status: You can give it a url and it'll download, parse, and render the text from the page
 
 ## Odilitime's vision
 A modern web browser is a huge project. I'd like to see this broken into several composable pieces.
@@ -39,7 +39,7 @@ I'd like to develop text-based structures for communication between each piece.
 [nightly binary only (no font files)](https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner)
 
 ### OSX
-[2017-07-27 binary package](https://my.mixtape.moe/gbludd.zip)
+[2017-07-31 binary package](https://my.mixtape.moe/ywjanx.zip)
 
 ## Milestones
 - Browse 4chan /g/ board
@@ -63,6 +63,13 @@ I don't think one on here could ever say they know what their doing without bein
 - odilitime - Lead Developer
   - OSX Dev, focused on clean up
   - Repo: https://gitgud.io/odilitime/netrunner/
+
+- Nubben
+  - contributed local file code
+  - repo: https://github.com/nubben/netrunner
+
+- Tomleb
+  - contributed keyboard code
 
 - RetroTech - Web / Sys Admin
   - Created original website
@@ -102,6 +109,6 @@ We coordinate on [irc.rizon.net](https://www.rizon.net/chat) #/g/netrunner or [O
   - element - our DOM tree classes
 
 ### Class Types
-- Nodes DOM tree objects
-- Elements Individual tag types
-- Components (gameobjects) renderer entities
+- Nodes: DOM tree objects
+- Elements: Individual tag types
+- Components: (gameobjects) renderer entities
