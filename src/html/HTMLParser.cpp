@@ -4,8 +4,6 @@
 #include <iostream>
 #include <memory>
 
-void printNode(const std::shared_ptr<Node> node, const int indent);
-
 void printNode(const std::shared_ptr<Node> node, const int indent) {
     for (int i = 0; i < indent; i++) {
         std::cout << '\t';
