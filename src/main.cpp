@@ -130,10 +130,11 @@ int main(int argc, char *argv[]) {
     }
     std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
     currentURL=argv[1];
+    std::cout << "loading [" << currentURL << "]" << std::endl;
 
     WebResource res = getWebResource(currentURL);
     if (res.resourceType == ResourceType::INVALID) {
-        std::cout << "Invalid resource type" << std::endl;
+        std::cout << "Invalid resource type: " << res.raw << std::endl;
         return 1;
     }
 
