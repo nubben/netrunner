@@ -1,5 +1,6 @@
 #include "Component.h"
 #include <iostream>
+#include <algorithm>
 
 Component::~Component() {
 }
