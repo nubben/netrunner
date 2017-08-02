@@ -6,7 +6,7 @@
 
 class AnimeComponent : public BoxComponent {
 public:
-    AnimeComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight);
+    AnimeComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight);
 };
 
 #endif

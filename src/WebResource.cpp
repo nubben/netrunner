@@ -6,6 +6,7 @@
 #include "networking/HTTPRequest.h"
 #include "networking/HTTPResponse.h"
 #include "StringUtils.h"
+#include <iostream>
 
 namespace {
     
@@ -34,8 +35,10 @@ WebResource::WebResource(ResourceType rtype, std::string const& rraw) {
 
 WebResource getWebResource(std::string resourceName) {
     if (isOnlineResource(resourceName)) {
+        //std::cout << "WebReousrce::getWebResource - isOnline" << std::endl;
         return getOnlineWebResource(resourceName);
     }
+    //std::cout << "WebReousrce::getWebResource - isOffline" << std::endl;
     return getLocalWebResource(resourceName);
 }
 
@@ -54,7 +57,7 @@ WebResource getLocalWebResource(std::string fileName) {
 
     if (strToRT.find(fileExtension) == strToRT.end()) {
         return WebResource(ResourceType::INVALID,
-                           "Resource type " + fileExtension + " not supported");
+                           "Local file with extension " + fileExtension + " is not supported. Did you forget a http://?");
     }
 
     std::ifstream in(fileName, std::ios::in | std::ios::binary);

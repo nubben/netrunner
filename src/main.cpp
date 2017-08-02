@@ -132,14 +132,15 @@ int main(int argc, char *argv[]) {
     initCLParams(argc, argv);
     std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
     currentURL=argv[1];
+    std::cout << "loading [" << currentURL << "]" << std::endl;
 
     WebResource res = getWebResource(currentURL);
     if (res.resourceType == ResourceType::INVALID) {
-        std::cout << "Invalid resource type" << std::endl;
+        std::cout << "Invalid resource type: " << res.raw << std::endl;
         return 1;
     }
 
-    const HTMLParser parser;
+    HTMLParser parser;
     const std::clock_t begin = clock();
     std::shared_ptr<Node> rootNode = parser.parse(res.raw);
     const std::clock_t end = clock();

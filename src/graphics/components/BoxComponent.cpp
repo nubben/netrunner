@@ -2,7 +2,7 @@
 #include <cmath>
 #include <iostream>
 
-BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight) {
+BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight) {
     x = rawX;
     y = rawY;
     width = rawWidth;
@@ -115,7 +115,7 @@ void BoxComponent::resize() {
     verticesDirty = true;
 }
 
-void BoxComponent::pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const {
+void BoxComponent::pointToViewport(float &rawX, float &rawY, const int passedWindowWidth, const int passedWindowHeight) const {
     if (rawX < 0) {
         rawX += windowWidth;
     }
@@ -132,7 +132,7 @@ void BoxComponent::pointToViewport(float &rawX, float &rawY, const int windowWid
     rawY = (rawY * 2) - 1;
 }
 
-void BoxComponent::distanceToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const {
+void BoxComponent::distanceToViewport(float &rawX, float &rawY, const int passedWindowWidth, const int passedWindowHeight) const {
     if (std::abs(rawX) > 1) {
         rawX /= windowWidth;
     }

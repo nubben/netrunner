@@ -191,6 +191,8 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     //std::cout << "starting at: " << x << std::endl;
     cx = wrapped ? x : 0; // reset
     cy = 0;
+    //int miny0 = 99;
+    int maxy0 = 0;
     for (unsigned int i = 0; i < glyphCount; i++) {
         if (FT_Load_Glyph(*face, glyphInfo[i].codepoint, FT_LOAD_DEFAULT)) {
             std::cout << "Could not load glyph" << std::endl;
@@ -208,6 +210,9 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
         // figure out glyph starting point
         const float yo = static_cast<float>(glyphPos[i].y_offset) / 64;
         int y0 = static_cast<int>(floor(yo + slot->bitmap_top));
+
+        //miny0 = std::min(y0, miny0);
+        maxy0 = std::max(y0, maxy0);
 
         int bump = y0max - y0; // Y adjust for this glyph
         const float xa = static_cast<float>(glyphPos[i].x_advance) / 64;
@@ -239,7 +244,10 @@ std::unique_ptr<Glyph[]> TextRasterizer::rasterize(const std::string &text, cons
     //std::cout << "final size: " << (int)width << "x" << (int)height << std::endl;
     //std::cout << "at: " << (int)line->x0 << "x" << (int)line->y0 << " to: " << (int)line->x1 << "x" << (int)line->y1 <<std::endl;
     endingX = cx; // maybe should be one xa less?
-    endingY = cy + std::ceil(1.2f * fontSize); // definitely should be one lineheight higher
+    //std::ceil(0.5 * 1.2f * fontSize)+2
+    endingY = cy + maxy0; // definitely should be one lineheight higher
+    //std::cout << "miny0: " << miny0 << " maxy0: " << maxy0 << " fontsize:" << fontSize << std::endl;
+    //endingY += 2;
 
     // report a single glyph (since this one "glyph" represents the entire block of text)
     glyphCount = 1;

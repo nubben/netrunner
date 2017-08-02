@@ -54,6 +54,9 @@ public:
     // current placement on screen
     float x = 0.0f;
     float y = 0.0f;
+    // text flow (needed here because parent elements of textnode need to pass this info)
+    int endingX = 0;
+    int endingY = 0;
     // height/width on screen
     float height = 0.0f;
     float width = 0.0f;

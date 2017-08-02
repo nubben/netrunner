@@ -1,5 +1,7 @@
 #include "Component.h"
 #include <iostream>
+#include <algorithm>
+#include "TextComponent.h"
 
 Component::~Component() {
 }
@@ -37,16 +39,31 @@ void Component::layout() {
     // reset position
     x = 0;
     y = 0;
+
+    /*
+    TextComponent *textComponent = dynamic_cast<TextComponent*>(this);
+    if (textComponent) {
+        std::cout << "Component::layout[" << textComponent->text << "]" << std::endl;
+    }
+    */
     
     // if we're a child, get our parents position
     if (parent) {
         //std::cout << "Component::layout - copying position from parent: " << (int)parent->x << "x" << (int)parent->y << std::endl;
+
         x = parent->x;
         y = parent->y;
         // if we have sibilings see if they're inline or block
         if (parent->children.size()) {
             //std::cout << "Component::layout - parent children: " << parent->children.size() << std::endl;
             if (previous) {
+                /*
+                TextComponent *prevTextComponent = dynamic_cast<TextComponent*>(previous.get());
+                if (prevTextComponent) {
+                    std::cout << "Component::layout - previous [" << prevTextComponent->text << "] ending at: " << (int)prevTextComponent->endingX << "x" << (int)prevTextComponent->endingY << "" << std::endl;
+                }
+                */
+                //std::cout << "Component::layout - previous at: " << (int)previous->x << "x" << (int)previous->y << " size: " << (int)previous->width << "x" << (int)previous->height << " ending at: " << (int)previous->endingX << "x" << (int)previous->endingY << std::endl;
                 // 2nd or last
                 if (previous->isInline) {
                     // last was inline
@@ -54,6 +71,12 @@ void Component::layout() {
                         x = previous->x + previous->width;
                         y = previous->y; // keep on same line
                         //std::cout << "Component::layout - inLine (" << (int)previous->width << " wide) inLine" << std::endl;
+                        if (x >= windowWidth) {
+                            //std::cout << "Component::layout - inline inline wrapping because x: " << (int)x << " window: " << windowWidth << std::endl;
+                            x = previous->endingX;
+                            //std::cout << "Component::layout - p.y: " << (int)previous->y << " p.ey: " << previous->endingY << " p.h" << (int)previous->height << std::endl;
+                            y = previous->y - previous->height + previous->endingY;
+                        }
                     } else {
                         // we're block
                         y = previous->y - previous->height;
@@ -66,6 +89,7 @@ void Component::layout() {
                 }
                 // really only inline but can't hurt block AFAICT
                 if (x >= windowWidth) {
+                    //std::cout << "Component::layout - wrapping because x: " << (int)x << " window: " << windowWidth << std::endl;
                     x = 0;
                     y -= previous->height; // how far down do we need to wrap?, the previous height?
                 }
@@ -130,7 +154,10 @@ void Component::updateParentSize() {
     // back up current size
     unsigned int lastParentWidth = parent->width;
     unsigned int lastParentHeight = parent->height;
-
+    
+    parent->endingX = endingX;
+    parent->endingY = endingY;
+    
     // find max width of all siblings
     unsigned int maxWidth = width; // float?
     unsigned int heightAccum = 0;

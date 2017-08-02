@@ -1,16 +1,18 @@
 #include "StringUtils.h"
+#include <iostream>
 
 #include <iterator>
 #include <algorithm>
 
 /**
  * get an extension from a filename
- * @param a filename string
+ * @param fileName a filename string
  * @return '' or a string with the found extension
  */
 std::string getFilenameExtension(std::string const& fileName) {
     auto dotPos = fileName.find_last_of('.');
     if (dotPos != std::string::npos && dotPos + 1 != std::string::npos) {
+        //std::cout << "StringUtils::getFilenameExtension - " << fileName.substr(dotPos + 1) << std::endl;
         return fileName.substr(dotPos + 1);
     }
     return "";
@@ -18,7 +20,7 @@ std::string getFilenameExtension(std::string const& fileName) {
 
 /**
  * get an document from a url
- * @param url string
+ * @param url url string
  * @return '' or a string with the found document
  */
 const std::string getDocumentFromURL(const std::string &url) {
@@ -36,7 +38,7 @@ const std::string getDocumentFromURL(const std::string &url) {
 
 /**
  * get host from a url
- * @param url string
+ * @param url url string
  * @return '' or a string with the found host
  */
 const std::string getHostFromURL(const std::string &url) {
