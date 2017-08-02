@@ -24,17 +24,15 @@ private:
     std::vector<GLuint> vertexBufferObjects;
     GLuint elementBufferObject;
     std::vector<GLuint> textures;
-    int endingX = 0;
-    int endingY = 0;
 
 public:
     std::string text;
-    TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight);
+    TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int passedWindowWidth, const int passedWindowHeight);
     ~TextComponent();
-    void rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight);
+    void rasterize(const int rawX, const int rawY, const int passedWindowWidth, const int passedWindowHeight);
     void render();
     void resize();
-    void pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const;
+    void pointToViewport(float &rawX, float &rawY, const int passedWindowWidth, const int passedWindowHeight) const;
     void sanitize(std::string &str);
 
     // backgroundColor

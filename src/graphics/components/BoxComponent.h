@@ -22,12 +22,12 @@ protected:
     GLuint elementBufferObject = 0;
     GLuint texture = 0;
 public:
-    BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight);
+    BoxComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight);
     ~BoxComponent();
     void render();
     void resize();
-    void pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const ;
-    void distanceToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const ;
+    void pointToViewport(float &rawX, float &rawY, const int passedWindowWidth, const int passedWindowHeight) const ;
+    void distanceToViewport(float &rawX, float &rawY, const int passedWindowWidth, const int passedWindowHeight) const ;
 };
 
 #endif

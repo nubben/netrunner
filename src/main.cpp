@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    const HTMLParser parser;
+    HTMLParser parser;
     const std::clock_t begin = clock();
     std::shared_ptr<Node> rootNode = parser.parse(res.raw);
     const std::clock_t end = clock();

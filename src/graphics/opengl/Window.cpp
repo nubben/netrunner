@@ -110,7 +110,7 @@ bool Window::initGLFW() {
         if (thiz->transformMatrix[13]>std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f)) {
             thiz->transformMatrix[13]=std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f);
         }
-        //std::cout << "scroll y is at " << thiz->transformMatrix[13] << "/" << (int)(thiz->transformMatrix[13]*10000) << std::endl;
+        //std::cout << "scroll y is at " << thiz->transformMatrix[13] << "/" << static_cast<int>((thiz->transformMatrix[13]*10000) << std::endl;
         thiz->transformMatrixDirty = true;
     });
     glfwSetMouseButtonCallback(window, [](GLFWwindow *win, int button, int action, int mods) {
@@ -350,10 +350,10 @@ void Window::printComponentTree(const std::shared_ptr<Component> &component, int
     }
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
-        std::cout << std::fixed << "X: " << (int)textComponent->x << " Y: " << (int)textComponent->y << " WIDTH: " << (int)textComponent->width << " HEIGHT: " << (int)textComponent->height << " INLINE: " << textComponent->isInline << " TEXT: " << textComponent->text << std::endl;
+        std::cout << std::fixed << "X: " << static_cast<int>(textComponent->x) << " Y: " << static_cast<int>(textComponent->y) << " WIDTH: " << static_cast<int>(textComponent->width) << " HEIGHT: " << static_cast<int>(textComponent->height) << " INLINE: " << textComponent->isInline << " TEXT: " << textComponent->text << std::endl;
     }
     else {
-        std::cout << std::fixed << "X: " << (int)component->x << " Y: " << (int)component->y << " WIDTH: " << (int)component->width << " HEIGHT: " << (int)component->height << " INLINE: " << component->isInline << std::endl;
+        std::cout << std::fixed << "X: " << static_cast<int>(component->x) << " Y: " << static_cast<int>(component->y) << " WIDTH: " << static_cast<int>(component->width) << " HEIGHT: " << static_cast<int>(component->height) << " INLINE: " << component->isInline << std::endl;
     }
     for (std::shared_ptr<Component> child : component->children) {
         printComponentTree(child, depth + 1);
