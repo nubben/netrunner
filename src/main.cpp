@@ -11,6 +11,7 @@
 #include "WebResource.h"
 #include "CommandLineParams.h"
 #include "URL.h"
+#include "Log.h"
 
 const std::unique_ptr<Window> window = std::make_unique<Window>();
 URL currentURL;
@@ -20,7 +21,7 @@ bool setWindowContent(URL const& url);
 bool setWindowContent(URL const& url) {
     WebResource res = getWebResource(url);
     if (res.resourceType == ResourceType::INVALID) {
-        std::cout << "Invalid resource type: " << res.raw << std::endl;
+        logError() << "Invalid resource type: " << res.raw << std::endl;
         return false;
     }
 
@@ -28,15 +29,15 @@ bool setWindowContent(URL const& url) {
     const std::clock_t begin = clock();
     std::shared_ptr<Node> rootNode = parser.parse(res.raw);
     const std::clock_t end = clock();
-    std::cout << "Parsed document in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+    logDebug() << "Parsed document in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
     window->setDOM(rootNode);
     return true;
 }
 
 void navTo(std::string url) {
-    std::cout << "navTo(" << url << ")" << std::endl;
+    logDebug() << "navTo(" << url << ")" << std::endl;
     currentURL = currentURL.merge(URL(url));
-    std::cout << "go to: " << currentURL << std::endl;
+    logDebug() << "go to: " << currentURL << std::endl;
     setWindowContent(currentURL);
 }
 
@@ -45,14 +46,15 @@ int main(int argc, char *argv[]) {
         std::cout << "./netrunner <url|file.html>" << std::endl;
         return 1;
     }
-    initCLParams(argc, argv);
     std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
+    
+    initCLParams(argc, argv);
     std::string url = getCLParamByIndex(1);
     if (url[0] == '/') {
         url = "file://" + url;
     }
     currentURL=URL(url);
-    std::cout << "loading [" << currentURL << "]" << std::endl;
+    logDebug() << "loading [" << currentURL << "]" << std::endl;
 
     if (!setWindowContent(currentURL)) {
         return 1;
