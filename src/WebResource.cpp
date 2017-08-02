@@ -17,8 +17,8 @@ namespace {
         {"js", ResourceType::JS}
     };
 
-    bool isOnlineResource(std::string const& resourceName) {
-        return resourceName.find("://") != std::string::npos && resourceName.find("file://") == std::string::npos;
+    bool isOnlineResource(URL const& url) {
+        return url.protocol != "file";
     }
 
 }
@@ -33,17 +33,17 @@ WebResource::WebResource(ResourceType rtype, std::string const& rraw) {
     raw = rraw;
 }
 
-WebResource getWebResource(std::string resourceName) {
-    if (isOnlineResource(resourceName)) {
+WebResource getWebResource(URL const& url) {
+    if (isOnlineResource(url)) {
         //std::cout << "WebReousrce::getWebResource - isOnline" << std::endl;
-        return getOnlineWebResource(resourceName);
+        return getOnlineWebResource(url);
     }
     //std::cout << "WebReousrce::getWebResource - isOffline" << std::endl;
-    return getLocalWebResource(resourceName);
+    return getLocalWebResource(url);
 }
 
-WebResource getLocalWebResource(std::string fileName) {
-    std::string fileExtension = getFilenameExtension(fileName);
+WebResource getLocalWebResource(URL const& url) {
+    std::string fileExtension = getFilenameExtension(url.document);
     if (fileExtension.length() == 0) {
         return WebResource(ResourceType::INVALID,
                            "Could not find any file extension");
@@ -60,7 +60,7 @@ WebResource getLocalWebResource(std::string fileName) {
                            "Local file with extension " + fileExtension + " is not supported. Did you forget a http://?");
     }
 
-    std::ifstream in(fileName, std::ios::in | std::ios::binary);
+    std::ifstream in(url.document, std::ios::in | std::ios::binary);
     if (in) {
         // There exists more efficient ways of doing this, but it works for the
         // time being.
@@ -71,11 +71,11 @@ WebResource getLocalWebResource(std::string fileName) {
     }
 
     return WebResource(ResourceType::INVALID,
-                       "Could not open file " + fileName);
+                       "Could not open file " + url.document);
 }
 
-WebResource getOnlineWebResource(std::string url) {
-    HTTPRequest request (getHostFromURL(url), getDocumentFromURL(url));
+WebResource getOnlineWebResource(URL const& url) {
+    HTTPRequest request (url.host, url.document);
     WebResource returnRes;
 
     request.sendRequest([&](HTTPResponse const& response){

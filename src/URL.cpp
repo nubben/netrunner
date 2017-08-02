@@ -47,6 +47,11 @@ URL URL::merge(URL const& url) const {
         }
         returnURL.document += url.document;
     }
+
+    auto hashPos = returnURL.document.find("#");
+    if (hashPos != std::string::npos) {
+        returnURL.document = returnURL.document.substr(0, hashPos);
+    }
     
     return returnURL;
 }

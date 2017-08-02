@@ -2,6 +2,7 @@
 #define WEBRESOURCE_H
 
 #include <string>
+#include "URL.h"
 
 enum class ResourceType {
     INVALID,
@@ -20,12 +21,12 @@ struct WebResource {
 
 // Depending on the resourceName specified, this function will forward the call
 // to either getLocalWebResource or getOnlineWebResource.
-WebResource getWebResource(std::string resourceName);
+WebResource getWebResource(URL const& url);
 
 // Loads a resource from the local file storage.
-WebResource getLocalWebResource(std::string fileName);
+WebResource getLocalWebResource(URL const& url);
 
 // Loads a resource from an internet address.
-WebResource getOnlineWebResource(std::string url);
+WebResource getOnlineWebResource(URL const& url);
 
 #endif
