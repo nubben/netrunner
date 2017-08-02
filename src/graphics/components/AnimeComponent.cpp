@@ -2,7 +2,7 @@
 #include "../../../anime.h"
 #include <cmath>
 
-AnimeComponent::AnimeComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int windowWidth, const int windowHeight) : BoxComponent(rawX, rawY, rawWidth, rawHeight, windowWidth, windowHeight){
+AnimeComponent::AnimeComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight) : BoxComponent(rawX, rawY, rawWidth, rawHeight, passedWindowWidth, passedWindowHeight){
     x = rawX;
     y = rawY;
     width = rawWidth;

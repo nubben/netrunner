@@ -6,7 +6,7 @@
 
 extern TextRasterizerCache *rasterizerCache;
 
-TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int windowWidth, const int windowHeight) {
+TextComponent::TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int passedWindowWidth, const int passedWindowHeight) {
     //const std::clock_t begin = clock();
     text = rawText;
     //x = rawX;
@@ -92,7 +92,7 @@ inline void setVerticesColor(std::unique_ptr<float[]> &vertices, int p, unsigned
     vertices[static_cast<size_t>(posMac(p) + 6)] = (static_cast<float>((color >>  0) & 0xFF)) / 255;
 }
 
-void TextComponent::rasterize(const int rawX, const int rawY, const int windowWidth, const int windowHeight) {
+void TextComponent::rasterize(const int rawX, const int rawY, const int passedWindowWidth, const int passedWindowHeight) {
     //const std::clock_t begin = clock();
     const std::shared_ptr<TextRasterizer> textRasterizer=rasterizerCache->loadFont(fontSize, bold);
     unsigned int glyphCount;
@@ -227,7 +227,7 @@ void TextComponent::resize() {
     verticesDirty = true;
 }
 
-void TextComponent::pointToViewport(float &rawX, float &rawY, const int windowWidth, const int windowHeight) const {
+void TextComponent::pointToViewport(float &rawX, float &rawY, const int passedWindowWidth, const int passedWindowHeight) const {
     rawX = ((rawX / windowWidth) * 2) - 1;
     rawY = ((rawY / windowHeight) * 2) - 1;
 }
