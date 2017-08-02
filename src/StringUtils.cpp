@@ -42,16 +42,14 @@ const std::string getDocumentFromURL(const std::string &url) {
  * @return '' or a string with the found host
  */
 const std::string getHostFromURL(const std::string &url) {
-    int slashes = 0;
-    unsigned int start = 0;
-    for (unsigned int i = 0; i < url.length(); i++) {
-        if (url[i] == '/') {
-            if (slashes == 2) {
-                return url.substr(start, i - start);
-            }
-            slashes++;
-            start = i + 1;
+    auto colonDoubleSlash = url.find("://");
+    if (colonDoubleSlash != std::string::npos) {
+        auto startPos = colonDoubleSlash + 3;
+        auto thirdSlash = url.find("/", startPos);
+        if (thirdSlash == std::string::npos) {
+            return url.substr(startPos);
         }
+        return url.substr(startPos, thirdSlash - startPos);
     }
     return "";
 }
