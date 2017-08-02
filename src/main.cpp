@@ -19,7 +19,6 @@ bool setWindowContent(URL const& url);
 
 bool setWindowContent(URL const& url) {
     WebResource res = getWebResource(url);
-    std::cout << "RESTYPE: " << (int)res.resourceType << std::endl;
     if (res.resourceType == ResourceType::INVALID) {
         std::cout << "Invalid resource type: " << res.raw << std::endl;
         return false;
@@ -35,7 +34,7 @@ bool setWindowContent(URL const& url) {
 }
 
 void navTo(std::string url) {
-    std::cout << "go to: " << url << std::endl;
+    std::cout << "navTo(" << url << ")" << std::endl;
     currentURL = currentURL.merge(URL(url));
     std::cout << "go to: " << currentURL << std::endl;
     setWindowContent(currentURL);
