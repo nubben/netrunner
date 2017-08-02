@@ -9,7 +9,7 @@
  * @param fileName a filename string
  * @return '' or a string with the found extension
  */
-std::string getFilenameExtension(std::string const& fileName) {
+const std::string getFilenameExtension(std::string const& fileName) {
     auto dotPos = fileName.find_last_of('.');
     if (dotPos != std::string::npos && dotPos + 1 != std::string::npos) {
         //std::cout << "StringUtils::getFilenameExtension - " << fileName.substr(dotPos + 1) << std::endl;
@@ -52,6 +52,19 @@ const std::string getHostFromURL(const std::string &url) {
             slashes++;
             start = i + 1;
         }
+    }
+    return "";
+}
+
+/**
+ * get protocol from a url
+ * @param url url string
+ * @return '' or a string with the found protocol
+ */
+const std::string getProtocolFromURL(const std::string &url) {
+    auto colonDoubleSlash = url.find("://");
+    if (colonDoubleSlash != std::string::npos) {
+        return url.substr(0, colonDoubleSlash);
     }
     return "";
 }
