@@ -1,13 +1,35 @@
 #include "HTTPRequest.h"
 #include <errno.h>
 #include <iostream>
-#include <netdb.h>
 #include <string.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN 1
+#include <winsock2.h>
+#include <windows.h>
+#include <WS2tcpip.h>
+#define ssize_t intptr_t
+#else
+// unix includes here
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#endif
+
+#ifdef WIN32
+// Initialize Winsock
+WSADATA wsaData;
+int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
 
 HTTPRequest::HTTPRequest(const std::string &hostName, const std::string &doc) {
-    document = doc;
+#ifdef WIN32
+	if (iResult != 0) {
+		std::cout << "WSAStartup failed: " << iResult << std::endl;
+		return;
+	}
+#endif
+	document = doc;
     version = Version::HTTP10;
     method = Method::GET;
     host = hostName;
