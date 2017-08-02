@@ -1,13 +1,7 @@
 #include "graphics/opengl/Window.h"
 #include "html/HTMLParser.h"
-#include "html/TagNode.h"
-#include "html/TextNode.h"
-#include "networking/HTTPRequest.h"
-#include "networking/HTTPResponse.h"
 #include <ctime>
 #include <iostream>
-#include <memory>
-#include "StringUtils.h"
 #include "WebResource.h"
 #include "CommandLineParams.h"
 #include "URL.h"
@@ -43,7 +37,7 @@ void navTo(std::string url) {
 
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-        std::cout << "./netrunner <url|file.html>" << std::endl;
+        std::cout << "./netrunner <url|file.html> [-log <error|warning|info|debug>]" << std::endl;
         return 1;
     }
     std::cout << "/g/ntr - NetRunner build " << __DATE__ << std::endl;
