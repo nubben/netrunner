@@ -7,6 +7,7 @@
 #include "networking/HTTPResponse.h"
 #include "StringUtils.h"
 #include <iostream>
+#include "Log.h"
 
 namespace {
     
@@ -78,15 +79,43 @@ WebResource getOnlineWebResource(URL const& url) {
     HTTPRequest request (url.host, url.document);
     WebResource returnRes;
 
+    std::string redirectLocation = "";
+
     request.sendRequest([&](HTTPResponse const& response){
-        if (response.statusCode != 200) {
+        if (response.statusCode == 301) {
+            std::string location;
+            if (response.properties.find("Location")==response.properties.end()) {
+                if (response.properties.find("location")==response.properties.end()) {
+                    logDebug() << "getOnlineWebResource - got 301 without a location" << std::endl;
+                    for(auto const &row : response.properties) {
+                        logDebug() << "getOnlineWebResource - " << row.first << "=" << response.properties.at(row.first) << std::endl;
+                    }
+                    redirectLocation = "_";
+                } else {
+                    location = response.properties.at("location");
+                }
+            } else {
+                location = response.properties.at("Location");
+            }
+            logDebug() << "Redirect To: " << location << std::endl;
+            redirectLocation = location;
+        } else if (response.statusCode != 200) {
             returnRes.resourceType = ResourceType::INVALID;
             returnRes.raw = "Unsupported status code";
+        } else {
+            // TODO: Set resourceType based on Content-Type field.
+            returnRes.resourceType = ResourceType::HTML;
+            returnRes.raw = std::move(response.body);
         }
-        // TODO: Set resourceType based on Content-Type field.
-        returnRes.resourceType = ResourceType::HTML;
-        returnRes.raw = std::move(response.body);
     });
+
+    if (redirectLocation.size() > 0) {
+        if (redirectLocation == "_") {
+            return WebResource(ResourceType::INVALID,
+                               "Got a 301 without a location");
+        }
+        return getOnlineWebResource(URL(redirectLocation));
+    }
 
     return returnRes;
 }
