@@ -19,7 +19,7 @@ namespace {
     };
 
     bool isOnlineResource(URL const& url) {
-        return url.protocol != "file";
+        return url.scheme != "file";
     }
 
 }
@@ -44,7 +44,7 @@ WebResource getWebResource(URL const& url) {
 }
 
 WebResource getLocalWebResource(URL const& url) {
-    std::string fileExtension = getFilenameExtension(url.document);
+    std::string fileExtension = getFilenameExtension(url.path);
     if (fileExtension.length() == 0) {
         return WebResource(ResourceType::INVALID,
                            "Could not find any file extension");
@@ -61,7 +61,7 @@ WebResource getLocalWebResource(URL const& url) {
                            "Local file with extension " + fileExtension + " is not supported. Did you forget a http://?");
     }
 
-    std::ifstream in(url.document, std::ios::in | std::ios::binary);
+    std::ifstream in(url.path, std::ios::in | std::ios::binary);
     if (in) {
         // There exists more efficient ways of doing this, but it works for the
         // time being.
@@ -72,20 +72,22 @@ WebResource getLocalWebResource(URL const& url) {
     }
 
     return WebResource(ResourceType::INVALID,
-                       "Could not open file " + url.document);
+                       "Could not open file " + url.path);
 }
 
-//WebResource getOnlineWebResource(URL const& url) {
-//    HTTPRequest request (url.host, url.document);
-WebResource getOnlineWebResource(std::string url) {
-    std::shared_ptr<URI> uri = parseUri(url);
+WebResource getOnlineWebResource(URL const& url) {
+    std::shared_ptr<URL> uri=std::make_shared<URL>(url);
     HTTPRequest request (uri);
 
+    //window->currentURL=url;
+    //request->sendRequest(handleRequest);
+    
     WebResource returnRes;
 
     std::string redirectLocation = "";
 
     request.sendRequest([&](HTTPResponse const& response){
+        logDebug() << "getOnlineWebResource request.sendRequest" << std::endl;
         if (response.statusCode == 301) {
             std::string location;
             if (response.properties.find("Location")==response.properties.end()) {
