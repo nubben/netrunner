@@ -402,6 +402,8 @@ std::shared_ptr<Component> Window::searchComponentTree(const std::shared_ptr<Com
     return nullptr;
 }
 
+// moving naviagtion closer to window, as window is now the owner of currentURL
+// preparation for multiple HTML documents
 void Window::navTo(std::string url) {
     logDebug() << "navTo(" << url << ")" << std::endl;
     currentURL = currentURL.merge(URL(url));
@@ -409,6 +411,45 @@ void Window::navTo(std::string url) {
     setWindowContent(currentURL);
 }
 
+/*
+ void handleRequest(const HTTPResponse &response) {
+ std::cout << "main:::handleRequest - statusCode: " << response.statusCode << std::endl;
+ if (response.statusCode == 200) {
+ const std::unique_ptr<HTMLParser> parser = std::make_unique<HTMLParser>();
+ const std::clock_t begin = clock();
+ std::shared_ptr<Node> rootNode = parser->parse(response.body);
+ const std::clock_t end = clock();
+ std::cout << "Parsed document in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+ window->setDOM(rootNode);
+ }
+ else if (response.statusCode == 301) {
+ std::string location;
+ if (response.properties.find("Location")==response.properties.end()) {
+ if (response.properties.find("location")==response.properties.end()) {
+ std::cout << "::handleRequest - got 301 without a location" << std::endl;
+ for(auto const &row : response.properties) {
+ std::cout << "::handleRequest - " << row.first << "=" << response.properties.at(row.first) << std::endl;
+ }
+ return;
+ } else {
+ location = response.properties.at("location");
+ }
+ } else {
+ location = response.properties.at("Location");
+ }
+ std::cout << "Redirect To: " << location << std::endl;
+ std::shared_ptr<URI> uri = parseUri(location);
+ const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(uri);
+ request->sendRequest(handleRequest);
+ return;
+ }
+ else {
+ std::cout << "Unknown Status Code: " << response.statusCode << std::endl;
+ }
+ }
+ */
+
+// tried to make a window method
 void handleRequest(const HTTPResponse &response) {
     std::cout << "main:::handleRequest - statusCode: " << response.statusCode << std::endl;
     if (response.statusCode == 200) {
@@ -435,7 +476,8 @@ void handleRequest(const HTTPResponse &response) {
             location = response.properties.at("Location");
         }
         std::cout << "Redirect To: " << location << std::endl;
-        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(location), getDocumentFromURL(location));
+        std::shared_ptr<URL> uri = parseUri(location);
+        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(uri);
         request->sendRequest(handleRequest);
         return;
     }
