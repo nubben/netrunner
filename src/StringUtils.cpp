@@ -1,4 +1,6 @@
 #include "StringUtils.h"
+
+#include <algorithm>
 #include <iostream>
 
 #include <iterator>
@@ -79,4 +81,10 @@ const std::string toLowercase(const std::string &str) {
                    back_inserter(returnString),
                    tolower);
     return returnString;
+/*
+    std::string stringToLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+    return s;
+*/
 }

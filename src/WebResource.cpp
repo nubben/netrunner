@@ -75,8 +75,12 @@ WebResource getLocalWebResource(URL const& url) {
                        "Could not open file " + url.document);
 }
 
-WebResource getOnlineWebResource(URL const& url) {
-    HTTPRequest request (url.host, url.document);
+//WebResource getOnlineWebResource(URL const& url) {
+//    HTTPRequest request (url.host, url.document);
+WebResource getOnlineWebResource(std::string url) {
+    std::shared_ptr<URI> uri = parseUri(url);
+    HTTPRequest request (uri);
+
     WebResource returnRes;
 
     std::string redirectLocation = "";

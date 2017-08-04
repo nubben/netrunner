@@ -12,7 +12,7 @@ std::vector<std::string> TagNode::getSourceList() {
     }
 
     for (std::shared_ptr<Node>& child : children) {
-        auto childSrcs = std::move(child->getSourceList());
+        auto childSrcs = child->getSourceList();
         returnVec.insert(returnVec.end(),
                          childSrcs.begin(),
                          childSrcs.end());

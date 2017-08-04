@@ -28,7 +28,7 @@ namespace {
 }
 
 Logger::Logger() :
-    logType(LogType::DEBUG),
+    logType(LogType::DBUG),
     outStream(std::cout),
     shouldLog(true) {
 }
@@ -44,7 +44,7 @@ Logger::Logger(LogType lt, std::ostream& out) :
     } else if (specifiedLog == "info") {
         logLevel = LogType::INFO;
     } else if (specifiedLog == "debug") {
-        logLevel = LogType::DEBUG;
+        logLevel = LogType::DBUG;
     }
 
     if (lt <= logLevel) {
@@ -67,10 +67,14 @@ std::ostream& logWarning() {
     return log(LogType::WARNING);
 }
 
+std::ostream& logNotice() {
+    return log(LogType::NOTICE);
+}
+
 std::ostream& logInfo() {
     return log(LogType::INFO);
 }
 
 std::ostream& logDebug() {
-    return log(LogType::DEBUG);
+    return log(LogType::DBUG);
 }

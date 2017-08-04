@@ -7,35 +7,44 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		843369541F1D885F00840DA9 /* AnimeComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369151F1D885F00840DA9 /* AnimeComponent.cpp */; };
-		843369551F1D885F00840DA9 /* BoxComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369171F1D885F00840DA9 /* BoxComponent.cpp */; };
-		843369561F1D885F00840DA9 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369191F1D885F00840DA9 /* Component.cpp */; };
-		843369571F1D885F00840DA9 /* ComponentBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433691B1F1D885F00840DA9 /* ComponentBuilder.cpp */; };
-		843369581F1D885F00840DA9 /* TextComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433691D1F1D885F00840DA9 /* TextComponent.cpp */; };
-		843369591F1D885F00840DA9 /* AElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369201F1D885F00840DA9 /* AElement.cpp */; };
-		8433695A1F1D885F00840DA9 /* BLOCKQUOTEElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369221F1D885F00840DA9 /* BLOCKQUOTEElement.cpp */; };
-		8433695C1F1D885F00840DA9 /* H1Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369261F1D885F00840DA9 /* H1Element.cpp */; };
-		8433695D1F1D885F00840DA9 /* H2Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369281F1D885F00840DA9 /* H2Element.cpp */; };
-		8433695E1F1D885F00840DA9 /* H3Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433692A1F1D885F00840DA9 /* H3Element.cpp */; };
-		8433695F1F1D885F00840DA9 /* LIElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433692C1F1D885F00840DA9 /* LIElement.cpp */; };
-		843369601F1D885F00840DA9 /* PElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433692E1F1D885F00840DA9 /* PElement.cpp */; };
-		843369621F1D885F00840DA9 /* SPANElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369321F1D885F00840DA9 /* SPANElement.cpp */; };
-		843369631F1D885F00840DA9 /* Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433693E1F1D885F00840DA9 /* Window.cpp */; };
-		843369641F1D885F00840DA9 /* TextRasterizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369411F1D885F00840DA9 /* TextRasterizer.cpp */; };
-		843369651F1D885F00840DA9 /* TextRasterizerCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369431F1D885F00840DA9 /* TextRasterizerCache.cpp */; };
-		843369661F1D885F00840DA9 /* HTMLParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369461F1D885F00840DA9 /* HTMLParser.cpp */; };
-		843369671F1D885F00840DA9 /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369481F1D885F00840DA9 /* Node.cpp */; };
-		843369681F1D885F00840DA9 /* TagNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433694A1F1D885F00840DA9 /* TagNode.cpp */; };
-		843369691F1D885F00840DA9 /* TextNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433694C1F1D885F00840DA9 /* TextNode.cpp */; };
-		8433696A1F1D885F00840DA9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433694E1F1D885F00840DA9 /* main.cpp */; };
-		8433696B1F1D885F00840DA9 /* HTTPRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369501F1D885F00840DA9 /* HTTPRequest.cpp */; };
-		8433696C1F1D885F00840DA9 /* HTTPResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369521F1D885F00840DA9 /* HTTPResponse.cpp */; };
 		8433696F1F1D888E00840DA9 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8433696E1F1D888E00840DA9 /* OpenGL.framework */; };
 		843369711F1D889C00840DA9 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843369701F1D889C00840DA9 /* Cocoa.framework */; };
 		843369731F1D88A000840DA9 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843369721F1D88A000840DA9 /* IOKit.framework */; };
 		843369751F1D88A800840DA9 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843369741F1D88A800840DA9 /* CoreVideo.framework */; };
+		8437F8981F2F540300E89305 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433694E1F1D885F00840DA9 /* main.cpp */; };
+		8437F89A1F2F543400E89305 /* StringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8437F8991F2F543400E89305 /* StringUtils.cpp */; };
+		8437F89C1F2F54B600E89305 /* HTTPRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369501F1D885F00840DA9 /* HTTPRequest.cpp */; };
+		8437F89D1F2F54B900E89305 /* HTTPResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369521F1D885F00840DA9 /* HTTPResponse.cpp */; };
+		8437F89E1F2F54BE00E89305 /* WebResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843C30E71F2F5110006F00B3 /* WebResource.cpp */; };
+		8437F89F1F2F552500E89305 /* AnimeComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369151F1D885F00840DA9 /* AnimeComponent.cpp */; };
+		8437F8A01F2F552900E89305 /* BoxComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369171F1D885F00840DA9 /* BoxComponent.cpp */; };
+		8437F8A11F2F552C00E89305 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369191F1D885F00840DA9 /* Component.cpp */; };
+		8437F8A21F2F552E00E89305 /* ComponentBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433691B1F1D885F00840DA9 /* ComponentBuilder.cpp */; };
+		8437F8A31F2F553100E89305 /* TextComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433691D1F1D885F00840DA9 /* TextComponent.cpp */; };
+		8437F8A41F2F555600E89305 /* DIVElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849C756A1F2BF9580082827A /* DIVElement.cpp */; };
+		8437F8A51F2F555600E89305 /* Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849C756C1F2BF9580082827A /* Element.cpp */; };
+		8437F8A61F2F555600E89305 /* STRONGElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849C756E1F2BF9580082827A /* STRONGElement.cpp */; };
+		8437F8A71F2F555600E89305 /* AElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369201F1D885F00840DA9 /* AElement.cpp */; };
+		8437F8A81F2F555600E89305 /* BLOCKQUOTEElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369221F1D885F00840DA9 /* BLOCKQUOTEElement.cpp */; };
+		8437F8A91F2F555600E89305 /* H1Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369261F1D885F00840DA9 /* H1Element.cpp */; };
+		8437F8AA1F2F555600E89305 /* H2Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369281F1D885F00840DA9 /* H2Element.cpp */; };
+		8437F8AB1F2F555600E89305 /* H3Element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433692A1F1D885F00840DA9 /* H3Element.cpp */; };
+		8437F8AC1F2F555600E89305 /* LIElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433692C1F1D885F00840DA9 /* LIElement.cpp */; };
+		8437F8AD1F2F555600E89305 /* PElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433692E1F1D885F00840DA9 /* PElement.cpp */; };
+		8437F8AE1F2F555600E89305 /* SPANElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369321F1D885F00840DA9 /* SPANElement.cpp */; };
+		8437F8AF1F2F555600E89305 /* Window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433693E1F1D885F00840DA9 /* Window.cpp */; };
+		8437F8B01F2F555600E89305 /* TextRasterizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369411F1D885F00840DA9 /* TextRasterizer.cpp */; };
+		8437F8B11F2F555600E89305 /* TextRasterizerCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369431F1D885F00840DA9 /* TextRasterizerCache.cpp */; };
+		8437F8B21F2F555600E89305 /* HTMLParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369461F1D885F00840DA9 /* HTMLParser.cpp */; };
+		8437F8B31F2F555600E89305 /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843369481F1D885F00840DA9 /* Node.cpp */; };
+		8437F8B41F2F555600E89305 /* TagNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433694A1F1D885F00840DA9 /* TagNode.cpp */; };
+		8437F8B51F2F555600E89305 /* TextNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8433694C1F1D885F00840DA9 /* TextNode.cpp */; };
 		844925051F1D94ED007E8644 /* DejaVuSerif-Bold.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84B6602B1F1D8DF000AEFBEC /* DejaVuSerif-Bold.ttf */; };
 		844925061F1D94EF007E8644 /* DejaVuSerif.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 844925041F1D9478007E8644 /* DejaVuSerif.ttf */; };
+		846965401F32A9EF00980986 /* BrowsingHistory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 846965391F32A9EF00980986 /* BrowsingHistory.cpp */; };
+		846965411F32A9EF00980986 /* CommandLineParams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8469653B1F32A9EF00980986 /* CommandLineParams.cpp */; };
+		846965421F32A9EF00980986 /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8469653D1F32A9EF00980986 /* Log.cpp */; };
+		846965431F32A9EF00980986 /* URL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8469653E1F32A9EF00980986 /* URL.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -110,7 +119,26 @@
 		843369701F1D889C00840DA9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		843369721F1D88A000840DA9 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		843369741F1D88A800840DA9 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		8437F8991F2F543400E89305 /* StringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringUtils.cpp; path = "/Users/admin/Sites/nr-textwork170728/xcode/../src/StringUtils.cpp"; sourceTree = "<absolute>"; };
+		8437F89B1F2F545D00E89305 /* StringUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringUtils.h; path = "/Users/admin/Sites/nr-textwork170728/xcode/../src/StringUtils.h"; sourceTree = "<absolute>"; };
+		843C30E71F2F5110006F00B3 /* WebResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WebResource.cpp; path = "/Users/admin/Sites/nr-textwork170728/xcode/../src/WebResource.cpp"; sourceTree = "<absolute>"; };
+		843C30E81F2F5110006F00B3 /* WebResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebResource.h; path = "/Users/admin/Sites/nr-textwork170728/xcode/../src/WebResource.h"; sourceTree = "<absolute>"; };
+		843C31291F2F5307006F00B3 /* info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = info.plist; path = xcode/info.plist; sourceTree = "<group>"; };
 		844925041F1D9478007E8644 /* DejaVuSerif.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = DejaVuSerif.ttf; path = ../DejaVuSerif.ttf; sourceTree = SOURCE_ROOT; };
+		846965381F32A9EF00980986 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		846965391F32A9EF00980986 /* BrowsingHistory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BrowsingHistory.cpp; sourceTree = "<group>"; };
+		8469653A1F32A9EF00980986 /* BrowsingHistory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrowsingHistory.h; sourceTree = "<group>"; };
+		8469653B1F32A9EF00980986 /* CommandLineParams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CommandLineParams.cpp; sourceTree = "<group>"; };
+		8469653C1F32A9EF00980986 /* CommandLineParams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandLineParams.h; sourceTree = "<group>"; };
+		8469653D1F32A9EF00980986 /* Log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Log.cpp; sourceTree = "<group>"; };
+		8469653E1F32A9EF00980986 /* URL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = URL.cpp; sourceTree = "<group>"; };
+		8469653F1F32A9EF00980986 /* URL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = URL.h; sourceTree = "<group>"; };
+		849C756A1F2BF9580082827A /* DIVElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIVElement.cpp; sourceTree = "<group>"; };
+		849C756B1F2BF9580082827A /* DIVElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DIVElement.h; sourceTree = "<group>"; };
+		849C756C1F2BF9580082827A /* Element.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Element.cpp; sourceTree = "<group>"; };
+		849C756D1F2BF9580082827A /* Element.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Element.h; sourceTree = "<group>"; };
+		849C756E1F2BF9580082827A /* STRONGElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = STRONGElement.cpp; sourceTree = "<group>"; };
+		849C756F1F2BF9580082827A /* STRONGElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRONGElement.h; sourceTree = "<group>"; };
 		84B6602B1F1D8DF000AEFBEC /* DejaVuSerif-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "DejaVuSerif-Bold.ttf"; path = "../DejaVuSerif-Bold.ttf"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -149,23 +177,36 @@
 		8433690A1F1D881B00840DA9 /* Saltasaurus */ = {
 			isa = PBXGroup;
 			children = (
+				843C31291F2F5307006F00B3 /* info.plist */,
 				84B6602B1F1D8DF000AEFBEC /* DejaVuSerif-Bold.ttf */,
 				844925041F1D9478007E8644 /* DejaVuSerif.ttf */,
 				843369121F1D885F00840DA9 /* src */,
 			);
-			path = Saltasaurus;
-			sourceTree = "<group>";
+			name = Saltasaurus;
+			path = "/Users/admin/Sites/nr-textwork170728";
+			sourceTree = "<absolute>";
 		};
 		843369121F1D885F00840DA9 /* src */ = {
 			isa = PBXGroup;
 			children = (
 				843369131F1D885F00840DA9 /* graphics */,
 				843369451F1D885F00840DA9 /* html */,
-				8433694E1F1D885F00840DA9 /* main.cpp */,
 				8433694F1F1D885F00840DA9 /* networking */,
+				8433694E1F1D885F00840DA9 /* main.cpp */,
+				8437F8991F2F543400E89305 /* StringUtils.cpp */,
+				8437F89B1F2F545D00E89305 /* StringUtils.h */,
+				843C30E71F2F5110006F00B3 /* WebResource.cpp */,
+				843C30E81F2F5110006F00B3 /* WebResource.h */,
+				846965391F32A9EF00980986 /* BrowsingHistory.cpp */,
+				8469653A1F32A9EF00980986 /* BrowsingHistory.h */,
+				8469653B1F32A9EF00980986 /* CommandLineParams.cpp */,
+				8469653C1F32A9EF00980986 /* CommandLineParams.h */,
+				8469653D1F32A9EF00980986 /* Log.cpp */,
+				846965381F32A9EF00980986 /* Log.h */,
+				8469653E1F32A9EF00980986 /* URL.cpp */,
+				8469653F1F32A9EF00980986 /* URL.h */,
 			);
-			name = src;
-			path = ../../src;
+			path = src;
 			sourceTree = "<group>";
 		};
 		843369131F1D885F00840DA9 /* graphics */ = {
@@ -176,8 +217,7 @@
 				843369341F1D885F00840DA9 /* opengl */,
 				843369401F1D885F00840DA9 /* text */,
 			);
-			name = graphics;
-			path = ../src/graphics;
+			path = graphics;
 			sourceTree = "<group>";
 		};
 		843369141F1D885F00840DA9 /* components */ = {
@@ -200,6 +240,12 @@
 		8433691F1F1D885F00840DA9 /* elements */ = {
 			isa = PBXGroup;
 			children = (
+				849C756A1F2BF9580082827A /* DIVElement.cpp */,
+				849C756B1F2BF9580082827A /* DIVElement.h */,
+				849C756C1F2BF9580082827A /* Element.cpp */,
+				849C756D1F2BF9580082827A /* Element.h */,
+				849C756E1F2BF9580082827A /* STRONGElement.cpp */,
+				849C756F1F2BF9580082827A /* STRONGElement.h */,
 				843369201F1D885F00840DA9 /* AElement.cpp */,
 				843369211F1D885F00840DA9 /* AElement.h */,
 				843369221F1D885F00840DA9 /* BLOCKQUOTEElement.cpp */,
@@ -287,8 +333,7 @@
 				843369521F1D885F00840DA9 /* HTTPResponse.cpp */,
 				843369531F1D885F00840DA9 /* HTTPResponse.h */,
 			);
-			name = networking;
-			path = ../src/networking;
+			path = networking;
 			sourceTree = "<group>";
 		};
 		8433696D1F1D888E00840DA9 /* Frameworks */ = {
@@ -359,29 +404,38 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				843369641F1D885F00840DA9 /* TextRasterizer.cpp in Sources */,
-				843369591F1D885F00840DA9 /* AElement.cpp in Sources */,
-				8433695A1F1D885F00840DA9 /* BLOCKQUOTEElement.cpp in Sources */,
-				8433695C1F1D885F00840DA9 /* H1Element.cpp in Sources */,
-				843369631F1D885F00840DA9 /* Window.cpp in Sources */,
-				843369541F1D885F00840DA9 /* AnimeComponent.cpp in Sources */,
-				843369651F1D885F00840DA9 /* TextRasterizerCache.cpp in Sources */,
-				8433696A1F1D885F00840DA9 /* main.cpp in Sources */,
-				843369561F1D885F00840DA9 /* Component.cpp in Sources */,
-				8433696B1F1D885F00840DA9 /* HTTPRequest.cpp in Sources */,
-				8433695F1F1D885F00840DA9 /* LIElement.cpp in Sources */,
-				843369661F1D885F00840DA9 /* HTMLParser.cpp in Sources */,
-				843369581F1D885F00840DA9 /* TextComponent.cpp in Sources */,
-				8433695E1F1D885F00840DA9 /* H3Element.cpp in Sources */,
-				8433695D1F1D885F00840DA9 /* H2Element.cpp in Sources */,
-				843369601F1D885F00840DA9 /* PElement.cpp in Sources */,
-				843369551F1D885F00840DA9 /* BoxComponent.cpp in Sources */,
-				843369691F1D885F00840DA9 /* TextNode.cpp in Sources */,
-				843369571F1D885F00840DA9 /* ComponentBuilder.cpp in Sources */,
-				8433696C1F1D885F00840DA9 /* HTTPResponse.cpp in Sources */,
-				843369621F1D885F00840DA9 /* SPANElement.cpp in Sources */,
-				843369681F1D885F00840DA9 /* TagNode.cpp in Sources */,
-				843369671F1D885F00840DA9 /* Node.cpp in Sources */,
+				8437F8A41F2F555600E89305 /* DIVElement.cpp in Sources */,
+				8437F8A51F2F555600E89305 /* Element.cpp in Sources */,
+				8437F8A61F2F555600E89305 /* STRONGElement.cpp in Sources */,
+				8437F8A71F2F555600E89305 /* AElement.cpp in Sources */,
+				8437F8A81F2F555600E89305 /* BLOCKQUOTEElement.cpp in Sources */,
+				8437F8A91F2F555600E89305 /* H1Element.cpp in Sources */,
+				8437F8AA1F2F555600E89305 /* H2Element.cpp in Sources */,
+				846965411F32A9EF00980986 /* CommandLineParams.cpp in Sources */,
+				8437F8AB1F2F555600E89305 /* H3Element.cpp in Sources */,
+				8437F8AC1F2F555600E89305 /* LIElement.cpp in Sources */,
+				8437F8AD1F2F555600E89305 /* PElement.cpp in Sources */,
+				846965431F32A9EF00980986 /* URL.cpp in Sources */,
+				8437F8AE1F2F555600E89305 /* SPANElement.cpp in Sources */,
+				8437F8AF1F2F555600E89305 /* Window.cpp in Sources */,
+				8437F8B01F2F555600E89305 /* TextRasterizer.cpp in Sources */,
+				8437F8B11F2F555600E89305 /* TextRasterizerCache.cpp in Sources */,
+				8437F8B21F2F555600E89305 /* HTMLParser.cpp in Sources */,
+				8437F8B31F2F555600E89305 /* Node.cpp in Sources */,
+				8437F8B41F2F555600E89305 /* TagNode.cpp in Sources */,
+				8437F8B51F2F555600E89305 /* TextNode.cpp in Sources */,
+				8437F8A21F2F552E00E89305 /* ComponentBuilder.cpp in Sources */,
+				8437F89A1F2F543400E89305 /* StringUtils.cpp in Sources */,
+				846965421F32A9EF00980986 /* Log.cpp in Sources */,
+				8437F8981F2F540300E89305 /* main.cpp in Sources */,
+				8437F89D1F2F54B900E89305 /* HTTPResponse.cpp in Sources */,
+				8437F89C1F2F54B600E89305 /* HTTPRequest.cpp in Sources */,
+				8437F89E1F2F54BE00E89305 /* WebResource.cpp in Sources */,
+				846965401F32A9EF00980986 /* BrowsingHistory.cpp in Sources */,
+				8437F89F1F2F552500E89305 /* AnimeComponent.cpp in Sources */,
+				8437F8A01F2F552900E89305 /* BoxComponent.cpp in Sources */,
+				8437F8A11F2F552C00E89305 /* Component.cpp in Sources */,
+				8437F8A31F2F553100E89305 /* TextComponent.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,7 +541,9 @@
 					/usr/local/include/harfbuzz,
 					/usr/local/include/,
 				);
+				INFOPLIST_FILE = "$(SRCROOT)/info.plist";
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"-lglfw3",
 					"-lharfbuzz",
@@ -509,7 +565,9 @@
 					/usr/local/include/harfbuzz,
 					/usr/local/include/,
 				);
+				INFOPLIST_FILE = "$(SRCROOT)/info.plist";
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"-lglfw3",
 					"-lharfbuzz",

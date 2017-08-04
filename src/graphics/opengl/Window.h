@@ -12,7 +12,8 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
-
+#include "../../networking/HTTPResponse.h"
+#include "../../URL.h"
 
 class Window {
 private:
@@ -33,6 +34,8 @@ public:
     void renderComponents(std::shared_ptr<Component> component);
     void resizeComponentTree(const std::shared_ptr<Component> &component, const int windowWidth, const int windowHeight);
     std::shared_ptr<Component> searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y);
+    void navTo(std::string url);
+    // properties
     float transformMatrix[16] = {
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -55,6 +58,11 @@ public:
     GLFWcursor* cursorHand;
     GLFWcursor* cursorArrow;
     GLFWcursor* cursorIbeam;
+    URL currentURL;
 };
+
+bool setWindowContent(URL const& url);
+void handleRequest(const HTTPResponse &response);
+extern const std::unique_ptr<Window> window;
 
 #endif

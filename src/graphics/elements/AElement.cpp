@@ -1,6 +1,9 @@
 #include "AElement.h"
 #include "../../html/TagNode.h"
 #include <iostream>
+#include "../opengl/Window.h"
+
+extern const std::unique_ptr<Window> window;
 
 AElement::AElement() {
     isInline = true;
@@ -16,7 +19,7 @@ std::unique_ptr<Component> AElement::renderer(const std::shared_ptr<Node> node, 
             if (hrefPair != tagNode->properties.end()) {
                 component->onClick = [hrefPair]() {
                     std::cout << "Direct to: " << hrefPair->second << std::endl;
-                    navTo(hrefPair->second);
+                    window->navTo(hrefPair->second);
                 };
             }
         }

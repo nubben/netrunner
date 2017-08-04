@@ -20,13 +20,16 @@
     than error. For example, if you specify "-log info", then the program
     will print out info, and all lower prioritized logtypes (warning+error).
  */
-
+// I'd like logging macro(s) that auto include __FILE__ and __LINE__ for where the output is coming from (would be cool if we could include function/method name (and class if method)) - odilitime 17/08/02
 enum class LogType {
-    ERROR,
-    WARNING,
-    INFO,
-    DEBUG,    
+    ERROR, // issue
+    WARNING, // potential issue
+    NOTICE, // basic user messages, Default include NOTICE, WARNING, ERROR
+    INFO, // basic 10k ft overview of what's going on
+    DBUG, // can't be DEBUG in clang
+    CALLLIST // track each function call entrance and exit
 };
+// network logging should be separate
 
 class Logger {
 public:
@@ -39,8 +42,11 @@ private:
     bool shouldLog;
 };
 
+// can we have some sort of macro to make these noOPs if compile as such
+// no need to compile in all the debug logging calls in release
 std::ostream& logError();
 std::ostream& logWarning();
+std::ostream& logNotice();
 std::ostream& logInfo();
 std::ostream& logDebug();
 

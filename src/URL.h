@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+// I'm really mixed about this being a struct like this
+// probably fine for now
 struct URL {
     URL();
     URL(std::string const& url);
