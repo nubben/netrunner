@@ -6,6 +6,15 @@
 #include <memory>
 #include <string>
 
+#ifndef VERSION
+std::string stringToLower(std::string s);
+std::string stringToLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+    return s;
+}
+#endif
+
 /*
  * From the following RFC: https://tools.ietf.org/html/rfc3986
  *
@@ -33,6 +42,7 @@ enum uri_parse_state {
 
 std::unique_ptr<URI> parseUri(std::string raw) {
     std::unique_ptr<URI> uri = std::make_unique<URI>();
+    uri->path = "/";
     unsigned int cursor = 0;
     unsigned int last = 0;
     unsigned int last_semicolon = 0;
@@ -98,6 +108,14 @@ std::unique_ptr<URI> parseUri(std::string raw) {
                 last = cursor;
                 cursor--;
                 state = PATH;
+            } else if (raw[cursor] == '?' || raw[cursor] == '#') {
+                uri->authority.host = raw.substr(last, cursor - last);
+                last = cursor;
+                if (raw[cursor] == '?') {
+                    state = QUERY;
+                } else {
+                    state = FRAGMENT;
+                }
             } else if (cursor + 1 == raw.length()) {
                 uri->authority.host = raw.substr(last, last_semicolon - last);
                 uri->path = "/";
@@ -139,13 +157,17 @@ std::unique_ptr<URI> parseUri(std::string raw) {
                 break;
             }
         } else if (state == QUERY) {
-            if (raw[cursor] == '#' || cursor + 1 == raw.length()) {
-                uri->query = raw.substr(last + 1, cursor + 1 - last);
+            if (raw[cursor] == '#') {
+                uri->query = raw.substr(last + 1, cursor - last - 1);
                 last = cursor;
+                state = FRAGMENT;
+            } else if (cursor + 1 == raw.length()) {
+                uri->query = raw.substr(last + 1, cursor + 1 - last);
+                break;
             }
         } else if (state == FRAGMENT) {
             if (cursor + 1 == raw.length()) {
-                uri->fragment = raw.substr(last, cursor - last);
+                uri->fragment = raw.substr(last + 1, cursor + 1 - last);
                 break;
             }
         }
@@ -192,5 +214,9 @@ main(void) {
     test_parser("http://www.example.org:9090/this/path?query",                    "http", "", "www.example.org", 9090, "/this/path", "query", "");
     test_parser("http://www.example.org/this/path?query",                         "http", "", "www.example.org", 80, "/this/path", "query", "");
     test_parser("http://www.example.org?query",                                   "http", "", "www.example.org", 80, "/", "query", "");
+    test_parser("http://www.example.org/?query",                                   "http", "", "www.example.org", 80, "/", "query", "");
+    test_parser("http://www.example.org?query#fragment",                          "http", "", "www.example.org", 80, "/", "query", "fragment");
+    test_parser("http://www.example.org/#fragment",                               "http", "", "www.example.org", 80, "/", "", "fragment");
+    test_parser("http://www.example.org#fragment",                                "http", "", "www.example.org", 80, "/", "", "fragment");
 }
 #endif
