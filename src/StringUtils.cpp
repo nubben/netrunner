@@ -57,11 +57,11 @@ const std::string getHostFromURL(const std::string &url) {
 }
 
 /**
- * get protocol from a url
+ * get scheme from a url
  * @param url url string
  * @return '' or a string with the found protocol
  */
-const std::string getProtocolFromURL(const std::string &url) {
+const std::string getSchemeFromURL(const std::string &url) {
     auto colonDoubleSlash = url.find("://");
     if (colonDoubleSlash != std::string::npos) {
         return url.substr(0, colonDoubleSlash);
