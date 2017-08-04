@@ -83,7 +83,8 @@ void navTo(std::string url) {
     std::cout << "go to: " << url << std::endl;
     std::shared_ptr<Node> rootNode = std::make_shared<Node>(NodeType::ROOT);
     window->setDOM(rootNode);
-    const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(url), getDocumentFromURL(url));
+    std::shared_ptr<URI> uri = parseUri(url);
+    const std::shared_ptr<HTTPRequest> request = std::make_shared<HTTPRequest>(uri, getHostFromURL(url), getDocumentFromURL(url));
     currentURL=url;
     request->sendRequest(handleRequest);
 }
@@ -114,7 +115,8 @@ void handleRequest(const HTTPResponse &response) {
             location = response.properties.at("Location");
         }
         std::cout << "Redirect To: " << location << std::endl;
-        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(getHostFromURL(location), getDocumentFromURL(location));
+        std::shared_ptr<URI> uri = parseUri(location);
+        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(uri, getHostFromURL(location), getDocumentFromURL(location));
         request->sendRequest(handleRequest);
         return;
     }

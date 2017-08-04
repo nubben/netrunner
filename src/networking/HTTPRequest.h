@@ -2,6 +2,8 @@
 #define HTTPREQUEST_H
 
 #include "HTTPResponse.h"
+#include "URI.h"
+
 #include <functional>
 #include <string>
 
@@ -16,7 +18,7 @@ enum class Method {
 
 class HTTPRequest {
 public:
-    HTTPRequest(const std::string &hostName, const std::string &doc);
+    HTTPRequest(const std::shared_ptr<URI> u, const std::string &hostName, const std::string &doc);
     bool sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const;
     const std::string versionToString(const Version version) const;
     const std::string methodToString(const Method method) const;
@@ -26,6 +28,7 @@ private:
     Method method;
     std::string host;
     std::string userAgent;
+    std::shared_ptr<URI> uri;
 };
 
 #endif

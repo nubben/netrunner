@@ -75,7 +75,8 @@ WebResource getLocalWebResource(std::string fileName) {
 }
 
 WebResource getOnlineWebResource(std::string url) {
-    HTTPRequest request (getHostFromURL(url), getDocumentFromURL(url));
+    std::shared_ptr<URI> uri = parseUri(url);
+    HTTPRequest request (uri, getHostFromURL(url), getDocumentFromURL(url));
     WebResource returnRes;
 
     request.sendRequest([&](HTTPResponse const& response){

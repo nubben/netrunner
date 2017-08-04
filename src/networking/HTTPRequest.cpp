@@ -22,13 +22,14 @@ WSADATA wsaData;
 int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
 
-HTTPRequest::HTTPRequest(const std::string &hostName, const std::string &doc) {
+HTTPRequest::HTTPRequest(const std::shared_ptr<URI> u, const std::string &hostName, const std::string &doc) {
 #ifdef WIN32
 	if (iResult != 0) {
 		std::cout << "WSAStartup failed: " << iResult << std::endl;
 		return;
 	}
 #endif
+    uri = u;
 	document = doc;
     version = Version::HTTP10;
     method = Method::GET;
