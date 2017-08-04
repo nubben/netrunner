@@ -71,7 +71,7 @@ std::unique_ptr<URI> parseUri(std::string raw) {
                 last = cursor + 1;
                 state = AUTHORITY;
             } else {
-                // TODO Handle this, URI can have only one slash
+                // TODO Handle this, URI may have only one slash
             }
         } else if (state == AUTHORITY) {
             /* At this point, this could either be the semi colon for
