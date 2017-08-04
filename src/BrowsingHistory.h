@@ -4,6 +4,8 @@
 #include <vector>
 #include "URL.h"
 
+// if it's going to have fwd/back then
+// please model after https://developer.mozilla.org/en-US/docs/Web/API/History
 class BrowsingHistory {
 public:
     BrowsingHistory();
