@@ -32,14 +32,21 @@ I'd like to develop text-based structures for communication between each piece.
 #### Void
 `sudo xbps-install -S glew glfw harfbuzz-devel`
 
+#### Gentoo
+`sudo emerge freetype harfbuzz glew glfw`
+
 ## Binaries
 ### Linux
-[2017-07-27 binary package](https://my.mixtape.moe/ltuspw.tar.gz)
+[2017-07-31 binary package](https://my.mixtape.moe/imatcb.tar.gz)
 
+GyroNinja.net is temporarily offline. Working with registrar to bring it back online.
 [nightly binary only (no font files)](https://gyroninja.net:1615/job/NetRunner/lastSuccessfulBuild/artifact/netrunner)
 
 ### OSX
 [2017-07-31 binary package](https://my.mixtape.moe/ywjanx.zip)
+
+### Windows
+[2017-07-31 binary package](https://my.mixtape.moe/hkpcyu.zip)
 
 ## Milestones
 - Browse 4chan /g/ board

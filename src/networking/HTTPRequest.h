@@ -2,6 +2,7 @@
 #define HTTPREQUEST_H
 
 #include "HTTPResponse.h"
+#include "URL.h"
 #include <functional>
 #include <string>
 
@@ -16,16 +17,15 @@ enum class Method {
 
 class HTTPRequest {
 public:
-    HTTPRequest(const std::string &hostName, const std::string &doc);
+    HTTPRequest(const std::shared_ptr<URL> u);
     bool sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const;
     const std::string versionToString(const Version version) const;
     const std::string methodToString(const Method method) const;
 private:
-    std::string document;
     Version version;
     Method method;
-    std::string host;
     std::string userAgent;
+    std::shared_ptr<URL> uri;
 };
 
 #endif

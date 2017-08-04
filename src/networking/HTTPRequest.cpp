@@ -1,27 +1,51 @@
 #include "HTTPRequest.h"
 #include <errno.h>
 #include <iostream>
-#include <netdb.h>
 #include <string.h>
+
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN 1
+#include <winsock2.h>
+#include <windows.h>
+#include <WS2tcpip.h>
+#define ssize_t intptr_t
+#else
+// unix includes here
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#endif
 
-HTTPRequest::HTTPRequest(const std::string &hostName, const std::string &doc) {
-    document = doc;
+#ifdef WIN32
+// Initialize Winsock
+WSADATA wsaData;
+int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
+
+HTTPRequest::HTTPRequest(const std::shared_ptr<URL> u) {
+#ifdef WIN32
+	if (iResult != 0) {
+		std::cout << "WSAStartup failed: " << iResult << std::endl;
+		return;
+	}
+#endif
+    uri = u;
     version = Version::HTTP10;
     method = Method::GET;
-    host = hostName;
     userAgent = "NetRunner";
 }
 
 bool HTTPRequest::sendRequest(std::function<void(const HTTPResponse&)> responseCallback) const {
     struct addrinfo hints;
     struct addrinfo *serverInfo = nullptr;
+    std::string host = uri->host;
+    std::string document = uri->path;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    const int res = getaddrinfo(host.c_str(), "80", &hints, &serverInfo);
+    const int res = getaddrinfo(uri->host.c_str(), std::to_string(uri->port).c_str(), &hints, &serverInfo);
     if (res != 0) {
         std::cout << "Could not lookup " << host << ": " << res << std::endl;
         freeaddrinfo(serverInfo);

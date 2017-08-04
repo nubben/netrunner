@@ -1,5 +1,7 @@
 #include "AnimeComponent.h"
+#ifndef _MSC_VER
 #include "../../../anime.h"
+#endif
 #include <cmath>
 
 AnimeComponent::AnimeComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight) : BoxComponent(rawX, rawY, rawWidth, rawHeight, passedWindowWidth, passedWindowHeight){
@@ -8,6 +10,7 @@ AnimeComponent::AnimeComponent(const float rawX, const float rawY, const float r
     width = rawWidth;
     height = rawHeight;
 
+#ifndef _MSC_VER
     if (width == 512) {
         for (int py = 0; py < 1024; py++) {
             for (int px = 0; px < 1024; px++) {
@@ -17,6 +20,7 @@ AnimeComponent::AnimeComponent(const float rawX, const float rawY, const float r
             }
         }
     }
+#endif
 
     float vx = rawX;
     float vy = rawY;

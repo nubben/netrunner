@@ -7,6 +7,8 @@ class TextNode : public Node {
 public:
     TextNode();
     std::string text;
+
+    std::vector<std::string> getSourceList() override { return {}; };
 };
 
 #endif

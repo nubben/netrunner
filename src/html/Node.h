@@ -23,6 +23,8 @@ public:
     std::shared_ptr<Node> parent;
     std::vector<std::shared_ptr<Node>> children;
     std::shared_ptr<Component> component;
+
+    virtual std::vector<std::string> getSourceList();
 };
 
 #endif

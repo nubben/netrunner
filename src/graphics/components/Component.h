@@ -84,7 +84,7 @@ public:
     unsigned int bottomPadding = 0;
     // x + left margin + left padding = start x for texture
     // size preference (could also prefer t/b, l/r)
-    bool growRight = false;
+    bool growRight = false; // if less than windowWidth, why not be greedy?
     bool growLeft = false;
     bool growTop = false; // if top/bott grow from center
     bool growBottom = false;

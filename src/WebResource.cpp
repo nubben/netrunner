@@ -6,6 +6,8 @@
 #include "networking/HTTPRequest.h"
 #include "networking/HTTPResponse.h"
 #include "StringUtils.h"
+#include <iostream>
+#include "Log.h"
 
 namespace {
     
@@ -16,8 +18,8 @@ namespace {
         {"js", ResourceType::JS}
     };
 
-    bool isOnlineResource(std::string const& resourceName) {
-        return resourceName.find("://") != std::string::npos && resourceName.find("file://") == std::string::npos;
+    bool isOnlineResource(URL const& url) {
+        return url.scheme != "file";
     }
 
 }
@@ -32,15 +34,17 @@ WebResource::WebResource(ResourceType rtype, std::string const& rraw) {
     raw = rraw;
 }
 
-WebResource getWebResource(std::string resourceName) {
-    if (isOnlineResource(resourceName)) {
-        return getOnlineWebResource(resourceName);
+WebResource getWebResource(URL const& url) {
+    if (isOnlineResource(url)) {
+        //std::cout << "WebReousrce::getWebResource - isOnline" << std::endl;
+        return getOnlineWebResource(url);
     }
-    return getLocalWebResource(resourceName);
+    //std::cout << "WebReousrce::getWebResource - isOffline" << std::endl;
+    return getLocalWebResource(url);
 }
 
-WebResource getLocalWebResource(std::string fileName) {
-    std::string fileExtension = getFilenameExtension(fileName);
+WebResource getLocalWebResource(URL const& url) {
+    std::string fileExtension = getFilenameExtension(url.path);
     if (fileExtension.length() == 0) {
         return WebResource(ResourceType::INVALID,
                            "Could not find any file extension");
@@ -54,10 +58,10 @@ WebResource getLocalWebResource(std::string fileName) {
 
     if (strToRT.find(fileExtension) == strToRT.end()) {
         return WebResource(ResourceType::INVALID,
-                           "Resource type " + fileExtension + " not supported");
+                           "Local file with extension " + fileExtension + " is not supported. Did you forget a http://?");
     }
 
-    std::ifstream in(fileName, std::ios::in | std::ios::binary);
+    std::ifstream in(url.path, std::ios::in | std::ios::binary);
     if (in) {
         // There exists more efficient ways of doing this, but it works for the
         // time being.
@@ -68,22 +72,56 @@ WebResource getLocalWebResource(std::string fileName) {
     }
 
     return WebResource(ResourceType::INVALID,
-                       "Could not open file " + fileName);
+                       "Could not open file " + url.path);
 }
 
-WebResource getOnlineWebResource(std::string url) {
-    HTTPRequest request (getHostFromURL(url), getDocumentFromURL(url));
+WebResource getOnlineWebResource(URL const& url) {
+    std::shared_ptr<URL> uri=std::make_shared<URL>(url);
+    HTTPRequest request (uri);
+
+    //window->currentURL=url;
+    //request->sendRequest(handleRequest);
+    
     WebResource returnRes;
 
+    std::string redirectLocation = "";
+
     request.sendRequest([&](HTTPResponse const& response){
-        if (response.statusCode != 200) {
+        logDebug() << "getOnlineWebResource request.sendRequest" << std::endl;
+        if (response.statusCode == 301) {
+            std::string location;
+            if (response.properties.find("Location")==response.properties.end()) {
+                if (response.properties.find("location")==response.properties.end()) {
+                    logDebug() << "getOnlineWebResource - got 301 without a location" << std::endl;
+                    for(auto const &row : response.properties) {
+                        logDebug() << "getOnlineWebResource - " << row.first << "=" << response.properties.at(row.first) << std::endl;
+                    }
+                    redirectLocation = "_";
+                } else {
+                    location = response.properties.at("location");
+                }
+            } else {
+                location = response.properties.at("Location");
+            }
+            logDebug() << "Redirect To: " << location << std::endl;
+            redirectLocation = location;
+        } else if (response.statusCode != 200) {
             returnRes.resourceType = ResourceType::INVALID;
             returnRes.raw = "Unsupported status code";
+        } else {
+            // TODO: Set resourceType based on Content-Type field.
+            returnRes.resourceType = ResourceType::HTML;
+            returnRes.raw = std::move(response.body);
         }
-        // TODO: Set resourceType based on Content-Type field.
-        returnRes.resourceType = ResourceType::HTML;
-        returnRes.raw = std::move(response.body);
     });
+
+    if (redirectLocation.size() > 0) {
+        if (redirectLocation == "_") {
+            return WebResource(ResourceType::INVALID,
+                               "Got a 301 without a location");
+        }
+        return getOnlineWebResource(URL(redirectLocation));
+    }
 
     return returnRes;
 }
