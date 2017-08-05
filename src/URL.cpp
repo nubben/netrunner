@@ -27,6 +27,11 @@ enum URIParseState {
     FRAGMENT,
 };
 
+// TODO
+bool isValidCharacter(char c);
+bool isValidCharacter(char c) {
+    return true;
+}
 
 std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
     std::unique_ptr<URL> uri = std::make_unique<URL>();
@@ -34,6 +39,7 @@ std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
     unsigned int cursor = 0;
     unsigned int last = 0;
     unsigned int lastSemicolon = 0;
+    bool isPercentEncoded = true;
     enum URIParseState state = SCHEME;
     // TODO Validate at the end that every field were defined (ie: http:// is valid, but it's clearly not)
     // Remember file:// doesn't need a port (for end validation)
@@ -114,6 +120,10 @@ std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
                 uri->host = raw.substr(last, lastSemicolon - last);
                 uri->path = "/";
                 break;
+            } else {
+                if (isPercentEncoded && !isValidCharacter(raw[cursor])) {
+                    isPercentEncoded = false;
+                }
             }
         // TODO Accept Ipv weirdness (ipversion and literal)
         /* We are accepting pretty much anything here.. However not everything
@@ -128,6 +138,10 @@ std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
                 last = cursor;
                 cursor--;
                 state = PATH;
+            } else {
+                if (isPercentEncoded && !isValidCharacter(raw[cursor])) {
+                    isPercentEncoded = false;
+                }
             }
         } else if (state == AUTHORITY_PORT) {
             if (raw[cursor] == '/') {
