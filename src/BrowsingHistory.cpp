@@ -1,33 +1,52 @@
 #include "BrowsingHistory.h"
 
-BrowsingHistory::BrowsingHistory() :
+BrowsingHistory::BrowsingHistory(std::function<void(URL const&)> onGotoPage_) :
     history(),
-    currentPosition(0) {}
+    currentPosition(history.end()),
+    onGotoPage(onGotoPage_) {}
 
-void BrowsingHistory::addEntry(URL url) {
-    if (!history.empty()) {
-        ++currentPosition;
-    }
-    if (currentPosition < history.size()) {
-        history.erase(history.begin() + currentPosition, history.end());
-    }
-    history.push_back(url);
+unsigned int BrowsingHistory::length() const {
+    return history.size();
 }
 
-URL const& BrowsingHistory::goForward() {
-    if (currentPosition < history.size()) {
-        ++currentPosition;
-    }
-    return history[currentPosition];
+void BrowsingHistory::back() {
+    go(-1);
 }
 
-URL const& BrowsingHistory::goBack() {
-    if (currentPosition > 0) {
-        --currentPosition;
-    }
-    return history[currentPosition];
+void BrowsingHistory::forward() {
+    go(1);
 }
 
-std::vector<URL> const& BrowsingHistory::getHistory() const {
-    return history;
+void BrowsingHistory::go() {
+    go(0);
+}
+
+void BrowsingHistory::go(int diff) {
+    if (history.size() == 0) {
+        return;
+    }
+    std::vector<URL>::iterator newPos = currentPosition + diff;
+    if (newPos >= history.begin() && newPos < history.end()) {
+        currentPosition = newPos;
+        onGotoPage(*currentPosition);
+    }
+}
+
+void BrowsingHistory::pushState(void* stateObj, std::string const& title, URL const& url) {
+    if (history.size() == 0) {
+        history.push_back(url);
+        currentPosition = history.begin();
+        return;
+    }
+    URL currentURL = *currentPosition;
+    history.erase(++currentPosition, history.end());
+    history.push_back(currentURL.merge(url));
+    currentPosition = history.end() - 1;
+}
+
+void BrowsingHistory::replaceState(void* stateObj, std::string const& title, URL const& url) {
+    if (history.size() == 0) {
+        return;
+    }
+    *currentPosition = (*currentPosition).merge(url);
 }
