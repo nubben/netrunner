@@ -5,12 +5,12 @@
 #include "../../html/TextNode.h"
 #include "../../networking/HTTPRequest.h"
 #include "../../html/HTMLParser.h"
-#include "StringUtils.h"
+#include "../../StringUtils.h"
+#include "../../URL.h"
+#include "../../Log.h"
 #include <cmath>
 #include <ctime>
 #include <iostream>
-#include "URL.h"
-#include "Log.h"
 
 void deleteComponent(std::shared_ptr<Component> &component);
 void deleteNode(std::shared_ptr<Node> node);

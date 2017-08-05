@@ -2,7 +2,7 @@
 #define HTTPREQUEST_H
 
 #include "HTTPResponse.h"
-#include "URL.h"
+#include "../URL.h"
 #include <functional>
 #include <string>
 
