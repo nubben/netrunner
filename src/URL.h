@@ -5,10 +5,10 @@
 #include <memory>
 #include <iostream>
 
-struct Authority {
-    std::string userinfo;
-    std::string host;
-    int port;
+enum URIParseError {
+    URI_PARSE_ERROR_SCHEME,
+    URI_PARSE_ERROR_PORT,
+    URI_PARSE_ERROR_NONE,
 };
 
 struct URL {
@@ -34,7 +34,7 @@ private:
     URL copy() const;
 };
 
-std::unique_ptr<URL> parseUri(std::string raw);
+std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw);
 std::ostream& operator<<(std::ostream& out, URL const& url);
 
 #endif

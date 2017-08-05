@@ -13,7 +13,7 @@
  *
  */
 
-enum uri_parse_state {
+enum URIParseState {
     SCHEME,
     FIRST_SLASH,
     SECOND_SLASH_OR_ELSE,
@@ -27,17 +27,20 @@ enum uri_parse_state {
     FRAGMENT,
 };
 
-std::unique_ptr<URL> parseUri(std::string raw) {
+
+std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
     std::unique_ptr<URL> uri = std::make_unique<URL>();
     uri->path = "/";
     unsigned int cursor = 0;
     unsigned int last = 0;
-    unsigned int last_semicolon = 0;
-    enum uri_parse_state state = SCHEME;
+    unsigned int lastSemicolon = 0;
+    enum URIParseState state = SCHEME;
+    // TODO Validate at the end that every field were defined (ie: http:// is valid, but it's clearly not)
+    // Remember file:// doesn't need a port (for end validation)
     // First character of scheme MUST be alphabetic
     if (!isalpha(raw[cursor])) {
-        std::cout << "parse scheme error" << std::endl;
-        return NULL;
+        std::cerr << "invalid scheme: '" << raw.substr(last, cursor - last+1) << "'" << std::endl;
+        return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
     }
     for (cursor = 1; cursor < raw.length(); cursor++) {
         /* TODO
@@ -54,14 +57,16 @@ std::unique_ptr<URL> parseUri(std::string raw) {
                 state = FIRST_SLASH;
             } else if (!isalpha(raw[cursor]) && !isdigit(raw[cursor]) && raw[cursor] != '+' &&
                        raw[cursor] != '-' && raw[cursor] != '.') {
-                std::cout << "parse scheme error" << std::endl;
-                return NULL;
+                /* URI MUST have a scheme  */
+                std::cerr << "invalid scheme: '" << raw.substr(last, cursor - last+1) << "'" << std::endl;
+                return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
             }
         } else if (state == FIRST_SLASH) {
             if (raw[cursor] == '/') {
                 state = SECOND_SLASH_OR_ELSE;
             } else {
-                std::cout << "parse error" << std::endl;
+                std::cerr << "missing '/' after scheme" << std::endl;
+                return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
             }
         } else if (state == SECOND_SLASH_OR_ELSE) {
             if (raw[cursor] == '/') {
@@ -69,12 +74,14 @@ std::unique_ptr<URL> parseUri(std::string raw) {
                 state = AUTHORITY;
             } else {
                 // TODO Handle this, URI may have only one slash
+                std::cerr << "URI with only one '/' not currently supported" << std::endl;
+                return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
             }
         } else if (state == AUTHORITY) {
             /* At this point, this could either be the semi colon for
              * the password or for the port*/
             if (raw[cursor] == ':') {
-                last_semicolon = cursor;
+                lastSemicolon = cursor;
             } else if (raw[cursor] == '@') {
                 uri->userinfo = raw.substr(last, cursor - last);
                 last = cursor + 1;
@@ -83,12 +90,12 @@ std::unique_ptr<URL> parseUri(std::string raw) {
                 //  TODO terminated by the next slash ("/"), question mark ("?"), or number sign ("#") character, or by the end of the URI.
                 //  What to do when ? and # ?
             } else if (raw[cursor] == '/') {
-                if (last_semicolon > 0) {
+                if (lastSemicolon > 0) {
                     // TODO Validate port
-                    if (cursor - last_semicolon - 1 > 0) {
-                        uri->port = std::stoi(raw.substr(last_semicolon+1, cursor - last_semicolon+1));
+                    if (cursor - lastSemicolon - 1 > 0) {
+                        uri->port = std::stoi(raw.substr(lastSemicolon+1, cursor - lastSemicolon+1));
                     }
-                    uri->host = raw.substr(last, last_semicolon - last);
+                    uri->host = raw.substr(last, lastSemicolon - last);
                 } else {
                     uri->host = raw.substr(last, cursor - last);
                 }
@@ -104,10 +111,13 @@ std::unique_ptr<URL> parseUri(std::string raw) {
                     state = FRAGMENT;
                 }
             } else if (cursor + 1 == raw.length()) {
-                uri->host = raw.substr(last, last_semicolon - last);
+                uri->host = raw.substr(last, lastSemicolon - last);
                 uri->path = "/";
                 break;
             }
+        // TODO Accept Ipv weirdness (ipversion and literal)
+        /* We are accepting pretty much anything here.. However not everything
+         * is valid. Should we try to validate at this point ? */
         } else if (state == AUTHORITY_HOST) {
             if (raw[cursor] == ':') {
                 uri->host = raw.substr(last, cursor - last);
@@ -122,13 +132,16 @@ std::unique_ptr<URL> parseUri(std::string raw) {
         } else if (state == AUTHORITY_PORT) {
             if (raw[cursor] == '/') {
                 if (cursor - last > 0) {
+                    /* RFC doesn't specify the max port number, so at this point
+                     * just accept it. */
                     uri->port = std::stoi(raw.substr(last, cursor - last));
                 }
                 last = cursor;
                 cursor--;
                 state = PATH;
             } else if (!isdigit(raw[cursor])) {
-                
+                std::cerr << "invalid port: '" << raw.substr(last, cursor - last + 1) << "'" << std::endl;
+                return std::make_tuple(std::move(uri), URI_PARSE_ERROR_PORT);
             }
         } else if (state == PATH) {
             if (raw[cursor] == '?' || raw[cursor] == '#') {
@@ -159,7 +172,7 @@ std::unique_ptr<URL> parseUri(std::string raw) {
             }
         }
     }
-    return uri;
+    return std::make_tuple(std::move(uri), URI_PARSE_ERROR_NONE);
 }
 
 
@@ -224,7 +237,13 @@ URL URL::merge(URL const& url) const {
 }
 
 void URL::construct(std::string const& url) {
-    std::unique_ptr<URL> uri=parseUri(url);
+    auto result = parseUri(url);
+    if (std::get<1>(result) != URI_PARSE_ERROR_NONE) {
+        // TODO We probably wanna handle this better..
+        std::cerr << "error parsing uri" << std::endl;
+        return;
+    }
+    std::unique_ptr<URL> uri = std::move(std::get<0>(result));
     scheme = uri->scheme;
     userinfo = uri->userinfo;
     host = uri->host;

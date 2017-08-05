@@ -1,3 +1,4 @@
+#include "../../URL.h"
 #include "Window.h"
 #include "shaders/gen/FontShader.h"
 #include "shaders/gen/TextureShader.h"
@@ -476,8 +477,14 @@ void handleRequest(const HTTPResponse &response) {
             location = response.properties.at("Location");
         }
         std::cout << "Redirect To: " << location << std::endl;
-        std::shared_ptr<URL> uri = parseUri(location);
-        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(uri);
+        std::tuple<std::unique_ptr<URL>,enum URIParseError> result = parseUri(location);
+        if (std::get<1>(result) != URI_PARSE_ERROR_NONE) {
+            // TODO We probably wanna handle this better..
+            std::cerr << "error parsing uri" << std::endl;
+            return;
+        }
+        std::unique_ptr<URL> uri = std::move(std::get<0>(result));
+        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(std::move(uri));
         request->sendRequest(handleRequest);
         return;
     }
