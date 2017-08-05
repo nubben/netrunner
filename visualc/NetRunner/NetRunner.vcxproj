@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{0ECC8CA1-2094-4A51-BD89-8AEC9A6B6A43}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>NetRunner</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\user1\Source\Repos\netrunner\deps\vcpkg-master\vcpkg-master\installed\x86-windows\include;C:\Users\user1\Source\Repos\netrunner\deps\vcpkg-master\vcpkg-master\installed\x86-windows\include\harfbuzz;C:\Users\user1\Source\Repos\netrunner\deps\glew-2.0.0-win32\glew-2.0.0\include;C:\Users\user1\Source\Repos\netrunner\deps\glfw-3.2.1.bin.WIN32\glfw-3.2.1.bin.WIN32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>C:\Users\user1\Source\Repos\netrunner\deps\vcpkg-master\vcpkg-master\installed\x86-windows\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;glew32.lib;glfw3dll.lib;harfbuzz.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)..\*.ttf" "$(OutDir)"
+copy "$(SolutionDir)glfw3.dll" "$(OutDir)"
+copy "$(SolutionDir)glew32d.dll" "$(OutDir)"
+copy "$(SolutionDir)freetyped.dll" "$(OutDir)"
+copy "$(SolutionDir)harfbuzz.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\user1\Source\Repos\netrunner\deps\vcpkg-master\vcpkg-master\installed\x86-windows\include;C:\Users\user1\Source\Repos\netrunner\deps\vcpkg-master\vcpkg-master\installed\x86-windows\include\harfbuzz;C:\Users\user1\Source\Repos\netrunner\deps\glew-2.0.0-win32\glew-2.0.0\include;C:\Users\user1\Source\Repos\netrunner\deps\glfw-3.2.1.bin.WIN32\glfw-3.2.1.bin.WIN32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\Users\user1\Source\Repos\netrunner\deps\vcpkg-master\vcpkg-master\installed\x86-windows\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;Ws2_32.lib;glew32.lib;glfw3dll.lib;harfbuzz.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(SolutionDir)..\*.ttf" "$(OutDir)"
+copy "$(SolutionDir)glfw3.dll" "$(OutDir)"
+copy "$(SolutionDir)glew32d.dll" "$(OutDir)"
+copy "$(SolutionDir)freetyped.dll" "$(OutDir)"
+copy "$(SolutionDir)harfbuzz.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\BrowsingHistory.h" />
+    <ClInclude Include="..\..\src\CommandLineParams.h" />
+    <ClInclude Include="..\..\src\graphics\components\AnimeComponent.h" />
+    <ClInclude Include="..\..\src\graphics\components\BoxComponent.h" />
+    <ClInclude Include="..\..\src\graphics\components\Component.h" />
+    <ClInclude Include="..\..\src\graphics\components\ComponentBuilder.h" />
+    <ClInclude Include="..\..\src\graphics\components\TextComponent.h" />
+    <ClInclude Include="..\..\src\graphics\elements\AElement.h" />
+    <ClInclude Include="..\..\src\graphics\elements\BLOCKQUOTEElement.h" />
+    <ClInclude Include="..\..\src\graphics\elements\DIVElement.h" />
+    <ClInclude Include="..\..\src\graphics\elements\Element.h" />
+    <ClInclude Include="..\..\src\graphics\elements\H1Element.h" />
+    <ClInclude Include="..\..\src\graphics\elements\H2Element.h" />
+    <ClInclude Include="..\..\src\graphics\elements\H3Element.h" />
+    <ClInclude Include="..\..\src\graphics\elements\LIElement.h" />
+    <ClInclude Include="..\..\src\graphics\elements\PElement.h" />
+    <ClInclude Include="..\..\src\graphics\elements\SPANElement.h" />
+    <ClInclude Include="..\..\src\graphics\elements\STRONGElement.h" />
+    <ClInclude Include="..\..\src\graphics\opengl\shaders\gen\FontShader.h" />
+    <ClInclude Include="..\..\src\graphics\opengl\shaders\gen\TextureShader.h" />
+    <ClInclude Include="..\..\src\graphics\opengl\Window.h" />
+    <ClInclude Include="..\..\src\graphics\text\TextRasterizer.h" />
+    <ClInclude Include="..\..\src\graphics\text\TextRasterizerCache.h" />
+    <ClInclude Include="..\..\src\html\HTMLParser.h" />
+    <ClInclude Include="..\..\src\html\Node.h" />
+    <ClInclude Include="..\..\src\html\TagNode.h" />
+    <ClInclude Include="..\..\src\html\TextNode.h" />
+    <ClInclude Include="..\..\src\Log.h" />
+    <ClInclude Include="..\..\src\networking\HTTPRequest.h" />
+    <ClInclude Include="..\..\src\networking\HTTPResponse.h" />
+    <ClInclude Include="..\..\src\StringUtils.h" />
+    <ClInclude Include="..\..\src\URL.h" />
+    <ClInclude Include="..\..\src\WebResource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\BrowsingHistory.cpp" />
+    <ClCompile Include="..\..\src\CommandLineParams.cpp" />
+    <ClCompile Include="..\..\src\graphics\components\AnimeComponent.cpp" />
+    <ClCompile Include="..\..\src\graphics\components\BoxComponent.cpp" />
+    <ClCompile Include="..\..\src\graphics\components\Component.cpp" />
+    <ClCompile Include="..\..\src\graphics\components\ComponentBuilder.cpp" />
+    <ClCompile Include="..\..\src\graphics\components\TextComponent.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\AElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\BLOCKQUOTEElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\DIVElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\Element.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\H1Element.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\H2Element.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\H3Element.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\LIElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\PElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\SPANElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\elements\STRONGElement.cpp" />
+    <ClCompile Include="..\..\src\graphics\opengl\Window.cpp" />
+    <ClCompile Include="..\..\src\graphics\text\TextRasterizer.cpp" />
+    <ClCompile Include="..\..\src\graphics\text\TextRasterizerCache.cpp" />
+    <ClCompile Include="..\..\src\html\HTMLParser.cpp" />
+    <ClCompile Include="..\..\src\html\Node.cpp" />
+    <ClCompile Include="..\..\src\html\TagNode.cpp" />
+    <ClCompile Include="..\..\src\html\TextNode.cpp" />
+    <ClCompile Include="..\..\src\Log.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\networking\HTTPRequest.cpp" />
+    <ClCompile Include="..\..\src\networking\HTTPResponse.cpp" />
+    <ClCompile Include="..\..\src\StringUtils.cpp" />
+    <ClCompile Include="..\..\src\URL.cpp" />
+    <ClCompile Include="..\..\src\WebResource.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
