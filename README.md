@@ -77,6 +77,7 @@ I don't think one on here could ever say they know what their doing without bein
 
 - Tomleb
   - contributed keyboard code
+  - repo: https://github.com/tomleb/netrunner
 
 - RetroTech - Web / Sys Admin
   - Created original website
