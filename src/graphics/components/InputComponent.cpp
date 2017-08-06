@@ -86,7 +86,7 @@ InputComponent::InputComponent(const float rawX, const float rawY, const float r
 
 void InputComponent::render() {
     //std::cout << "InputComponent::render" << std::endl;
-    int glErr=glGetError();
+    GLenum glErr=glGetError();
     if(glErr != GL_NO_ERROR) {
         std::cout << "InputComponent::render - start not ok: " << glErr << std::endl;
     }

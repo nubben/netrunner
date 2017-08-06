@@ -192,8 +192,8 @@ void TextComponent::rasterize(const int rawX, const int rawY) {
         glyphVertices.push_back(std::move(vertices));
     //std::cout << "TextComponent::rasterize - glyphVertices count: " << glyphVertices.size() << std::endl;
     
-    textureWidth = response->textureWidth;
-    textureHeight = response->textureHeight;
+    textureWidth = static_cast<GLsizei>(response->textureWidth);
+    textureHeight = static_cast<GLsizei>(response->textureHeight);
     textureData = std::move(response->textureData);
     //}
     //const std::clock_t end = clock();

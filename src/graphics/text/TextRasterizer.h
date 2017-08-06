@@ -16,8 +16,8 @@ struct Glyph {
     float t0;
     float s1;
     float t1;
-    int textureWidth;
-    int textureHeight;
+    unsigned int textureWidth;
+    unsigned int textureHeight;
     std::unique_ptr<unsigned char[]> textureData;
 };
 
@@ -55,8 +55,8 @@ struct rasterizationResponse {
     float t0;
     float s1; // calculated on other members here
     float t1; // calculated on other members here
-    int textureWidth;
-    int textureHeight;
+    unsigned int textureWidth;
+    unsigned int textureHeight;
     std::unique_ptr<unsigned char[]> textureData;
 };
 
