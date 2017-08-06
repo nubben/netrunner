@@ -232,7 +232,7 @@ void InputComponent::updateText() {
     request.sourceStartX = 0;
     request.sourceStartY = 0;
     request.noWrap = true;
-    std::unique_ptr<std::tuple<int, int>> textInfo=textRasterizer->size(request);
+    std::unique_ptr<std::pair<int, int>> textInfo=textRasterizer->size(request);
     if (textInfo.get() == nullptr) {
         std::cout << "InputComponent::updateText couldn't estimate value[" << value << "] size" << std::endl;
         return;

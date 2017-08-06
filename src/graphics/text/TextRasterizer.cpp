@@ -36,7 +36,7 @@ TextRasterizer::~TextRasterizer() {
     FT_Done_FreeType(lib);
 }
 
-std::unique_ptr<std::tuple<int, int>> TextRasterizer::size(const rasterizationRequest &request) const {
+std::unique_ptr<std::pair<int, int>> TextRasterizer::size(const rasterizationRequest &request) const {
     
     if (request.startX == request.availableWidth) {
         std::cout << "TextRasterizer::size - x [" << static_cast<int>(request.startX) << "] matches window width [" << static_cast<int>(request.availableWidth)<< "] for text[" << request.text << "] no room to render anything" << std::endl;
@@ -151,7 +151,7 @@ std::unique_ptr<std::tuple<int, int>> TextRasterizer::size(const rasterizationRe
         response->height = y1max;
         //std::cout << "adjusted:" << (int)width << "x" << (int)height << std::endl;
     }
-    return std::make_unique<std::tuple<int, int>>(std::tuple<int, int>(response->width, response->height));
+    return std::make_unique<std::pair<int, int>>(std::pair<int, int>(response->width, response->height));
 }
 
 std::unique_ptr<rasterizationResponse> TextRasterizer::rasterize(const rasterizationRequest &request) const {
