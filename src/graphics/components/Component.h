@@ -80,7 +80,7 @@ public:
     float reqHeight = 0.0f;
     float reqWidth = 0.0f;
     unsigned int reqMinHeight = 0;
-    unsigned int reqMinWidth = 0.;
+    unsigned int reqMinWidth = 0;
     unsigned int reqMaxHeight = 0;
     unsigned int reqMaxWidth = 0;
     // margin
