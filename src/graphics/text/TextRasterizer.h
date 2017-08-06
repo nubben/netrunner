@@ -68,7 +68,7 @@ public:
     TextRasterizer(const std::string &fontPath, const int size, const unsigned int resolution, const bool bold);
     ~TextRasterizer();
     //std::unique_ptr<Glyph[]> rasterize(const std::string &text, const int x, const int windowWidth, const int wrapToX, float &width, float &height, unsigned int &glyphCount, int &endingX, int &endingY, bool &wrapped) const;
-    std::unique_ptr<std::tuple<int, int>> size(const rasterizationRequest &request) const;
+    std::unique_ptr<std::pair<int, int>> size(const rasterizationRequest &request) const;
     std::unique_ptr<rasterizationResponse> rasterize(const rasterizationRequest &request) const;
     bool isUnicodeBMP(const FT_Face &face) const;
     FT_Library lib;
