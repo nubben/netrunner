@@ -33,6 +33,7 @@ bool isValidCharacter(char c) {
     return true;
 }
 
+// put inside URL(std::strong) constructor?
 std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
     std::unique_ptr<URL> uri = std::make_unique<URL>();
     uri->path = "/";
@@ -78,6 +79,10 @@ std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
             if (raw[cursor] == '/') {
                 last = cursor + 1;
                 state = AUTHORITY;
+                if (uri->scheme == "file") {
+                    std::cout << "file scheme, current path[" << uri->path << "]" << std::endl;
+                    state = PATH;
+                }
             } else {
                 // TODO Handle this, URI may have only one slash
                 std::cerr << "URI with only one '/' not currently supported" << std::endl;
@@ -205,6 +210,7 @@ URL::URL(std::string const& url) {
 }
 
 std::string URL::toString() const {
+    std::cout << "scheme[" << scheme << "] host[" << host << "] path [" << path << "]" << std::endl;
     if (isRelative()) {
         return path;
     }
@@ -279,7 +285,7 @@ void URL::construct(std::string const& url) {
     if (path.size() == 0) {
         path = "/";
     }
-     */
+    */
 }
 
 URL URL::copy() const {
