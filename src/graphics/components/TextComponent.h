@@ -37,8 +37,8 @@ public:
     bool noWrap = false; // different than overflow but related
     int availableWidth = 0;
     
-    int textureWidth;
-    int textureHeight;
+    GLsizei textureWidth;
+    GLsizei textureHeight;
     std::unique_ptr<unsigned char[]> textureData;
 
     // backgroundColor

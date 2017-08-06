@@ -37,7 +37,7 @@ bool Window::init() {
         return false;
     }
     initGL();
-    int glErr=glGetError();
+    GLenum glErr=glGetError();
     if(glErr != GL_NO_ERROR) {
         std::cout << "window::init - post initGL - not ok: " << glErr << std::endl;
     }
@@ -320,7 +320,7 @@ bool Window::initGL() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    int glErr=glGetError();
+    GLenum glErr=glGetError();
     if(glErr != GL_NO_ERROR) {
         std::cout << "window::initGL - blend, clear, texParam - not ok: " << glErr << std::endl;
     }
@@ -355,7 +355,7 @@ GLuint Window::compileShader(const GLenum shaderType, const char *shaderSource) 
     glShaderSource(shader, 1, &shaderSource, nullptr);
     glCompileShader(shader);
 
-    int glErr=glGetError();
+    GLenum glErr=glGetError();
     if(glErr != GL_NO_ERROR) {
         std::cout << "window::compileShader - compileShader - not ok: " << glErr << std::endl;
     }
@@ -377,7 +377,7 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
 
-    int glErr=glGetError();
+    GLenum glErr=glGetError();
     if(glErr != GL_NO_ERROR) {
         std::cout << "window::compileProgram - glLinkProgram - not ok: " << glErr << std::endl;
     }
@@ -451,7 +451,7 @@ void Window::render() {
     if (renderDirty || transformMatrixDirty) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        int glErr=glGetError();
+        GLenum glErr=glGetError();
         if(glErr != GL_NO_ERROR) {
             std::cout << "window::render - box render start - not ok: " << glErr << std::endl;
         }
@@ -589,7 +589,7 @@ void Window::renderBoxComponents(std::shared_ptr<Component> component) {
     //inputComponent->render();
     if (boxComponent) {
         /*
-        int glErr=glGetError();
+        GLenum glErr=glGetError();
         if(glErr != GL_NO_ERROR) {
             std::cout << "Window::renderBoxComponents - box render start - not ok: " << glErr << std::endl;
         }
@@ -635,7 +635,7 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
         BoxComponent *boxComponent = dynamic_cast<BoxComponent*>(component.get());
         //inputComponent->render();
         if (boxComponent) {
-            int glErr=glGetError();
+            GLenum glErr=glGetError();
             if(glErr != GL_NO_ERROR) {
                 std::cout << "box render start - not ok: " << glErr << std::endl;
             }

@@ -65,7 +65,7 @@ std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
             // so if y=640 , f(y)=-640
             int ny = -y;
             std::cout << "TextSelection adjusted " << x << "," << ny << std::endl;
-            std::cout << "Component at " << (int)component->x << "," << (int)component->y << std::endl;
+            std::cout << "Component at " << static_cast<int>(component->x) << "," << static_cast<int>(component->y) << std::endl;
         };
         component->onMouseup =  [component](int x, int y) {
             std::cout << "TextSelection ending at " << x << "," << y << std::endl;

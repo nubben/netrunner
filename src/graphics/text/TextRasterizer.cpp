@@ -364,7 +364,7 @@ std::unique_ptr<rasterizationResponse> TextRasterizer::rasterize(const rasteriza
             // source is 0 to (0:iy:rows)
             // dest is cx+bl, (0:iy:rows)+(0:cy:height)+bump
             //std::cout << "placing glyph row at " << (cx + slot->bitmap_left) << "x" << ((iy + cy) + bump) << std::endl;
-            unsigned int destPos = (cx - request.sourceStartX + leftPadding + slot->bitmap_left) + ((iy + static_cast<unsigned int>(cy - request.sourceStartY)) + static_cast<unsigned int>(bump)) * static_cast<unsigned int>(response->textureWidth);
+            unsigned int destPos = static_cast<unsigned int>(cx - request.sourceStartX + leftPadding + slot->bitmap_left) + ((iy + static_cast<unsigned int>(cy - request.sourceStartY)) + static_cast<unsigned int>(bump)) * response->textureWidth;
             if (destPos >= size) {
                 // we're done with this line
                 continue;

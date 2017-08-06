@@ -107,7 +107,7 @@ BoxComponent::~BoxComponent() {
 
 void BoxComponent::render() {
     //std::cout << "BoxComponent::render" << std::endl;
-    int glErr=glGetError();
+    GLenum glErr=glGetError();
     if(glErr != GL_NO_ERROR) {
         std::cout << "BoxComponent::render - start not ok: " << glErr << std::endl;
     }
