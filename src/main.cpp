@@ -36,9 +36,11 @@ int main(int argc, char *argv[]) {
 
     initCLParams(argc, argv);
     std::string url = getCLParamByIndex(1);
-    if (url[0] == '/') {
+    // if we do this here, shouldn't we do this in parseUri too?
+    if (url.find("://") == url.npos) {
         url = "file://" + url;
     }
+    //logDebug() << "pre URL parse [" << url << "]" << std::endl;
     window->currentURL=URL(url);
     logDebug() << "loading [" << window->currentURL << "]" << std::endl;
     
