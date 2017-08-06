@@ -33,7 +33,7 @@ bool isValidCharacter(char c) {
     return true;
 }
 
-// put inside URL(std::strong) constructor?
+// put inside URL(std::string) constructor?
 std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
     std::unique_ptr<URL> uri = std::make_unique<URL>();
     uri->path = "/";
