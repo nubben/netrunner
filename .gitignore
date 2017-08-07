@@ -2,7 +2,7 @@
 d
 gen
 src/graphics/opengl/shaders/gen
-netrunner
+/netrunner
 *.iml
 tags
 src/networking/URI

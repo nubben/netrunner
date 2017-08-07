@@ -1,13 +1,16 @@
+#include "../../URL.h"
 #include "Window.h"
 #include "shaders/gen/FontShader.h"
 #include "shaders/gen/TextureShader.h"
 #include "../../html/TagNode.h"
 #include "../../html/TextNode.h"
+
 #include "../../networking/HTTPRequest.h"
 #include "../../html/HTMLParser.h"
 #include "../../StringUtils.h"
 #include "../../URL.h"
 #include "../../Log.h"
+
 #include <cmath>
 #include <ctime>
 #include <iostream>
@@ -34,12 +37,30 @@ bool Window::init() {
         return false;
     }
     initGL();
+    GLenum glErr=glGetError();
+    if(glErr != GL_NO_ERROR) {
+        std::cout << "window::init - post initGL - not ok: " << glErr << std::endl;
+    }
 
     //UI
-    boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 1.0f, 1.0f, -64, windowWidth, windowHeight));
+    // at 0x(640-64) size (1024w, 64h)
+    boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 640.0f - 64.0f, 1024.0f, 64.0f, windowWidth, windowHeight));
 
+    //boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, -96, 125, 13, windowWidth, windowHeight));
+    // grows from center
+    //boxComponents.push_back(std::make_unique<AnimeComponent>(0.0f, -80, 16, 16, windowWidth, windowHeight));
+    //boxComponents.push_back(std::make_unique<InputComponent>(0.0f, -56.0f, 125.0f, 13.0f, windowWidth, windowHeight));
+    
+    // draws 13 px up from the bottom of 0
+    //boxComponents.push_back(std::make_unique<InputComponent>(0.0f, 0.0f, 12.0f, 13.0f, windowWidth, windowHeight));
+    // this works fine, we can translate and resize
+    //boxComponents.back()->y = -56;
+    //boxComponents.back()->width = 125;
+    //boxComponents.back()->resize(windowWidth, windowHeight);
+    //boxComponents.push_back(std::make_unique<InputComponent>(0.0f, 20.0f, 123.0f, 13.0f, windowWidth, windowHeight));
+    
     //Mascot
-    boxComponents.push_back(std::make_unique<AnimeComponent>(-256.0f, 0.0f, 512, 512, windowWidth, windowHeight));
+    boxComponents.push_back(std::make_unique<AnimeComponent>(768.0f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight));
     
     return true;
 }
@@ -90,9 +111,10 @@ bool Window::initGLFW() {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->cursorX = xPos;
         thiz->cursorY = yPos;
-        std::shared_ptr<Component> hoverComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
-        if (hoverComponent) {
-            if (hoverComponent->onClick) {
+        thiz->hoverComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
+        if (thiz->hoverComponent) {
+            //std::cout << "hover event" << std::endl;
+            if (thiz->hoverComponent->onClick) {
                 glfwSetCursor(thiz->window, thiz->cursorHand);
             } else {
                 glfwSetCursor(thiz->window, thiz->cursorIbeam);
@@ -120,16 +142,157 @@ bool Window::initGLFW() {
     });
     glfwSetMouseButtonCallback(window, [](GLFWwindow *win, int button, int action, int mods) {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            std::cout << "left press" << std::endl;
+            if (thiz->hoverComponent) {
+                //std::cout << "focus event" << std::endl;
+                if (thiz->focusedComponent != thiz->hoverComponent) {
+                    // blur old component
+                    if (thiz->focusedComponent) {
+                        if (thiz->focusedComponent->onBlur) {
+                            thiz->focusedComponent->onBlur();
+                        }
+                    }
+                    // focus new component
+                    if (thiz->hoverComponent->onFocus) {
+                        thiz->hoverComponent->onFocus();
+                    }
+                }
+                thiz->focusedComponent = thiz->hoverComponent;
+                if (thiz->focusedComponent->onMousedown) {
+                    //std::cout << "click event" << std::endl;
+                    thiz->focusedComponent->onMousedown(thiz->cursorX, thiz->cursorY);
+                }
+            }
+        }
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
             std::cout << "left release" << std::endl;
-            std::shared_ptr<Component> clickedComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
-            if (clickedComponent) {
-                if (clickedComponent->onClick) {
-                    clickedComponent->onClick();
+            if (thiz->hoverComponent) {
+                //std::cout << "focus event" << std::endl;
+                if (thiz->focusedComponent != thiz->hoverComponent) {
+                    // blur old component
+                    if (thiz->focusedComponent) {
+                        if (thiz->focusedComponent->onBlur) {
+                            thiz->focusedComponent->onBlur();
+                        }
+                    }
+                    // focus new component
+                    if (thiz->hoverComponent->onFocus) {
+                        thiz->hoverComponent->onFocus();
+                    }
+                }
+                thiz->focusedComponent = thiz->hoverComponent;
+                if (thiz->focusedComponent->onMouseup) {
+                    //std::cout << "click event" << std::endl;
+                    thiz->focusedComponent->onMouseup(thiz->cursorX, thiz->cursorY);
+                }
+                if (thiz->focusedComponent->onClick) {
+                    //std::cout << "click event" << std::endl;
+                    thiz->focusedComponent->onClick();
                 }
             }
         }
     });
+    
+    // works with utf-32 but we'll lkeep the low level for now
+    /*
+    glfwSetCharCallback(window, [](GLFWwindow* win, unsigned int codepoint) {
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        std::cout << "Window::glfwSetCharCallback - codepoint: " << codepoint << std::endl;
+    });
+    */
+    
+    glfwSetKeyCallback(window, [](GLFWwindow *win, int key, int scancode, int action, int mods) {
+        Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
+        // we're focused on something
+        if (thiz->focusedComponent) {
+            InputComponent *inputComponent = dynamic_cast<InputComponent*>(thiz->focusedComponent.get());
+            if (inputComponent) {
+                //std::cout << "inputComponent is focsued, key pressed " << key << " action: " <<action << std::endl;
+                // action 1 is down, 0 is up, 2 is a repeat
+                if (action == 0 || action == 2) {
+                    // key up
+                    // it's always uppercase...
+                    if (key == 259) {
+                        inputComponent->backSpace();
+                    } else if (key == 257) {
+                        std::cout << "enter!" << std::endl;
+                    } else {
+                        if (key < 256) {
+                            if (mods & GLFW_MOD_SHIFT) {
+                                // SHIFT
+                                if (key == GLFW_KEY_SLASH) key='?';
+                                if (key == GLFW_KEY_APOSTROPHE) key='"';
+                                if (key == GLFW_KEY_COMMA) key='<';
+                                if (key == GLFW_KEY_MINUS) key='_';
+                                if (key == GLFW_KEY_PERIOD) key='>';
+                                if (key == GLFW_KEY_SEMICOLON) key=':';
+                                if (key == GLFW_KEY_EQUAL) key='+';
+                                if (key == GLFW_KEY_LEFT_BRACKET) key='{';
+                                if (key == GLFW_KEY_BACKSLASH) key='|';
+                                if (key == GLFW_KEY_RIGHT_BRACKET) key='}';
+                                if (key == GLFW_KEY_GRAVE_ACCENT) key='~';
+                                
+                            } else {
+                                // no shift or caplocks
+                                // basically: when SHIFT isn't pressed but key is in A-Z range, add ascii offset to make it lower case
+                                if (key >= 'A' && key <= 'Z') {
+                                    key += 'a' - 'A';
+                                }
+                            }
+                            inputComponent->addChar(key);
+                        } // otherwise I think it's some weird control char
+                    }
+                }
+                return;
+            }
+        }
+        switch (key) {
+            case GLFW_KEY_1:
+            case GLFW_KEY_2:
+            case GLFW_KEY_3:
+            case GLFW_KEY_4:
+            case GLFW_KEY_5:
+            case GLFW_KEY_6:
+            case GLFW_KEY_7:
+            case GLFW_KEY_8:
+            case GLFW_KEY_9:
+            case GLFW_KEY_0:
+                std::cout << "Key was pressed: " << key << std::endl;
+                //thiz->transformMatrixIndex = key - GLFW_KEY_0;
+                //std::cout << thiz->transformMatrixIndex << std::endl;
+                break;
+            default:
+                break;
+        }
+        if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+            std::cout << "Q was pressed. Exiting." << std::endl;
+            exit(0);
+        }
+        if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+            printf("Printing NodeTree\n\n");
+            printNode(thiz->domRootNode, 1);
+            printf("\n\n");
+        }
+        if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+            printf("Printing ComponentTree\n\n");
+            thiz->printComponentTree(thiz->rootComponent, 0);
+            printf("\n\n");
+        }
+
+        int yOffsetScroll = 1;
+        if (key == GLFW_KEY_J && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            std::cout << "J is/was pressed. Scrolling down." << std::endl;
+            thiz->transformMatrix[13] += yOffsetScroll * 0.1;
+            thiz->transformMatrixDirty = true;
+        }
+        if (key == GLFW_KEY_K && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            std::cout << "K is/was pressed. Scrolling up." << std::endl;
+            thiz->transformMatrix[13] += -yOffsetScroll * 0.1;
+            thiz->transformMatrixDirty = true;
+        }
+    });
+    
     glfwMakeContextCurrent(window);
 
     return true;
@@ -157,17 +320,30 @@ bool Window::initGL() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    GLenum glErr=glGetError();
+    if(glErr != GL_NO_ERROR) {
+        std::cout << "window::initGL - blend, clear, texParam - not ok: " << glErr << std::endl;
+    }
+    
     const GLuint fontVertexShader = compileShader(GL_VERTEX_SHADER, fontVertexShaderSource);
     const GLuint fontFragmentShader = compileShader(GL_FRAGMENT_SHADER, fontFragmentShaderSource);
     fontProgram = compileProgram(fontVertexShader, fontFragmentShader);
     glDeleteShader(fontVertexShader);
     glDeleteShader(fontFragmentShader);
+    glErr=glGetError();
+    if(glErr != GL_NO_ERROR) {
+        std::cout << "window::initGL - font program - not ok: " << glErr << std::endl;
+    }
 
     const GLuint textureVertexShader = compileShader(GL_VERTEX_SHADER, textureVertexShaderSource);
     const GLuint textureFragmentShader = compileShader(GL_FRAGMENT_SHADER, textureFragmentShaderSource);
     textureProgram = compileProgram(textureVertexShader, textureFragmentShader);
     glDeleteShader(textureVertexShader);
     glDeleteShader(textureFragmentShader);
+    glErr=glGetError();
+    if(glErr != GL_NO_ERROR) {
+        std::cout << "window::initGL - texture program - not ok: " << glErr << std::endl;
+    }
 
     //std::cout << "OpenGL is set up" << std::endl;
 
@@ -179,6 +355,11 @@ GLuint Window::compileShader(const GLenum shaderType, const char *shaderSource) 
     glShaderSource(shader, 1, &shaderSource, nullptr);
     glCompileShader(shader);
 
+    GLenum glErr=glGetError();
+    if(glErr != GL_NO_ERROR) {
+        std::cout << "window::compileShader - compileShader - not ok: " << glErr << std::endl;
+    }
+    
     GLint success;
     GLchar infoLog[1024];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -196,9 +377,14 @@ GLuint Window::compileProgram(const GLuint vertexShader, const GLuint fragmentSh
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
 
+    GLenum glErr=glGetError();
+    if(glErr != GL_NO_ERROR) {
+        std::cout << "window::compileProgram - glLinkProgram - not ok: " << glErr << std::endl;
+    }
+    
     GLint success;
     GLchar infoLog[1024];
-    glGetProgramiv(program, GL_COMPILE_STATUS, &success);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(program, 1024, nullptr, infoLog);
         std::cout << "Could not compile program\n" << infoLog << std::endl;
@@ -215,11 +401,25 @@ void Window::render() {
         }
         std::cout << "restarting drawing" << std::endl;
         
+        // just delete and recreate
+        boxComponents.clear();
+        //UI
+        // at 0x(640-64) size (1024w, 64h)
+        boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, windowHeight - 64.0f, windowWidth, 64.0f, windowWidth, windowHeight));
+        
+        // draws 13 px up from the bottom of 0
+        //boxComponents.push_back(std::make_unique<InputComponent>(0.0f, 0.0f, 123.0f, 13.0f, windowWidth, windowHeight));
+        
+        //Mascot
+        boxComponents.push_back(std::make_unique<AnimeComponent>(windowWidth * 0.75f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight));
+        
+        /*
         for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
-            boxComponent->windowWidth = windowWidth;
-            boxComponent->windowHeight = windowHeight;
-            boxComponent->resize();
+            //boxComponent->windowWidth = windowWidth;
+            //boxComponent->windowHeight = windowHeight;
+            boxComponent->resize(windowWidth, windowHeight);
         }
+         */
         //std::cout << "resizing" << std::endl;
         const std::clock_t begin = clock();
         //resizeComponentTree(rootComponent, windowWidth, windowHeight);
@@ -227,7 +427,7 @@ void Window::render() {
         rootComponent->windowHeight = windowHeight;
         rootComponent->layout();
         const std::clock_t end = clock();
-        std::cout << "resized compoennts in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+        std::cout << "resized components in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
 
         // recalculate scroll max by calculating how many screens are in the rootComponent's Height
         if (transformMatrix[13]>std::max((rootComponent->height)/(windowHeight)*2.0f, 2.0f)) {
@@ -250,10 +450,22 @@ void Window::render() {
     }
     if (renderDirty || transformMatrixDirty) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        GLenum glErr=glGetError();
+        if(glErr != GL_NO_ERROR) {
+            std::cout << "window::render - box render start - not ok: " << glErr << std::endl;
+        }
+        
         glUseProgram(textureProgram);
+        glErr=glGetError();
+        if(glErr != GL_NO_ERROR) {
+            std::cout << "window::render - glUseProgram - not ok: " << glErr << std::endl;
+        }
+        //renderBoxComponents(rootComponent);
         for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
             boxComponent->render();
         }
+        renderBoxComponents(rootComponent);
         // it's quick but done on scroll
         glUseProgram(fontProgram);
         if (transformMatrixDirty) {
@@ -270,9 +482,11 @@ void Window::render() {
         // update 2nd buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(textureProgram);
+        //renderBoxComponents(rootComponent);
         for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
             boxComponent->render();
         }
+        renderBoxComponents(rootComponent);
         // it's quick but done on scroll
         glUseProgram(fontProgram);
         renderComponents(rootComponent);
@@ -365,6 +579,47 @@ void Window::printComponentTree(const std::shared_ptr<Component> &component, int
     }
 }
 
+void Window::renderBoxComponents(std::shared_ptr<Component> component) {
+    if (!component) {
+        std::cout << "Window::renderBoxComponents - got null passed" << std::endl;
+        return;
+    }
+    // render non-text components too
+    BoxComponent *boxComponent = dynamic_cast<BoxComponent*>(component.get());
+    //inputComponent->render();
+    if (boxComponent) {
+        /*
+        GLenum glErr=glGetError();
+        if(glErr != GL_NO_ERROR) {
+            std::cout << "Window::renderBoxComponents - box render start - not ok: " << glErr << std::endl;
+        }
+        */
+        /*
+        glUseProgram(textureProgram);
+        glErr=glGetError();
+        if(glErr != GL_NO_ERROR) {
+            std::cout << "glUseProgram - not ok: " << glErr << std::endl;
+        }
+        */
+        //std::cout << "Window::renderBoxComponents - Rendering at " << (int)boxComponent->x << "x" << (int)boxComponent->y << std::endl;
+        boxComponent->render();
+    }
+    /*
+     InputComponent *inputComponent = dynamic_cast<InputComponent*>(component.get());
+     if (inputComponent) {
+     glUseProgram(textureProgram);
+     inputComponent->render();
+     }
+     */
+    // is this needed?
+    if (component->children.empty()) {
+        return;
+    }
+    for (std::shared_ptr<Component> &child : component->children) {
+        renderBoxComponents(child);
+    }
+}
+
 void Window::renderComponents(std::shared_ptr<Component> component) {
     if (!component) {
         std::cout << "Window::renderComponents - got null passed" << std::endl;
@@ -372,8 +627,35 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
     }
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
+        //glUseProgram(fontProgram);
         textComponent->render();
+    } else {
+        // render non-text components too
+        /*
+        BoxComponent *boxComponent = dynamic_cast<BoxComponent*>(component.get());
+        //inputComponent->render();
+        if (boxComponent) {
+            GLenum glErr=glGetError();
+            if(glErr != GL_NO_ERROR) {
+                std::cout << "box render start - not ok: " << glErr << std::endl;
+            }
+            glUseProgram(textureProgram);
+            glErr=glGetError();
+            if(glErr != GL_NO_ERROR) {
+                std::cout << "glUseProgram - not ok: " << glErr << std::endl;
+            }
+            boxComponent->render();
+        }
+        */
+        /*
+        InputComponent *inputComponent = dynamic_cast<InputComponent*>(component.get());
+        if (inputComponent) {
+            glUseProgram(textureProgram);
+            inputComponent->render();
+        }
+        */
     }
+    // is this needed?
     if (component->children.empty()) {
         return;
     }
@@ -476,8 +758,14 @@ void handleRequest(const HTTPResponse &response) {
             location = response.properties.at("Location");
         }
         std::cout << "Redirect To: " << location << std::endl;
-        std::shared_ptr<URL> uri = parseUri(location);
-        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(uri);
+        std::tuple<std::unique_ptr<URL>,enum URIParseError> result = parseUri(location);
+        if (std::get<1>(result) != URI_PARSE_ERROR_NONE) {
+            // TODO We probably wanna handle this better..
+            std::cerr << "error parsing uri" << std::endl;
+            return;
+        }
+        std::unique_ptr<URL> uri = std::move(std::get<0>(result));
+        const std::unique_ptr<HTTPRequest> request = std::make_unique<HTTPRequest>(std::move(uri));
         request->sendRequest(handleRequest);
         return;
     }

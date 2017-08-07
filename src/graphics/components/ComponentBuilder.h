@@ -16,6 +16,7 @@
 #include "../elements/SPANElement.h"
 #include "../elements/DIVElement.h"
 #include "../elements/STRONGElement.h"
+#include "../elements/INPUTElement.h"
 #include "../../html/TagNode.h"
 #include "../../html/TextNode.h"
 #include "../../html/Node.h"

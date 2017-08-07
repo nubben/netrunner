@@ -17,9 +17,9 @@
 
 class Window {
 private:
+public:
     GLuint fontProgram = 0;
     GLuint textureProgram = 0;
-public:
     ~Window();
     bool init();
     bool initGLFW();
@@ -32,6 +32,7 @@ public:
     void createComponentTree(const std::shared_ptr<Node> rootNode, const std::shared_ptr<Component> &parentComponent);
     void printComponentTree(const std::shared_ptr<Component> &component, int depth);
     void renderComponents(std::shared_ptr<Component> component);
+    void renderBoxComponents(std::shared_ptr<Component> component);
     void resizeComponentTree(const std::shared_ptr<Component> &component, const int windowWidth, const int windowHeight);
     std::shared_ptr<Component> searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y);
     void navTo(std::string url);
@@ -52,6 +53,10 @@ public:
     ComponentBuilder componentBuilder;
     std::vector<std::unique_ptr<BoxComponent>> boxComponents;
     std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
+    // could break these out in some sort of cursor class
+    // to minimize dependencies
+    std::shared_ptr<Component> focusedComponent = nullptr;
+    std::shared_ptr<Component> hoverComponent = nullptr;
     double cursorX = 0;
     double cursorY = 0;
     unsigned int delayResize = 0;
@@ -63,6 +68,7 @@ public:
 
 bool setWindowContent(URL const& url);
 void handleRequest(const HTTPResponse &response);
+
 extern const std::unique_ptr<Window> window;
 
 #endif

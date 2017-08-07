@@ -3,31 +3,37 @@
 #include "../../../anime.h"
 #endif
 #include <cmath>
+#include <iostream>
 
 AnimeComponent::AnimeComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight) : BoxComponent(rawX, rawY, rawWidth, rawHeight, passedWindowWidth, passedWindowHeight){
+    //std::cout << "AnimeComponent::AnimeComponent" << std::endl;
+
+    windowWidth = passedWindowWidth;
+    windowHeight = passedWindowHeight;
+    
     x = rawX;
     y = rawY;
     width = rawWidth;
     height = rawHeight;
 
+    for (int py = 0; py < 1024; py++) {
+        for (int px = 0; px < 1024; px++) {
 #ifndef _MSC_VER
-    if (width == 512) {
-        for (int py = 0; py < 1024; py++) {
-            for (int px = 0; px < 1024; px++) {
-                for (int i = 0; i < 4; i++) {
-                    data[1023 - py][px][i] = anime.pixel_data[((px * 4) + (py * 4 * 1024)) + i];
-                }
+            for (int i = 0; i < 4; i++) {
+                data[1023 - py][px][i] = anime.pixel_data[((px * 4) + (py * 4 * 1024)) + i];
             }
+#else
+            data[1023 - py][px][3] = 0x00; // just make it all transparent for now
+#endif
         }
     }
-#endif
 
     float vx = rawX;
     float vy = rawY;
     float vWidth = rawWidth;
     float vHeight = rawHeight;
-    pointToViewport(vx, vy, windowWidth, windowHeight);
-    distanceToViewport(vWidth, vHeight, windowWidth, windowHeight);
+    pointToViewport(vx, vy);
+    distanceToViewport(vWidth, vHeight);
 
     vertices[(0 * 5) + 0] = vx;
     vertices[(0 * 5) + 1] = vy + vHeight;

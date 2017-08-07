@@ -1,12 +1,43 @@
 #include "Component.h"
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include "TextComponent.h"
 
 Component::~Component() {
 }
 
-void Component::resize() {
+
+void Component::resize(const int passedWindowWidth, const int passedWindowHeight) {
+    //std::cout << "Component::resize" << std::endl;
+    windowWidth = passedWindowWidth;
+    windowHeight = passedWindowHeight;
+    /*
+    if (boundToPage) {
+        
+    } else {
+     */
+        // no vertices in component
+        /*
+        float vx = x;
+        float vy = y;
+        float vWidth = width;
+        float vHeight = height;
+        pointToViewport(vx, vy);
+        distanceToViewport(vWidth, vHeight);
+        
+        vertices[(0 * 5) + 0] = vx;
+        vertices[(0 * 5) + 1] = vy + vHeight;
+        vertices[(1 * 5) + 0] = vx + vWidth;
+        vertices[(1 * 5) + 1] = vy + vHeight;
+        vertices[(2 * 5) + 0] = vx + vWidth;
+        vertices[(2 * 5) + 1] = vy;
+        vertices[(3 * 5) + 0] = vx;
+        vertices[(3 * 5) + 1] = vy;
+        
+        verticesDirty = true;
+        */
+    //}
 }
 
 void Component::setParent(std::shared_ptr<Component> passedParent) {
@@ -133,7 +164,7 @@ void Component::layout() {
 void Component::wrap() {
     float lW = width;
     float lH = height;
-    resize(); // this may change our w/h
+    resize(windowWidth, windowHeight); // this may change our w/h
     textureSetup = true;
     if (lW != width || lH != height) {
         //std::cout << "Component::wrap - component was " << (int)lW << "x" << (int)lH << " now " << (int)width << "x" << (int)height << std::endl;
@@ -209,4 +240,44 @@ void Component::updateParentSize() {
         parent->height = totalHeight;
         parent->updateParentSize(); // our parent size can only be recalculated by looking at it's children
     }
+}
+
+// converts 0-1 to screen
+// but centered
+void Component::pointToViewport(float &rawX, float &rawY) const {
+    if (boundToPage) {
+        //std::cout << "BoundToPage using " << screenWidth << "x" << screenHeight << std::endl;
+        rawX = ((rawX / windowWidth) * 2) - 1;
+        rawY = ((rawY / windowHeight) * 2) - 1;
+    } else {
+        //std::cout << "notBoundToPage using " << screenWidth << "x" << screenHeight << std::endl;
+        if (rawX < 0) {
+            rawX += windowWidth;
+        }
+        if (rawY < 0) {
+            rawY += windowHeight;
+        }
+        if (rawX > 1) {
+            rawX /= windowWidth;
+        }
+        if (rawY > 1) {
+            rawY /= windowHeight;
+        }
+        rawX = (rawX * 2) - 1;
+        rawY = (rawY * 2) - 1;
+    }
+}
+
+// keeps 0-1 (and *2 to convert to screen)
+// but also takes pixels (and converts to screen)
+// anchors to upperleft
+void Component::distanceToViewport(float &rawX, float &rawY) const {
+    if (std::abs(rawX) > 1) {
+        rawX /= windowWidth;
+    }
+    if (std::abs(rawY) > 1) {
+        rawY /= windowHeight;
+    }
+    rawX *= 2;
+    rawY *= 2;
 }

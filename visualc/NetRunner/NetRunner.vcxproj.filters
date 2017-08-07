@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\networking">
+      <UniqueIdentifier>{d3806624-b48c-45eb-a367-a6481b24d213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics">
+      <UniqueIdentifier>{e3775856-f829-4d9b-b20a-6c3e6c156ab2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\html">
+      <UniqueIdentifier>{3573b3b1-5cfc-433f-bd1e-03ddc2811eb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\networking">
+      <UniqueIdentifier>{2c052b20-bcae-4565-8594-1ab9e012a98f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\html">
+      <UniqueIdentifier>{38cd59ca-42a0-47a0-90e1-916c7ecd065b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics">
+      <UniqueIdentifier>{948541f0-b0e8-4535-87b0-ad7fb0199ed0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics\components">
+      <UniqueIdentifier>{56747018-d135-4bad-b0a2-bf9cf7438026}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics\elements">
+      <UniqueIdentifier>{e3b25b6b-3d95-4156-ad1d-b9a8a4d53947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics\text">
+      <UniqueIdentifier>{2ef32f37-7c86-4cd9-bf85-f1af8e47315f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\components">
+      <UniqueIdentifier>{a5b3417d-3b6b-44cf-b498-117febf74dbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\elements">
+      <UniqueIdentifier>{473cc93d-f674-4934-83c0-a8c06431bcac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\opengl">
+      <UniqueIdentifier>{da2eefb8-838f-4c69-b286-43b1d6d48eee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\text">
+      <UniqueIdentifier>{17b7d69a-f320-497f-8179-d5bc0a85b98b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics\opengl">
+      <UniqueIdentifier>{595beb1e-4d80-4cfa-9a93-24f5e6d12c68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\opengl\shaders">
+      <UniqueIdentifier>{90c82a2c-6f33-4d6d-b333-e28496b75985}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\opengl\shaders\gen">
+      <UniqueIdentifier>{46372e18-9e00-41d5-a8f6-d69fc0c0748b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\StringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\WebResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\html\HTMLParser.h">
+      <Filter>Header Files\html</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\html\Node.h">
+      <Filter>Header Files\html</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\html\TagNode.h">
+      <Filter>Header Files\html</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\html\TextNode.h">
+      <Filter>Header Files\html</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\networking\HTTPRequest.h">
+      <Filter>Header Files\networking</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\networking\HTTPResponse.h">
+      <Filter>Header Files\networking</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\components\AnimeComponent.h">
+      <Filter>Header Files\graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\components\BoxComponent.h">
+      <Filter>Header Files\graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\components\Component.h">
+      <Filter>Header Files\graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\components\ComponentBuilder.h">
+      <Filter>Header Files\graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\components\TextComponent.h">
+      <Filter>Header Files\graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\AElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\BLOCKQUOTEElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\DIVElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\Element.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\H1Element.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\H2Element.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\H3Element.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\LIElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\PElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\SPANElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\elements\STRONGElement.h">
+      <Filter>Header Files\graphics\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\opengl\Window.h">
+      <Filter>Header Files\graphics\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\text\TextRasterizer.h">
+      <Filter>Header Files\graphics\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\text\TextRasterizerCache.h">
+      <Filter>Header Files\graphics\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\opengl\shaders\gen\TextureShader.h">
+      <Filter>Header Files\graphics\opengl\shaders\gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\graphics\opengl\shaders\gen\FontShader.h">
+      <Filter>Header Files\graphics\opengl\shaders\gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\CommandLineParams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\BrowsingHistory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\URL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\StringUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\WebResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\html\HTMLParser.cpp">
+      <Filter>Source Files\html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\html\Node.cpp">
+      <Filter>Source Files\html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\html\TagNode.cpp">
+      <Filter>Source Files\html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\html\TextNode.cpp">
+      <Filter>Source Files\html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\networking\HTTPResponse.cpp">
+      <Filter>Source Files\networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\networking\HTTPRequest.cpp">
+      <Filter>Source Files\networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\components\AnimeComponent.cpp">
+      <Filter>Source Files\graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\components\BoxComponent.cpp">
+      <Filter>Source Files\graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\components\Component.cpp">
+      <Filter>Source Files\graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\components\ComponentBuilder.cpp">
+      <Filter>Source Files\graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\components\TextComponent.cpp">
+      <Filter>Source Files\graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\AElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\BLOCKQUOTEElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\DIVElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\Element.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\H1Element.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\H2Element.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\H3Element.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\LIElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\PElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\SPANElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\elements\STRONGElement.cpp">
+      <Filter>Source Files\graphics\elements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\opengl\Window.cpp">
+      <Filter>Source Files\graphics\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\text\TextRasterizer.cpp">
+      <Filter>Source Files\graphics\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\text\TextRasterizerCache.cpp">
+      <Filter>Source Files\graphics\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BrowsingHistory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CommandLineParams.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\URL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
