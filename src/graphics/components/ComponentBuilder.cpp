@@ -21,6 +21,10 @@ const std::unordered_map<std::string, std::shared_ptr<Element>> ComponentBuilder
 std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent, int windowWidth, int windowHeight) {
     std::shared_ptr<Component> component;
     std::string tag;
+    if (node == nullptr) {
+        std::cout << "ComponentBuilder::build - node is null" << std::endl;
+        return nullptr;
+    }
 
     if (node->nodeType == NodeType::TAG) {
         TagNode *tagNode = dynamic_cast<TagNode*>(node.get());
@@ -59,17 +63,19 @@ std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
     TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
     if (textComponent) {
         //std::cout << "compositing [" << textComponent->text << "]" << std::endl;
-        component->onMousedown =  [component](int x, int y) {
-            std::cout << "TextSelection starting at " << x << "," << y << std::endl;
-            // 0 to -640 (windowHeight)
-            // so if y=640 , f(y)=-640
-            int ny = -y;
-            std::cout << "TextSelection adjusted " << x << "," << ny << std::endl;
-            std::cout << "Component at " << static_cast<int>(component->x) << "," << static_cast<int>(component->y) << std::endl;
-        };
-        component->onMouseup =  [component](int x, int y) {
-            std::cout << "TextSelection ending at " << x << "," << y << std::endl;
-        };
+        if (!component->onMousedown) {
+            component->onMousedown =  [component](int x, int y) {
+                std::cout << "TextSelection starting at " << x << "," << y << std::endl;
+                // 0 to -640 (windowHeight)
+                // so if y=640 , f(y)=-640
+                int ny = -y;
+                std::cout << "TextSelection adjusted " << x << "," << ny << std::endl;
+                std::cout << "Component at " << static_cast<int>(component->x) << "," << static_cast<int>(component->y) << std::endl;
+            };
+            component->onMouseup =  [component](int x, int y) {
+                std::cout << "TextSelection ending at " << x << "," << y << std::endl;
+            };
+        }
     }
     InputComponent *inputComponent = dynamic_cast<InputComponent*>(component.get());
     if (inputComponent) {
@@ -103,4 +109,18 @@ std::shared_ptr<Component> ComponentBuilder::build(const std::shared_ptr<Node> n
     
     //std::cout << "post layout placed: " << (int)component->x << "x" << (int)component->y << " w/h: " << (int)component->width << "x" << (int)component->height << std::endl;
     return component;
+}
+
+#include "DocumentComponent.h"
+
+std::string typeOfComponent(const std::shared_ptr<Component> &component) {
+    DocumentComponent *docComponent = dynamic_cast<DocumentComponent*>(component.get());
+    if (docComponent) return "doc";
+    TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+    if (textComponent) return "text";
+    InputComponent *inputComponent = dynamic_cast<InputComponent*>(component.get());
+    if (inputComponent) return "input";
+    BoxComponent *boxComponent = dynamic_cast<BoxComponent*>(component.get());
+    if (boxComponent) return "box";
+    return "";
 }
