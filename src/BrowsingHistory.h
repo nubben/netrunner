@@ -16,7 +16,7 @@ class BrowsingHistory {
 public:
     BrowsingHistory(std::function<void(URL const&)> onGotoPage_);
 
-    unsigned int length() const;
+    size_t length() const;
     //void scrollRestoration(); // TODO: Implement this when it's relevant
     //void* state() const; // TODO: Implement when we have Javascript objects.
     
