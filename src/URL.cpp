@@ -44,10 +44,29 @@ std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
     enum URIParseState state = SCHEME;
     // TODO Validate at the end that every field were defined (ie: http:// is valid, but it's clearly not)
     // Remember file:// doesn't need a port (for end validation)
-    // First character of scheme MUST be alphabetic
-    if (!isalpha(raw[cursor])) {
-        std::cerr << "invalid scheme: '" << raw.substr(last, cursor - last+1) << "'" << std::endl;
-        return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
+
+    if (raw[cursor] == '/') {
+        // unless it's / for relative URLs
+        // need this so we can merge URLs
+        
+        // make sure it's not // (relative scheme)
+        if (raw.length() > 1) {
+            if (raw[cursor + 1] == '/') {
+                // there is a host
+                uri->scheme = "relative";
+                state = AUTHORITY;
+            } else {
+                 // relative path
+                uri->scheme = ""; // probably doesn't matter if it's "" or "relative"
+                state = PATH;
+            }
+        }
+    } else {
+        // First character of scheme MUST be alphabetic
+        if (!isalpha(raw[cursor])) {
+            std::cerr << "invalid scheme: '" << raw.substr(last, cursor - last+1) << "'" << std::endl;
+            return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
+        }
     }
     for (cursor = 1; cursor < raw.length(); cursor++) {
         /* TODO
@@ -63,9 +82,9 @@ std::tuple<std::unique_ptr<URL>,enum URIParseError> parseUri(std::string raw) {
                 }
                 state = FIRST_SLASH;
             } else if (!isalpha(raw[cursor]) && !isdigit(raw[cursor]) && raw[cursor] != '+' &&
-                       raw[cursor] != '-' && raw[cursor] != '.') {
+                       raw[cursor] != '-' && raw[cursor] != '.'  && raw[cursor] != '/') { // why this exception list?
                 /* URI MUST have a scheme  */
-                std::cerr << "invalid scheme: '" << raw.substr(last, cursor - last+1) << "'" << std::endl;
+                std::cerr << "invalid scheme: '" << raw.substr(last, cursor - last+1) << "' cursor: " << cursor << std::endl;
                 return std::make_tuple(std::move(uri), URI_PARSE_ERROR_SCHEME);
             }
         } else if (state == FIRST_SLASH) {
@@ -210,7 +229,7 @@ URL::URL(std::string const& url) {
 }
 
 std::string URL::toString() const {
-    std::cout << "scheme[" << scheme << "] host[" << host << "] path [" << path << "]" << std::endl;
+    //std::cout << "scheme[" << scheme << "] host[" << host << "] path [" << path << "]" << std::endl;
     if (isRelative()) {
         return path;
     }

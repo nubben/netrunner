@@ -110,11 +110,13 @@ void TextComponent::rasterize(const int rawX, const int rawY) {
     //glyphs = textRasterizer->rasterize(text, rawX, windowWidth, wrapToX, width, height, glyphCount, endingX, endingY, wrapped);
     rasterizationRequest request;
     request.text = text;
-    request.startX = rawX;
+    // startX needs to be relative to the parent x
+    request.startX = rawX - x;
     request.availableWidth = availableWidth;
     request.sourceStartX = rasterStartX;
     request.sourceStartY = rasterStartY;
     request.noWrap = noWrap;
+    //std::cout << "rasterizing [" << text << "] @" << rawX << " availableWidth: " << availableWidth << " sourceStartX: " << rasterStartX << " noWrap: " << noWrap << std::endl;
     std::shared_ptr<rasterizationResponse> response = textRasterizer->rasterize(request);
     if (response.get() == nullptr) {
         std::cout << "TextComponent::rasterize - got nullptr from rasterizer" << std::endl;
@@ -124,8 +126,9 @@ void TextComponent::rasterize(const int rawX, const int rawY) {
     height = response->height;
     endingX = response->endingX;
     endingY = response->endingY;
-    
-    //std::cout << "TextComponent::rasterize done [" <<  text << "] - start x: " << rawX << " width: " << (int)width << " wrapWidth: " << windowWidth << " wrapTo: " << wrapToX << std::endl;
+
+    // << " wrapTo: " << wrapToX
+    //std::cout << "TextComponent::rasterize done [" <<  text << "] - start x: " << rawX << " width: " << (int)width << " wrapWidth: " << windowWidth << std::endl;
     //std::cout << "TextComponent::rasterize post-height: " << (int)height << std::endl;
     //if (glyphs == nullptr) {
     //    return;
@@ -198,6 +201,7 @@ void TextComponent::rasterize(const int rawX, const int rawY) {
     //}
     //const std::clock_t end = clock();
     //std::cout << "rasterize text [" <<  text << "] in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+    verticesDirty = true;
 }
 
 void TextComponent::render() {
@@ -221,8 +225,8 @@ void TextComponent::render() {
             glBindTexture(GL_TEXTURE_2D, textures[i - 1]); // load texture
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); // draw primitives using vertices and texture
         }
-    //} else {
-        //std::cout << "no textures" << std::endl;
+    } else {
+        std::cout << "TextComponent::render - no textures" << std::endl;
     }
 }
 
@@ -237,8 +241,9 @@ void TextComponent::resize(const int passedWindowWidth, const int passedWindowHe
     windowHeight = passedWindowHeight;
     availableWidth = passedAvailableWidth;
     //std::cout << "TextComponent::resize" << std::endl;
-    rasterize(x, y);
     //std::cout << "TextComponent::resize - rasterizing at " << (int)x << "x" << (int)y << " size: " << (int)width << "x" << (int)height << std::endl;
+    rasterize(x, y);
+    //std::cout << "TextComponent::resize - rasterized at " << (int)x << "x" << (int)y << " size: " << (int)width << "x" << (int)height << std::endl;
 
     // make sure we have glyphs
     if (!glyphVertices.size()) {
@@ -261,8 +266,6 @@ void TextComponent::resize(const int passedWindowWidth, const int passedWindowHe
     glBindTexture(GL_TEXTURE_2D, textures.back()); // select texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RED, GL_UNSIGNED_BYTE, textureData.get()); // update texture
     glGenerateMipmap(GL_TEXTURE_2D);
-
-    verticesDirty = true;
 }
 
 void TextComponent::sanitize(std::string &str) {

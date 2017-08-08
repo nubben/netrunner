@@ -32,6 +32,7 @@ struct rasterizationRequest {
     std::string text;
     int availableWidth; // (relative to 0)
     // not availableHeight because we're either going to wrap or not
+    // is X relative to parent or absolute to window? well since no wrapTo, it's relative to parent
     int startX; // starting x point (relative to 0) this is currently
     //int wrapToX; // next line starts at X (was always 0)
 

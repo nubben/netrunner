@@ -51,7 +51,7 @@ public:
     bool domDirty = false;
     bool renderDirty = false;
     ComponentBuilder componentBuilder;
-    std::vector<std::unique_ptr<BoxComponent>> boxComponents;
+    //std::vector<std::unique_ptr<BoxComponent>> boxComponents;
     std::shared_ptr<Component> rootComponent = std::make_shared<Component>();
     // could break these out in some sort of cursor class
     // to minimize dependencies

@@ -4,6 +4,12 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <GL/glew.h>
+
+const unsigned int indices[6] = {
+    0, 1, 2,
+    0, 2, 3
+};
 
 struct rgba {
     unsigned int r;
@@ -35,7 +41,17 @@ public:
     // but we may hang onto the variables to know what the state is set up for
     // why pass it here? on resize we call layout no this...
     virtual void resize(const int passedWindowWidth, const int passedWindowHeight);
-
+    
+    // vab container has handle, shaderProtoType, vbo, ebo (const)
+    // we could just have 2 global vabs on for each shaderProto
+    // but then we'd might need to vbos each time (on top of the texture)
+    void initTheElementBufferObject() const;
+    GLuint CreateVertexArrayObject() const;
+    GLuint CreateVertexBufferObject() const;
+    bool setPosition4(GLuint vertexBufferObject, int x0, int y0, int x1, int y1) const ;
+    GLuint CreateTexture() const ;
+    bool setTexture(GLuint textureNum, GLsizei w, GLsizei h, const unsigned char *texture) const ;
+    
     void pointToViewport(float &rawX, float &rawY) const ;
     void distanceToViewport(float &rawX, float &rawY) const ;
     
@@ -51,13 +67,11 @@ public:
              int windowHeight;
      };
      */
+    // possible badly named as these aren't bound to a window
+    // how are these used?
     int windowWidth;
     int windowHeight;
     bool boundToPage = true;
-    const unsigned int indices[6] = {
-        0, 1, 2,
-        0, 2, 3
-    };
     bool verticesDirty = false;
     std::shared_ptr<Component> parent = nullptr;
     std::shared_ptr<Component> previous = nullptr;
@@ -103,10 +117,14 @@ public:
     rgba color;
     bool isVisibile = true;
     bool isInline = false; // text-only thing but there maybe other non-text inline
+    bool isPickable = true;
     bool textureSetup = false;
     // probably shoudl be vector (or maybe use the event emitter)
     std::function<void(int x, int y)> onMousedown = nullptr;
     std::function<void(int x, int y)> onMouseup = nullptr;
+    std::function<void(int x, int y)> onMousemove = nullptr;
+    std::function<void(int x, int y)> onWheel = nullptr;
+    std::function<void(int key, int scancode, int action, int mods)> onKeyup = nullptr;
     std::function<void()> onClick = nullptr;
     std::function<void()> onFocus = nullptr;
     std::function<void()> onBlur = nullptr;
