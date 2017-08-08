@@ -10,6 +10,7 @@
 #include "../../StringUtils.h"
 #include "../../URL.h"
 #include "../../Log.h"
+#include "../components/DocumentComponent.h"
 
 #include <cmath>
 #include <ctime>
@@ -44,7 +45,7 @@ bool Window::init() {
 
     //UI
     // at 0x(640-64) size (1024w, 64h)
-    boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 640.0f - 64.0f, 1024.0f, 64.0f, windowWidth, windowHeight));
+    //boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, 640.0f - 64.0f, windowWidth, 64.0f, windowWidth, windowHeight));
 
     //boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, -96, 125, 13, windowWidth, windowHeight));
     // grows from center
@@ -58,9 +59,12 @@ bool Window::init() {
     //boxComponents.back()->width = 125;
     //boxComponents.back()->resize(windowWidth, windowHeight);
     //boxComponents.push_back(std::make_unique<InputComponent>(0.0f, 20.0f, 123.0f, 13.0f, windowWidth, windowHeight));
+
+    // address bar
+    //boxComponents.push_back(std::make_unique<InputComponent>(192.0f, 640.0f - 48.0f, windowWidth - 384.0f, 24.0f, windowWidth, windowHeight));
     
     //Mascot
-    boxComponents.push_back(std::make_unique<AnimeComponent>(768.0f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight));
+    //boxComponents.push_back(std::make_unique<AnimeComponent>(768.0f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight));
     
     return true;
 }
@@ -80,8 +84,10 @@ bool Window::initGLFW() {
     glfwSetErrorCallback([](int error, const char* description) {
         std::cout << "glfw error [" << error << "]:" << description << std::endl;
     });
-
-    window = glfwCreateWindow(1024, 640, "NetRunner", nullptr, nullptr);
+    
+    windowWidth = 1024;
+    windowHeight = 640;
+    window = glfwCreateWindow(windowWidth, windowHeight, "NetRunner", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         std::cout << "Could not create window" << std::endl;
@@ -111,13 +117,50 @@ bool Window::initGLFW() {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         thiz->cursorX = xPos;
         thiz->cursorY = yPos;
+        //std::cout << "Window::Window:onMousemove - at " << static_cast<int>(xPos) << "," << static_cast<int>(yPos) << std::endl;
+        if (xPos < 0 || yPos < 0) return;
+        if (xPos > thiz->windowWidth || yPos > thiz->windowHeight) return;
+        // p. much worthless on double
+        /*
+        static double lx = 0;
+        static double ly = 0;
+        if (lx == xPos && ly == yPos) {
+            return;
+        }
+        lx = xPos;
+        ly = yPos;
+        std::cout << "Window::Window:onMousemove - noCache" << std::endl;
+        */
+        //std::cout << "Window::Window:onMousemove - begin search" << std::endl;
         thiz->hoverComponent = thiz->searchComponentTree(thiz->rootComponent, thiz->cursorX, (thiz->windowHeight - thiz->cursorY) + ((-thiz->transformMatrix[13] / 2) * thiz->windowHeight));
         if (thiz->hoverComponent) {
+            /*
+            TextComponent *textComponent = dynamic_cast<TextComponent*>(thiz->hoverComponent.get());
+            if (textComponent) {
+                std::cout << "TextHover" << std::endl;
+            }
+            InputComponent *inputComponent = dynamic_cast<InputComponent*>(thiz->hoverComponent.get());
+            if (inputComponent) {
+                std::cout << "InputHover" << std::endl;
+            }
+            */
+            // we don't care about BoxHover or AnimeHover
+            
+            
             //std::cout << "hover event" << std::endl;
             if (thiz->hoverComponent->onClick) {
                 glfwSetCursor(thiz->window, thiz->cursorHand);
             } else {
-                glfwSetCursor(thiz->window, thiz->cursorIbeam);
+                TextComponent *textComponent = dynamic_cast<TextComponent*>(thiz->hoverComponent.get());
+                InputComponent *inputComponent = dynamic_cast<InputComponent*>(thiz->hoverComponent.get());
+                if (textComponent || inputComponent) {
+                    glfwSetCursor(thiz->window, thiz->cursorIbeam);
+                }
+                // otherwise we could be an Box/Anime or Document Component
+            }
+            if (thiz->hoverComponent->onMousemove) {
+                // this could communicate the cursor to use
+                thiz->hoverComponent->onMousemove(thiz->cursorX, thiz->cursorY);
             }
         } else {
             glfwSetCursor(thiz->window, thiz->cursorArrow);
@@ -127,15 +170,20 @@ bool Window::initGLFW() {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         // yOffset is a delta vector
         thiz->transformMatrix[13] += -yOffset * 0.1;
+        if (thiz->hoverComponent) {
+            if (thiz->hoverComponent->onWheel) {
+                thiz->hoverComponent->onWheel(xOffset * 10, yOffset * 10);
+            }
+        }
         
         // 2.0 is one screen height
         // we draw from 0 downwards (y+), so can't scroll past our starting draw point
-        if (thiz->transformMatrix[13]<2) {
-            thiz->transformMatrix[13]=2;
+        if (thiz->transformMatrix[13] < 2) {
+            thiz->transformMatrix[13] = 2;
         }
         // calculate scroll max by calculating how many screens are in the rootComponent's Height
-        if (thiz->transformMatrix[13]>std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f)) {
-            thiz->transformMatrix[13]=std::max((thiz->rootComponent->height)/(thiz->windowHeight)*2.0f, 2.0f);
+        if (thiz->transformMatrix[13] > std::max( thiz->rootComponent->height / thiz->windowHeight * 2.0f, 2.0f)) {
+            thiz->transformMatrix[13] = std::max( thiz->rootComponent->height / thiz->windowHeight * 2.0f, 2.0f);
         }
         //std::cout << "scroll y is at " << thiz->transformMatrix[13] << "/" << static_cast<int>((thiz->transformMatrix[13]*10000) << std::endl;
         thiz->transformMatrixDirty = true;
@@ -182,6 +230,10 @@ bool Window::initGLFW() {
                     }
                 }
                 thiz->focusedComponent = thiz->hoverComponent;
+                InputComponent *inputComponent = dynamic_cast<InputComponent*>(thiz->focusedComponent.get());
+                if (inputComponent) {
+                    std::cout << "inputComponent focus" << std::endl;
+                }
                 if (thiz->focusedComponent->onMouseup) {
                     //std::cout << "click event" << std::endl;
                     thiz->focusedComponent->onMouseup(thiz->cursorX, thiz->cursorY);
@@ -206,6 +258,15 @@ bool Window::initGLFW() {
         Window *thiz = reinterpret_cast<Window*>(glfwGetWindowUserPointer(win));
         // we're focused on something
         if (thiz->focusedComponent) {
+            DocumentComponent *docComponent = dynamic_cast<DocumentComponent*>(thiz->focusedComponent.get());
+            if (docComponent) {
+                if (action == 0) {
+                    if (docComponent->onKeyup) {
+                        docComponent->onKeyup(key, scancode, action, mods);
+                    }
+                }
+                return;
+            }
             InputComponent *inputComponent = dynamic_cast<InputComponent*>(thiz->focusedComponent.get());
             if (inputComponent) {
                 //std::cout << "inputComponent is focsued, key pressed " << key << " action: " <<action << std::endl;
@@ -217,6 +278,9 @@ bool Window::initGLFW() {
                         inputComponent->backSpace();
                     } else if (key == 257) {
                         std::cout << "enter!" << std::endl;
+                        if (inputComponent->onEnter) {
+                            inputComponent->onEnter(inputComponent->value);
+                        }
                     } else {
                         if (key < 256) {
                             if (mods & GLFW_MOD_SHIFT) {
@@ -402,16 +466,16 @@ void Window::render() {
         std::cout << "restarting drawing" << std::endl;
         
         // just delete and recreate
-        boxComponents.clear();
+        //boxComponents.clear();
         //UI
         // at 0x(640-64) size (1024w, 64h)
-        boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, windowHeight - 64.0f, windowWidth, 64.0f, windowWidth, windowHeight));
+        //boxComponents.push_back(std::make_unique<BoxComponent>(0.0f, windowHeight - 64.0f, windowWidth, 64.0f, windowWidth, windowHeight));
         
         // draws 13 px up from the bottom of 0
         //boxComponents.push_back(std::make_unique<InputComponent>(0.0f, 0.0f, 123.0f, 13.0f, windowWidth, windowHeight));
         
         //Mascot
-        boxComponents.push_back(std::make_unique<AnimeComponent>(windowWidth * 0.75f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight));
+        //boxComponents.push_back(std::make_unique<AnimeComponent>(windowWidth * 0.75f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight));
         
         /*
         for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
@@ -443,8 +507,9 @@ void Window::render() {
         const std::clock_t begin = clock();
         createComponentTree(domRootNode, rootComponent);
         const std::clock_t end = clock();
-        std::cout << "built & laid out components in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
+        std::cout << "built & laid out window components in: " << std::fixed << ((static_cast<double>(end - begin)) / CLOCKS_PER_SEC) << std::scientific << " seconds" << std::endl;
         //printComponentTree(rootComponent, 0);
+        //std::cout << "Window printComponentTree end" << std::endl;
         domDirty = false;
         renderDirty = true;
     }
@@ -462,9 +527,11 @@ void Window::render() {
             std::cout << "window::render - glUseProgram - not ok: " << glErr << std::endl;
         }
         //renderBoxComponents(rootComponent);
+        /*
         for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
             boxComponent->render();
         }
+        */
         renderBoxComponents(rootComponent);
         // it's quick but done on scroll
         glUseProgram(fontProgram);
@@ -483,9 +550,11 @@ void Window::render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(textureProgram);
         //renderBoxComponents(rootComponent);
+        /*
         for (const std::unique_ptr<BoxComponent> &boxComponent : boxComponents) {
             boxComponent->render();
         }
+        */
         renderBoxComponents(rootComponent);
         // it's quick but done on scroll
         glUseProgram(fontProgram);
@@ -533,8 +602,74 @@ void Window::setDOM(const std::shared_ptr<Node> rootNode) {
     // new root component
     rootComponent = std::make_shared<Component>();
     rootComponent->y = 0;
-    domRootNode = rootNode;
-    domDirty = true;
+
+    // (re)build UI (top to bottom)
+    //std::cout << "Window::setDOM window size: " << windowWidth << "x" << windowHeight << std::endl;
+    
+    // Nav background
+    std::shared_ptr<BoxComponent> navBackground = std::make_unique<BoxComponent>(0.0f, windowHeight - 64.0f, windowWidth, 64.0f, windowWidth, windowHeight);
+    //navBackground->y = -64;
+    navBackground->isPickable = false;
+    // add it to our components
+    navBackground->parent = rootComponent;
+    rootComponent->children.push_back(navBackground);
+    
+    // Address Bar
+    std::shared_ptr<InputComponent> navAddressBar = std::make_unique<InputComponent>(192.0f, windowHeight - 48.0f, windowWidth - 384.0f, 24.0f, windowWidth, windowHeight);
+    // add it to our components
+    navAddressBar->x = 192.0f;
+    navAddressBar->y = windowHeight-48.0f;
+    //navAddressBar->y = -48; // this works but breaks picking
+    navAddressBar->value = currentURL.toString();
+    navAddressBar->updateText();
+    navAddressBar->onEnter=[this](std::string value) {
+        std::cout << "navAddressBar::onEnter got" << value << std::endl;
+        this->navTo(value);
+    };
+    render();
+    renderDirty = true;
+    //std::cout << "placing inputComponent at " << static_cast<int>(navAddressBar->x) << "," << static_cast<int>(navAddressBar->y) << std::endl;
+    navAddressBar->parent = rootComponent;
+    rootComponent->children.push_back(navAddressBar);
+
+    /*
+    // textTest
+    // TextComponent(const std::string &rawText, const int rawX, const int rawY, const unsigned int size, const bool bolded, const unsigned int hexColor, const int passedWindowWidth, const int passedWindowHeight);
+    std::shared_ptr<TextComponent> textTest = std::make_unique<TextComponent>("Test", -99, -99, 12, false, 0x000000ff, windowWidth, windowHeight);
+    textTest->x=192.0f;
+    textTest->y=-64.0f;
+    textTest->isPickable = false;
+    // add it to our components
+    textTest->parent = rootComponent;
+    rootComponent->children.push_back(textTest);
+    // we really don't want to layout because that's moves us relative to parent
+    // and this is static layout we want, not a free flow
+    //textTest->layout(); // to rasterize
+    textTest->resize(windowWidth, windowHeight);
+    */
+
+    
+    //Mascot
+    std::shared_ptr<AnimeComponent> mascot = std::make_unique<AnimeComponent>(windowWidth * 0.75f, 0.0f, 512.0f, 512.0f, windowWidth, windowHeight);
+    mascot->isPickable = false;
+    // add it to our components
+    mascot->parent = rootComponent;
+    rootComponent->children.push_back(mascot);
+    
+    // create default document container
+    std::shared_ptr<DocumentComponent> documentComponent = std::make_shared<DocumentComponent>(0, 0, static_cast<float>(windowWidth), static_cast<float>(windowHeight - 64), windowWidth, windowHeight);
+    documentComponent->domRootNode = rootNode;
+    documentComponent->domDirty = true;
+    documentComponent->y = -64;
+    // nothing layouts this out beyond thi
+    documentComponent->rootComponent->y = documentComponent->y;
+    documentComponent->win = this;
+    // add it to our components
+    documentComponent->parent = rootComponent;
+    rootComponent->children.push_back(documentComponent);
+    
+    //domRootNode = rootNode;
+    //domDirty = true;
 }
 
 void Window::createComponentTree(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent) {
@@ -548,11 +683,14 @@ void Window::createComponentTree(const std::shared_ptr<Node> node, const std::sh
         // add new component as child to parent
         //parentComponent->children.push_back(component);
     //}
-    
-    if (node==domRootNode) {
+    if (component && node==domRootNode) {
         // if this is the root node
         component->reqWidth = windowWidth;
         component->reqHeight = windowHeight;
+    }
+    
+    if (!node) {
+        return;
     }
     
     // create children elements
@@ -625,35 +763,45 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
         std::cout << "Window::renderComponents - got null passed" << std::endl;
         return;
     }
-    TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
-    if (textComponent) {
-        //glUseProgram(fontProgram);
-        textComponent->render();
+    DocumentComponent *docComponent = dynamic_cast<DocumentComponent*>(component.get());
+    if (docComponent) {
+        docComponent->windowWidth = windowWidth;
+        docComponent->windowHeight = windowHeight;
+        docComponent->width = windowWidth;
+        docComponent->height = windowHeight - 64;
+        docComponent->render();
     } else {
-        // render non-text components too
-        /*
-        BoxComponent *boxComponent = dynamic_cast<BoxComponent*>(component.get());
-        //inputComponent->render();
-        if (boxComponent) {
-            GLenum glErr=glGetError();
-            if(glErr != GL_NO_ERROR) {
-                std::cout << "box render start - not ok: " << glErr << std::endl;
+        TextComponent *textComponent = dynamic_cast<TextComponent*>(component.get());
+        if (textComponent) {
+            //glUseProgram(fontProgram);
+            //std::cout << "Window::renderComponents - rendering text" << std::endl;
+            textComponent->render();
+        } else {
+            // render non-text components too
+            /*
+            BoxComponent *boxComponent = dynamic_cast<BoxComponent*>(component.get());
+            //inputComponent->render();
+            if (boxComponent) {
+                GLenum glErr=glGetError();
+                if(glErr != GL_NO_ERROR) {
+                    std::cout << "box render start - not ok: " << glErr << std::endl;
+                }
+                glUseProgram(textureProgram);
+                glErr=glGetError();
+                if(glErr != GL_NO_ERROR) {
+                    std::cout << "glUseProgram - not ok: " << glErr << std::endl;
+                }
+                boxComponent->render();
             }
-            glUseProgram(textureProgram);
-            glErr=glGetError();
-            if(glErr != GL_NO_ERROR) {
-                std::cout << "glUseProgram - not ok: " << glErr << std::endl;
+            */
+            /*
+            InputComponent *inputComponent = dynamic_cast<InputComponent*>(component.get());
+            if (inputComponent) {
+                glUseProgram(textureProgram);
+                inputComponent->render();
             }
-            boxComponent->render();
+            */
         }
-        */
-        /*
-        InputComponent *inputComponent = dynamic_cast<InputComponent*>(component.get());
-        if (inputComponent) {
-            glUseProgram(textureProgram);
-            inputComponent->render();
-        }
-        */
     }
     // is this needed?
     if (component->children.empty()) {
@@ -665,16 +813,29 @@ void Window::renderComponents(std::shared_ptr<Component> component) {
 }
 
 // used for picking
+// should return multiple components
 std::shared_ptr<Component> Window::searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y) {
     if (component->children.empty()) {
-        if (component->y > y && component->y - component->height < y) {
+        // x,y: 0,0 is the upper left
+        //std::cout << "cursor at: " << x << "," << y << " component at " << static_cast<int>(component->x) << "," << static_cast<int>(component->y) << " size " << static_cast<int>(component->width) << "," << static_cast<int>(component->height) << std::endl;
+        int ty = component->y;
+        int ty1 = component->height + component->y;
+        if (ty < 0) {
+            ty = 0;
+            ty1 += 64; // FIXME: hack
+        }
+        //std::cout << "Window::searchComponentTree - y search: " << ty1 << ">" << static_cast<int>(windowHeight + y) << ">" << static_cast<int>(ty) << std::endl;
+        if (ty1 > windowHeight + y && windowHeight + y > ty) {
+            //std::cout << "y match" << std::endl;
             if (component->x < x && component->x + component->width > x) {
+                //std::cout << "Window::searchComponentTree - hit " << typeOfComponent(component) << std::endl;
                 return component;
             }
         }
     }
     else {
         for (std::shared_ptr<Component> child : component->children) {
+            if (!child->isPickable) continue;
             std::shared_ptr<Component> found = searchComponentTree(child, x, y);
             if (found) {
                 return found;
@@ -687,8 +848,10 @@ std::shared_ptr<Component> Window::searchComponentTree(const std::shared_ptr<Com
 // moving naviagtion closer to window, as window is now the owner of currentURL
 // preparation for multiple HTML documents
 void Window::navTo(std::string url) {
-    logDebug() << "navTo(" << url << ")" << std::endl;
-    currentURL = currentURL.merge(URL(url));
+    logDebug() << "Window::navTo(" << url << ")" << std::endl;
+    URL link=URL(url);
+    logDebug() << "Window::navTo - URL marshalled [" << link << "]" << std::endl;
+    currentURL = currentURL.merge(link);
     logDebug() << "go to: " << currentURL << std::endl;
     setWindowContent(currentURL);
 }
