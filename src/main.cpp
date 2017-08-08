@@ -40,6 +40,14 @@ int main(int argc, char *argv[]) {
     if (url.find("://") == url.npos) {
         url = "file://" + url;
     }
+
+    // we need to set up OGL before we can setDOM (because component can't be constructed (currently) without OGL)
+    // but should be after CommandLineParams incase we need to change some type of window config
+    window->init();
+    if (!window->window) {
+        return 1;
+    }
+    
     //logDebug() << "pre URL parse [" << url << "]" << std::endl;
     window->currentURL=URL(url);
     logDebug() << "loading [" << window->currentURL << "]" << std::endl;
@@ -48,10 +56,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    window->init();
-    if (!window->window) {
-        return 1;
-    }
     while (!glfwWindowShouldClose(window->window)) {
         //const std::clock_t begin = clock();
         window->render();
