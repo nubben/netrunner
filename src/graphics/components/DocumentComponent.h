@@ -35,8 +35,8 @@ public:
     int scrollHeight = 0;
 };
 
-bool setWindowContent(URL const& url);
-void handleRequest(const HTTPResponse &response);
+//bool setWindowContent(URL const& url);
+//void handleRequest(const HTTPResponse &response);
 
 extern const std::unique_ptr<Window> window;
 
