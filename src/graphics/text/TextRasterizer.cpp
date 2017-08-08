@@ -279,7 +279,7 @@ std::unique_ptr<rasterizationResponse> TextRasterizer::rasterize(const rasteriza
         //std::cout << "adjusted:" << (int)width << "x" << (int)height << std::endl;
     }
     // adjust sourceStart
-    //std::cout << "TextRasterizer::rasterize - adjust sourceStartX " << request.sourceStartX << std::endl;
+    //std::cout << "TextRasterizer::rasterize - adjust sourceStart: " << request.sourceStartX << "," << request.sourceStartY << std::endl;
     response->width -= request.sourceStartX;
     response->height -= request.sourceStartY;
     //std::cout << "TextRasterizer::rasterize - final:" << static_cast<int>(response->width) << "x" << static_cast<int>(response->height) << std::endl;
@@ -306,20 +306,20 @@ std::unique_ptr<rasterizationResponse> TextRasterizer::rasterize(const rasteriza
     response->y0 = 0;
     response->x1 = -leftPadding + response->width;
     response->y1 = -response->height;
-    //std::cout << "xd: " << static_cast<int>(line->x1-line->x0) << " yd: " << static_cast<int>(line->y0-line->y1) << std::endl;
+    //std::cout << "xd: " << static_cast<int>(response->x1-response->x0) << " yd: " << static_cast<int>(response->y0-response->y1) << std::endl;
     
     // texture coords
     response->s0 = 0.0f;
     response->t0 = 0.0f;
     response->s1 = response->width / response->textureWidth;
     response->t1 = response->height / response->textureHeight;
-    //std::cout << "s1: " << line->s1 << " t1: " << line->t1 << std::endl;
+    //std::cout << "s1: " << response->s1 << " t1: " << response->t1 << std::endl;
 
     // copy all glyphs into one single glyph
     // still neds to start at X
-    //std::cout << "starting at: " << x << std::endl;
     cx = response->wrapped ? request.startX : 0; // reset
     cy = 0;
+    //std::cout << "starting at: " << cx << std::endl;
     //int miny0 = 99;
     int maxy0 = 0;
     for (unsigned int i = 0; i < glyphCount; i++) {
@@ -372,11 +372,11 @@ std::unique_ptr<rasterizationResponse> TextRasterizer::rasterize(const rasteriza
             unsigned char *src = ftBitmap.buffer + iy * static_cast<unsigned int>(ftBitmap.width);
             unsigned char *dest = response->textureData.get() + destPos;
             for(unsigned int ix = 0; ix < ftBitmap.width; ix++) { // pixel by pixel
-                //std::cout << "putting:" << (int)src[ix] << " over " << (int)dest[ix] << std::endl;
                 if (destPos + ix >= size) {
                     // we're done with this line
                     continue;
                 }
+                //std::cout << "putting:" << (int)src[ix] << " over " << (int)dest[ix] << std::endl;
                 if (src[ix] && src[ix]>dest[ix]) {
                     dest[ix]=src[ix];
                 }
@@ -391,6 +391,7 @@ std::unique_ptr<rasterizationResponse> TextRasterizer::rasterize(const rasteriza
     //std::ceil(0.5 * 1.2f * fontSize)+2
     // should this be - request.sourceStartY?
     response->endingY = cy + maxy0 + request.sourceStartY; // definitely should be one lineheight higher
+    //std::cout << "ending at " << response->endingX << "," << response->endingY << std::endl;
     
     return response;
 }
