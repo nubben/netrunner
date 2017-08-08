@@ -18,6 +18,7 @@ InputComponent::InputComponent(const float rawX, const float rawY, const float r
     windowHeight = passedWindowHeight;
     width = rawWidth;
     height = rawHeight;
+    // ugh
     x = rawX;
     y = rawY;
     
@@ -121,7 +122,6 @@ void InputComponent::render() {
     }
     glBindVertexArray(0);
     // can actuall delete vertices here
-    
     if (userInputText) {
         glUseProgram(window->fontProgram);
         //std::cout << "rendering some text" << std::endl;
@@ -198,30 +198,36 @@ void InputComponent::resize(const int passedWindowWidth, const int passedWindowH
     
    
     glBindVertexArray(0); // protect what we created against any further modification
+    
+    //updateText();
 }
 
 void InputComponent::addChar(char c) {
     value+=c;
-    //std::cout << "input value is now: " << value << std::endl;
-    if (userInputText) {
-        delete userInputText;
-    }
     //std::cout << "InputComponent::addChar - at " << (int)x << "," << (int)y << std::endl;
     updateText();
 }
 void InputComponent::backSpace() {
     value=value.substr(0, value.length() - 1);
-    if (userInputText) {
-        delete userInputText;
-    }
-    //std::cout << "InputComponent::addChar - at " << (int)x << "," << (int)y << std::endl;
+    //std::cout << "InputComponent::backSpace - at " << (int)x << "," << (int)y << std::endl;
     updateText();
 }
 
 void InputComponent::updateText() {
+    std::cout << "InputComponent::updateText - input value is now: " << value << std::endl;
+    // maybe tie the fontsize to height
+    if (userInputText) {
+        delete userInputText;
+    }
     userInputText=new TextComponent(value, 0, 0, 12, false, 0x000000FF, windowWidth, windowHeight);
+    //std::cout << "placing userInputText at " << static_cast<int>(x) << "," << static_cast<int>(y) << std::endl;
     userInputText->x = x;
-    userInputText->y = y;
+    if (y < 0) {
+        userInputText->y = y;
+    } else {
+        userInputText->y = y - windowHeight + 16;
+    }
+    //std::cout << "placed userInputText at " << static_cast<int>(x) << "," << static_cast<int>(y - windowHeight) << std::endl;
     // 125 pixels width
     // but first we need to know how wide the text is
     const std::shared_ptr<TextRasterizer> textRasterizer=rasterizerCache->loadFont(12, false); // fontSize, bold
@@ -232,24 +238,24 @@ void InputComponent::updateText() {
     request.sourceStartX = 0;
     request.sourceStartY = 0;
     request.noWrap = true;
-    std::unique_ptr<std::pair<int, int>> textInfo=textRasterizer->size(request);
+    std::unique_ptr<std::pair<int, int>> textInfo = textRasterizer->size(request);
     if (textInfo.get() == nullptr) {
-        std::cout << "InputComponent::updateText couldn't estimate value[" << value << "] size" << std::endl;
+        std::cout << "InputComponent::updateText - couldn't estimate value[" << value << "] size" << std::endl;
         return;
     }
     int estWidth = std::get<0>(*textInfo.get());
     //int estHeight = std::get<1>(*textInfo.get());
     userInputText->rasterStartX = 0;
     userInputText->rasterStartY = 0;
-    //std::cout << "estWidth: " << estWidth << " width: " << static_cast<int>(width) << std::endl;
+    //std::cout << "InputComponent::updateText - estWidth: " << estWidth << " width: " << static_cast<int>(width) << std::endl;
     if (estWidth > width) {
         //std::cout << "scrolling text" << std::endl;
         userInputText->rasterStartX = estWidth - width;
     }
     userInputText->noWrap = true;
-    // FIXME: not really 125, if we're x>windowWidth-125
     // why does changing the width mess shit up?
-    //std::cout << "our width: " << static_cast<int>(width) << " windowWidth: " << windowWidth << std::endl;
-    userInputText->resize(windowWidth, windowHeight, 125); // need to make sure there's a texture
+    //std::cout << "InputComponent::updateText - our width: " << static_cast<int>(width) << " windowWidth: " << windowWidth << std::endl;
+    userInputText->resize(windowWidth, windowHeight, width); // need to make sure there's a texture
+    
     window->renderDirty = true;
 }
