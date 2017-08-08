@@ -311,7 +311,7 @@ GLuint Component::CreateTexture() const {
     return textureNum;
 }
 
-bool Component::setTexture(GLuint textureNum, unsigned int w, unsigned int h, const unsigned char *texture) const {
+bool Component::setTexture(GLuint textureNum, GLsizei w, GLsizei h, const unsigned char *texture) const {
     glBindTexture(GL_TEXTURE_2D, textureNum);
     
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
