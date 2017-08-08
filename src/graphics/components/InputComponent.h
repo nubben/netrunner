@@ -19,6 +19,7 @@ public:
     void updateText();
     std::string value="";
     TextComponent *userInputText = nullptr;
+    std::function<void(std::string value)> onEnter = nullptr;
 };
 
 #endif
