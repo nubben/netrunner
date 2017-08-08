@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../../Log.h"
 #include "InputComponent.h"
+#include <ctime>
 
 DocumentComponent::DocumentComponent(const float rawX, const float rawY, const float rawWidth, const float rawHeight, const int passedWindowWidth, const int passedWindowHeight) {
     //std::cout << "DocumentComponent::DocumentComponent" << std::endl;
@@ -21,23 +22,23 @@ DocumentComponent::DocumentComponent(const float rawX, const float rawY, const f
         height = 0;
     }
     //std::cout << "DocumentComponent::DocumentComponent - our size" << static_cast<int>(width) << "x" << static_cast<int>(height) << std::endl;
-    onMousemove=[this](int x, int y) {
+    onMousemove=[this](int passedX, int passedY) {
         // set hover component
         static int lx = 0;
         static int ly = 0;
         //std::cout << "DocumentComponent::DocumentComponent:onMousemove - at " << x << "," << y << std::endl;
-        if (lx == x && ly == y) {
+        if (lx == passedX && ly == passedY) {
             return;
         }
-        lx = x;
-        ly = y;
+        lx = passedX;
+        ly = passedY;
         //std::cout << "DocumentComponent::DocumentComponent:onMousemove - size " << this->windowWidth << "," << this->windowHeight << std::endl;
         this->hoverComponent = this->searchComponentTree(this->rootComponent, x, y);
         if (this->hoverComponent) {
             //std::cout << "DocumentComponent::DocumentComponent:onMousemove - hovering over " << typeOfComponent(this->hoverComponent) << " component" << std::endl;
             if (this->hoverComponent->onMousemove) {
                 // this could communicate the cursor to use
-                this->hoverComponent->onMousemove(x, y);
+                this->hoverComponent->onMousemove(passedX, passedY);
             }
             if (this->hoverComponent->onClick) {
                 glfwSetCursor(this->win->window, this->win->cursorHand);
@@ -48,9 +49,9 @@ DocumentComponent::DocumentComponent(const float rawX, const float rawY, const f
             glfwSetCursor(this->win->window, this->win->cursorArrow);
         }
     };
-    onWheel=[this](int x, int y) {
+    onWheel=[this](int passedX, int passedY) {
         //std::cout << "scroll yDelta: " << y << std::endl;
-        this->scrollY -= y;
+        this->scrollY -= passedX;
         if (this->scrollY < 0) {
             this->scrollY = 0;
         } else if (this->scrollY > this->scrollHeight) {
@@ -79,7 +80,7 @@ DocumentComponent::DocumentComponent(const float rawX, const float rawY, const f
         // don't need this
         //this->renderDirty = true;
     };
-    onMousedown=[this](int x, int y) {
+    onMousedown=[this](int passedX, int passedY) {
         std::cout << "document left press" << std::endl;
         if (this->hoverComponent) {
             if (this->focusedComponent != this->hoverComponent) {
@@ -97,11 +98,11 @@ DocumentComponent::DocumentComponent(const float rawX, const float rawY, const f
             this->focusedComponent = this->hoverComponent;
             if (this->focusedComponent->onMousedown) {
                 //std::cout << "click event" << std::endl;
-                this->focusedComponent->onMousedown(x, y);
+                this->focusedComponent->onMousedown(passedX, passedY);
             }
         }
     };
-    onMouseup=[this](int x, int y) {
+    onMouseup=[this](int passedX, int passedY) {
         std::cout << "document left release" << std::endl;
         if (this->hoverComponent) {
             //std::cout << "DocumentComponent::DocumentComponent:onMouseup - hovering over " << typeOfComponent(this->hoverComponent) << " component" << std::endl;
@@ -120,7 +121,7 @@ DocumentComponent::DocumentComponent(const float rawX, const float rawY, const f
             this->focusedComponent = this->hoverComponent;
             if (this->focusedComponent->onMouseup) {
                 //std::cout << "click event" << std::endl;
-                this->focusedComponent->onMouseup(x, y);
+                this->focusedComponent->onMouseup(passedX, passedY);
             }
             if (this->focusedComponent->onClick) {
                 //std::cout << "click event" << std::endl;
@@ -289,13 +290,13 @@ void DocumentComponent::renderBoxComponents(std::shared_ptr<Component> component
 }
 
 // used for picking
-std::shared_ptr<Component> DocumentComponent::searchComponentTree(const std::shared_ptr<Component> &component, const int x, const int y) {
+std::shared_ptr<Component> DocumentComponent::searchComponentTree(const std::shared_ptr<Component> &component, const int passedX, const int passedY) {
     if (component->children.empty()) {
         //std::cout << "DocumentComponent::searchComponentTree - component at " << static_cast<int>(component->x) << "," << static_cast<int>(component->y) << " size " << static_cast<int>(component->width) << "," << static_cast<int>(component->height) << std::endl;
         //std::cout << "DocumentComponent::searchComponentTree - y search: " << static_cast<int>(-component->y) << "<" << static_cast<int>(y) << "<" << static_cast<int>(-component->y + component->height) << std::endl;
-        if (-component->y < y && -component->y + component->height > y) {
+        if (-component->y < passedY && -component->y + component->height > passedY) {
             //std::cout << "DocumentComponent::searchComponentTree - x search: " << static_cast<int>(component->x) << "<" << static_cast<int>(x) << "<" << static_cast<int>(component->x + component->width) << std::endl;
-            if (component->x < x && component->x + component->width > x) {
+            if (component->x < passedX && component->x + component->width > passedX) {
                 //std::cout << "hit " << typeOfComponent(component) << std::endl;
                 return component;
             }
