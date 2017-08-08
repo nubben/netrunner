@@ -30,4 +30,6 @@ public:
     std::shared_ptr<Component> build(const std::shared_ptr<Node> node, const std::shared_ptr<Component> &parentComponent, int windowWidth, int windowHeight);
 };
 
+std::string typeOfComponent(const std::shared_ptr<Component> &component);
+
 #endif
