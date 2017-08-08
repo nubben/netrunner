@@ -19,6 +19,11 @@ BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWi
     height = rawHeight;
     x = rawX;
     y = rawY;
+
+    if (height < 0) {
+        std::cout << "BoxComponent::BoxComponent - height was less than zero" << std::endl;
+        height = 0;
+    }
     
     // copy initial state
     initialX = x;
@@ -36,8 +41,8 @@ BoxComponent::BoxComponent(const float rawX, const float rawY, const float rawWi
     float vx = rawX;
     float vy = rawY;
     //std::cout << "placing box at " << (int)vx << "x" << (int)vy << " size: " << (int)rawWidth << "x" << (int)rawHeight << std::endl;
-    float vWidth = rawWidth;
-    float vHeight = rawHeight;
+    float vWidth = width;
+    float vHeight = height;
     pointToViewport(vx, vy);
     
     /*
