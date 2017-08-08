@@ -50,7 +50,7 @@ public:
     GLuint CreateVertexBufferObject() const;
     bool setPosition4(GLuint vertexBufferObject, int x0, int y0, int x1, int y1) const ;
     GLuint CreateTexture() const ;
-    bool setTexture(GLuint textureNum, unsigned int w, unsigned int h, const unsigned char *texture) const ;
+    bool setTexture(GLuint textureNum, GLsizei w, GLsizei h, const unsigned char *texture) const ;
     
     void pointToViewport(float &rawX, float &rawY) const ;
     void distanceToViewport(float &rawX, float &rawY) const ;
