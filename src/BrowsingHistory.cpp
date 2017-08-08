@@ -5,7 +5,7 @@ BrowsingHistory::BrowsingHistory(std::function<void(URL const&)> onGotoPage_) :
     currentPosition(history.end()),
     onGotoPage(onGotoPage_) {}
 
-unsigned int BrowsingHistory::length() const {
+size_t BrowsingHistory::length() const {
     return history.size();
 }
 
